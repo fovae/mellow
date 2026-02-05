@@ -35,6 +35,15 @@
             <span class="big-text">Mellow</span>
         </div>
     </section>
+    <!-- Welcome modal -->
+    <div id="welcome-modal" class="welcome-modal-overlay" style="display: none;">
+        <div class="welcome-modal-content">
+            <h2>Welcome to Mellow!</h2>
+            <p>How would you like us to call you?👋</p>
+            <input type="text" id="username-input" placeholder="Your name..." autocomplete="off">
+            <button id="save-username-btn">Save</button>
+        </div>
+    </div>
 
     <!--Burger-->
     <div class="burger" id="burger">☰</div>
@@ -54,46 +63,111 @@
         <!-- Home Screen -->
         <section class="screen active" id="home">
             <div class="screen-header">
-                <h1 class="greeting">Welcome back, User! 👋</h1>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">142</div>
-                    <div class="stat-label">Words Learned</div>
+                <div>
+                    <h1 class="greeting">Welcome, <span class="username"></span> 👋</h1>
+                    <div class="subtle">What’s your mood today?</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">7</div>
-                    <div class="stat-label">Day Streak</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">89%</div>
-                    <div class="stat-label">Accuracy</div>
+                <div class="header-actions">
                 </div>
             </div>
 
-            <div class="activity-section">
-                <h2 class="section-title">Recent Activity</h2>
-                <div class="activity-card">
-                    <div class="activity-icon">📚</div>
-                    <div class="activity-content">
-                        <div class="activity-title">Spanish Basics</div>
-                        <div class="activity-subtitle">Learned 5 words • 2 min ago</div>
+            <!-- Counts Block (Main Dashboard Card) -->
+            <div class="dashboard-card">
+                <div class="counts-grid">
+                    <div class="small-stat">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Dictionaries</div>
+                    </div>
+                    <div class="small-stat">
+                        <div class="stat-icon">🔤</div>
+                        <div class="stat-value">1,248</div>
+                        <div class="stat-label">Total Words</div>
+                    </div>
+                    <div class="small-stat">
+                        <div class="stat-icon">★</div>
+                        <div class="stat-value">86</div>
+                        <div class="stat-label">Favourites</div>
+                    </div>
+                    <div class="small-stat">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">To Review</div>
                     </div>
                 </div>
-                <div class="activity-card">
-                    <div class="activity-icon">✨</div>
-                    <div class="activity-content">
-                        <div class="activity-title">French Phrases</div>
-                        <div class="activity-subtitle">Reviewed 3 cards • 1 hour ago</div>
+
+                <div class="active-dictionary">
+                    <div class="active-left">
+                        <div class="active-title">Active Dictionary</div>
+                        <div class="active-name">English → Spanish</div>
+                        <div class="active-sub">Tap to change</div>
+                    </div>
+                    <div class="active-right">📘</div>
+                </div>
+            </div>
+
+            <!-- Statistics Widget -->
+            <div class="stats-widget">
+                <h2 class="section-title">Recent Dictionaries</h2>
+                <div class="mini-dicts">
+                    <div class="mini-dict">
+                        <div class="md-left">
+                            <div class="md-name">Spanish Basics</div>
+                            <div class="md-sub">Words learned: 45</div>
+                        </div>
+                        <div class="md-right">
+                            <div class="md-acc">89%</div>
+                            <div class="md-bar">
+                                <div class="md-fill" style="width:89%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mini-dict">
+                        <div class="md-left">
+                            <div class="md-name">French Phrases</div>
+                            <div class="md-sub">Words learned: 28</div>
+                        </div>
+                        <div class="md-right">
+                            <div class="md-acc">74%</div>
+                            <div class="md-bar">
+                                <div class="md-fill" style="width:74%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mini-dict">
+                        <div class="md-left">
+                            <div class="md-name">German Words</div>
+                            <div class="md-sub">Words learned: 12</div>
+                        </div>
+                        <div class="md-right">
+                            <div class="md-acc">95%</div>
+                            <div class="md-bar">
+                                <div class="md-fill" style="width:95%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="activity-card">
-                    <div class="activity-icon">🎯</div>
-                    <div class="activity-content">
-                        <div class="activity-title">Daily Test Complete</div>
-                        <div class="activity-subtitle">Scored 95% • Yesterday</div>
-                    </div>
+            </div>
+
+            <!-- Saved Words Widget -->
+            <div class="saved-words">
+                <h2 class="section-title">Saved Words</h2>
+                <div class="tags">
+                    <span class="tag">#hello <span class="lang">(EN–RU)</span></span>
+                    <span class="tag">#forest <span class="lang">(EN–JP)</span></span>
+                    <span class="tag">#thankyou <span class="lang">(EN–ES)</span></span>
+                </div>
+            </div>
+
+            <!-- Achievements Widget -->
+            <div class="achievements">
+                <h2 class="section-title">Achievements</h2>
+                <div class="badges">
+                    <div class="badge bronze">Bronze</div>
+                    <div class="badge silver">Silver</div>
+                    <div class="badge gold">Gold</div>
+                    <div class="badge diamond">Diamond</div>
+                    <div class="badge amb">Ambassador</div>
                 </div>
             </div>
         </section>
