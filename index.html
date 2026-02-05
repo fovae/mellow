@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css" />
+    <title>Mellow</title>
+</head>
+
+<body>
+    <!--Page Loader-->
+    <section class="load-screen">
+        <div class="load-cards">
+            <div class="card card-a">
+                <span class="card-item">📚</span>
+                <span class="card-item2">Simple</span>
+            </div>
+            <div class="card card-b">
+                <span class="card-item">💭</span>
+                <span class="card-item2">Learning</span>
+            </div>
+            <div class="card card-c">
+                <span class="card-item">✨</span>
+                <span class="card-item2">Mellow</span>
+            </div>
+        </div>
+        <div class="load-text">
+            <span class="small-text">welcome to</span>
+            <span class="big-text">Mellow</span>
+        </div>
+    </section>
+
+    <!--Burger-->
+    <div class="burger" id="burger">☰</div>
+    <nav class="side-menu" id="sideMenu">
+        <div class="menu-item active" data-screen="home">Home</div>
+        <div class="menu-item" data-screen="dictionaries">Dictionaries</div>
+        <div class="menu-item" data-screen="cards">Cards</div>
+        <div class="menu-item" data-screen="tests">Tests</div>
+        <div class="menu-item" data-screen="stats">Statistics</div>
+        <div class="menu-item" data-screen="settings">Settings</div>
+        <div class="menu-item" data-screen="data">Data</div>
+    </nav>
+
+    <!--Main content-->
+    <main class="app" id="app">
+
+        <!-- Home Screen -->
+        <section class="screen active" id="home">
+            <div class="screen-header">
+                <h1 class="greeting">Welcome back, User! 👋</h1>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">142</div>
+                    <div class="stat-label">Words Learned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">89%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+
+            <div class="activity-section">
+                <h2 class="section-title">Recent Activity</h2>
+                <div class="activity-card">
+                    <div class="activity-icon">📚</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Spanish Basics</div>
+                        <div class="activity-subtitle">Learned 5 words • 2 min ago</div>
+                    </div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">✨</div>
+                    <div class="activity-content">
+                        <div class="activity-title">French Phrases</div>
+                        <div class="activity-subtitle">Reviewed 3 cards • 1 hour ago</div>
+                    </div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">🎯</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Daily Test Complete</div>
+                        <div class="activity-subtitle">Scored 95% • Yesterday</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dictionaries Screen -->
+        <section class="screen" id="dictionaries">
+            <div class="screen-header">
+                <h1 class="screen-title">Dictionaries</h1>
+            </div>
+
+            <div class="dictionaries-grid">
+                <div class="dict-card">
+                    <div class="dict-header">
+                        <div class="dict-emoji">📚</div>
+                        <button class="dict-menu-btn">⋮</button>
+                    </div>
+                    <div class="dict-title">Spanish Basics</div>
+                    <div class="dict-count">45 words</div>
+                    <div class="dict-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dict-card">
+                    <div class="dict-header">
+                        <div class="dict-emoji">🇫🇷</div>
+                        <button class="dict-menu-btn">⋮</button>
+                    </div>
+                    <div class="dict-title">French Phrases</div>
+                    <div class="dict-count">28 words</div>
+                    <div class="dict-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 42%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dict-card">
+                    <div class="dict-header">
+                        <div class="dict-emoji">🇩🇪</div>
+                        <button class="dict-menu-btn">⋮</button>
+                    </div>
+                    <div class="dict-title">German Words</div>
+                    <div class="dict-count">56 words</div>
+                    <div class="dict-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 78%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dict-card">
+                    <div class="dict-header">
+                        <div class="dict-emoji">🇮🇹</div>
+                        <button class="dict-menu-btn">⋮</button>
+                    </div>
+                    <div class="dict-title">Italian Essentials</div>
+                    <div class="dict-count">32 words</div>
+                    <div class="dict-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 55%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="fab">➕</button>
+        </section>
+
+        <!-- Cards Learning Screen -->
+        <section class="screen" id="cards">
+            <div class="screen-header">
+                <h1 class="screen-title">Cards</h1>
+                <div class="card-counter">3 / 12</div>
+            </div>
+
+            <div class="flashcard-container">
+                <div class="flashcard" onclick="this.classList.toggle('flipped')">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <span class="card-label">Spanish</span>
+                            <div class="card-content">Gato</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <span class="card-label">English</span>
+                            <div class="card-content">Cat</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-hint">Click to reveal answer</div>
+
+            <div class="card-buttons">
+                <button class="btn-secondary">Skip</button>
+                <button class="btn-primary">Got It!</button>
+            </div>
+        </section>
+
+        <!-- Tests Screen -->
+        <section class="screen" id="tests">
+            <div class="screen-header">
+                <h1 class="screen-title">Tests</h1>
+            </div>
+
+            <div class="test-selector">
+                <div class="selector-title">Select Dictionary</div>
+                <button class="test-dict-btn">
+                    <div class="test-dict-name">Spanish Basics</div>
+                    <div class="test-dict-info">45 words</div>
+                </button>
+                <button class="test-dict-btn">
+                    <div class="test-dict-name">French Phrases</div>
+                    <div class="test-dict-info">28 words</div>
+                </button>
+                <button class="test-dict-btn">
+                    <div class="test-dict-name">German Words</div>
+                    <div class="test-dict-info">56 words</div>
+                </button>
+            </div>
+
+            <div class="test-info">
+                <div class="test-info-card">
+                    <div class="test-info-icon">🎯</div>
+                    <div class="test-info-text">
+                        <div class="test-info-title">Multiple Choice</div>
+                        <div class="test-info-desc">4 options per question</div>
+                    </div>
+                </div>
+                <div class="test-info-card">
+                    <div class="test-info-icon">⏱️</div>
+                    <div class="test-info-text">
+                        <div class="test-info-title">Timed</div>
+                        <div class="test-info-desc">30 seconds per question</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary btn-large">Start Test</button>
+        </section>
+
+        <!-- Statistics Screen -->
+        <section class="screen" id="stats">
+            <div class="screen-header">
+                <h1 class="screen-title">Statistics</h1>
+            </div>
+
+            <div class="stats-section">
+                <h2 class="section-title">Learning Progress</h2>
+                <div class="chart-placeholder">
+                    <div class="chart-bar" style="height: 60%;"></div>
+                    <div class="chart-bar" style="height: 75%;"></div>
+                    <div class="chart-bar" style="height: 55%;"></div>
+                    <div class="chart-bar" style="height: 80%;"></div>
+                    <div class="chart-bar" style="height: 70%;"></div>
+                    <div class="chart-bar" style="height: 85%;"></div>
+                    <div class="chart-bar" style="height: 90%;"></div>
+                </div>
+                <div class="chart-labels">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+                </div>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-label">Total Time</div>
+                    <div class="summary-value">12h 45m</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Tests Taken</div>
+                    <div class="summary-value">24</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Avg Score</div>
+                    <div class="summary-value">87%</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <h2 class="section-title">Dictionary Progress</h2>
+                <div class="dict-progress-card">
+                    <div class="progress-header">
+                        <span>Spanish Basics</span>
+                        <span class="progress-percent">65%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%;"></div>
+                    </div>
+                </div>
+                <div class="dict-progress-card">
+                    <div class="progress-header">
+                        <span>French Phrases</span>
+                        <span class="progress-percent">42%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 42%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Screen -->
+        <section class="screen" id="settings">
+            <div class="screen-header">
+                <h1 class="screen-title">Settings</h1>
+            </div>
+
+            <div class="settings-section">
+                <h2 class="settings-section-title">Appearance</h2>
+                <div class="settings-item">
+                    <div class="settings-label">Dark Mode</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2 class="settings-section-title">Learning</h2>
+                <div class="settings-item">
+                    <div class="settings-label">Daily Goal</div>
+                    <div class="settings-value">10 minutes</div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-label">Notifications</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-label">Difficulty</div>
+                    <div class="settings-value">Medium</div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2 class="settings-section-title">Language</h2>
+                <div class="settings-item">
+                    <div class="settings-label">App Language</div>
+                    <div class="settings-value">English</div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2 class="settings-section-title">About</h2>
+                <div class="settings-item">
+                    <div class="settings-label">Version</div>
+                    <div class="settings-value">1.0.0</div>
+                </div>
+                <button class="settings-btn-link">Privacy Policy</button>
+                <button class="settings-btn-link">Terms of Service</button>
+            </div>
+        </section>
+
+        <!-- Data Screen -->
+        <section class="screen" id="data">
+            <div class="screen-header">
+                <h1 class="screen-title">Data</h1>
+            </div>
+
+            <div class="data-section">
+                <h2 class="section-title">Import / Export</h2>
+                <div class="data-card">
+                    <div class="data-icon">📥</div>
+                    <div class="data-content">
+                        <div class="data-title">Import Data</div>
+                        <div class="data-desc">Load dictionaries from file</div>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-icon">📤</div>
+                    <div class="data-content">
+                        <div class="data-title">Export Data</div>
+                        <div class="data-desc">Save your dictionaries</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <h2 class="section-title">Storage</h2>
+                <div class="storage-info">
+                    <div class="storage-label">Using <strong>2.4 MB</strong> of <strong>10 MB</strong></div>
+                    <div class="storage-bar">
+                        <div class="storage-fill" style="width: 24%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <h2 class="section-title">Danger Zone</h2>
+                <button class="btn-danger">Clear All Data</button>
+            </div>
+        </section>
+
+    </main>
+
+
+    <script src="app.js"></script>
+</body>
+
+</html>
