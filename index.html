@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,33 +81,33 @@
                 <div class="counts-grid">
                     <div class="small-stat">
                         <div class="stat-icon">📚</div>
-                        <div class="stat-value">12</div>
+                        <div class="stat-value" id="count-dictionaries">0</div>
                         <div class="stat-label">Dictionaries</div>
                     </div>
                     <div class="small-stat">
                         <div class="stat-icon">🔤</div>
-                        <div class="stat-value">1,248</div>
+                        <div class="stat-value" id="count-words">0</div>
                         <div class="stat-label">Total Words</div>
                     </div>
                     <div class="small-stat">
                         <div class="stat-icon">★</div>
-                        <div class="stat-value">86</div>
+                        <div class="stat-value" id="count-favourites">0</div>
                         <div class="stat-label">Favourites</div>
                     </div>
                     <div class="small-stat">
                         <div class="stat-icon">⏳</div>
-                        <div class="stat-value">24</div>
-                        <div class="stat-label">To Review</div>
+                        <div class="stat-value" id="count-hours">0m</div>
+                        <div class="stat-label">Active Time</div>
                     </div>
                 </div>
 
-                <div class="active-dictionary">
+                <div class="active-dictionary" id="active-dictionary-block" style="cursor: pointer;">
                     <div class="active-left">
                         <div class="active-title">Active Dictionary</div>
-                        <div class="active-name">English → Spanish</div>
-                        <div class="active-sub">Tap to change</div>
+                        <div class="active-name" id="active-dict-name">Select a dictionary</div>
+                        <div class="active-sub" id="active-dict-sub">Tap to choose</div>
                     </div>
-                    <div class="active-right">📘</div>
+                    <div class="active-right" id="active-dict-emoji">📚</div>
                 </div>
             </div>
 
@@ -182,66 +182,12 @@
             <div class="screen-header">
                 <h1 class="screen-title">Dictionaries</h1>
             </div>
-
-            <div class="dictionaries-grid">
-                <div class="dict-card">
-                    <div class="dict-header">
-                        <div class="dict-emoji">📚</div>
-                        <button class="dict-menu-btn">⋮</button>
-                    </div>
-                    <div class="dict-title">Spanish Basics</div>
-                    <div class="dict-count">45 words</div>
-                    <div class="dict-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 65%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dict-card">
-                    <div class="dict-header">
-                        <div class="dict-emoji">🇫🇷</div>
-                        <button class="dict-menu-btn">⋮</button>
-                    </div>
-                    <div class="dict-title">French Phrases</div>
-                    <div class="dict-count">28 words</div>
-                    <div class="dict-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 42%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dict-card">
-                    <div class="dict-header">
-                        <div class="dict-emoji">🇩🇪</div>
-                        <button class="dict-menu-btn">⋮</button>
-                    </div>
-                    <div class="dict-title">German Words</div>
-                    <div class="dict-count">56 words</div>
-                    <div class="dict-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 78%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dict-card">
-                    <div class="dict-header">
-                        <div class="dict-emoji">🇮🇹</div>
-                        <button class="dict-menu-btn">⋮</button>
-                    </div>
-                    <div class="dict-title">Italian Essentials</div>
-                    <div class="dict-count">32 words</div>
-                    <div class="dict-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 55%;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="fab">➕</button>
+            <button class="fab">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 4V20M4 12H20" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="dictionaries-grid" id="dictionaries-grid"></div>
         </section>
 
         <!-- Cards Learning Screen -->
@@ -278,22 +224,6 @@
         <section class="screen" id="tests">
             <div class="screen-header">
                 <h1 class="screen-title">Tests</h1>
-            </div>
-
-            <div class="test-selector">
-                <div class="selector-title">Select Dictionary</div>
-                <button class="test-dict-btn">
-                    <div class="test-dict-name">Spanish Basics</div>
-                    <div class="test-dict-info">45 words</div>
-                </button>
-                <button class="test-dict-btn">
-                    <div class="test-dict-name">French Phrases</div>
-                    <div class="test-dict-info">28 words</div>
-                </button>
-                <button class="test-dict-btn">
-                    <div class="test-dict-name">German Words</div>
-                    <div class="test-dict-info">56 words</div>
-                </button>
             </div>
 
             <div class="test-info">
