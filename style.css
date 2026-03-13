@@ -46,16 +46,8 @@ body{margin:0;overflow:hidden;font-family:'Comfortaa',sans-serif}
 .welcome-modal-content input{width:90%;padding:12px;margin:14px 0;border:1px solid rgba(123,63,242,.12);border-radius:12px;outline:none;transition:box-shadow .18s}
 .welcome-modal-content input:focus{box-shadow:0 6px 20px rgba(58,134,255,0.08);border-color:rgba(58,134,255,0.6)}
 button{padding:10px 20px;background:#007bff;color:#F6F7FB;border:none;border-radius:5px;cursor:pointer}
-
 /*Burger Menu*/
-.burger {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 26px;
-    cursor: pointer;
-    z-index: 2000;
-}
+.burger {position: fixed;top: 20px;left: 20px;font-size: 26px;cursor: pointer;z-index: 2000;}
 
 .side-menu {
     position: fixed;
