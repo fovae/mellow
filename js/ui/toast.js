@@ -1,3 +1,5 @@
+import { art } from "./art.js";
+import { calmMotion } from "../core/theme.js";
 import { h } from "../core/dom.js";
 
 // Short messages above everything, including dialogs. Shown one by one.
@@ -14,7 +16,7 @@ function next() {
     busy = Boolean(item);
     if (!item) return;
     const el = h("div", { class: "toast", role: "status", popover: "manual" },
-        h("span", { class: "toast-emoji", "aria-hidden": "true" }, item.emoji),
+        h("span", { class: "toast-emoji", "aria-hidden": "true" }, art(item.emoji)),
         h("span", { class: "row-main" }, h("strong", {}, item.title), item.text && h("small", {}, item.text)));
     document.body.append(el);
     // The top layer is needed to be seen over a dialog.
@@ -24,7 +26,7 @@ function next() {
 }
 
 export function confetti(parent) {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (calmMotion()) return;
     const box = h("div", { class: "confetti", "aria-hidden": "true" }, Array.from({ length: 28 }, (_, i) => h("i", {
         style: { left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 0.5}s`, animationDuration: `${1.6 + Math.random()}s`, opacity: String(0.6 + (i % 4) / 10) },
         class: `confetti-${i % 4}`,

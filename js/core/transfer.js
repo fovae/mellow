@@ -1,4 +1,5 @@
 // Import and export formats. Pure functions: no DOM, no storage.
+import { listProfiles } from "./profiles.js";
 import { accents, freeAccents } from "./accents.js";
 import { emptyDay, levelOf, totalXp } from "./rewards.js";
 import { normalize } from "./quiz.js";
@@ -80,7 +81,7 @@ const cleanSrs = (srs) => (isObject(srs) && Number.isFinite(srs.due) ? {
 } : null);
 
 // Rebuilds a state field by field, so a damaged or edited file cannot break the app.
-export function cleanState(raw, defaults, createId, { languages, studyLanguages, libraryLanguages }) {
+export function cleanState(raw, defaults, createId, { languages, studyLanguages }) {
     const ids = new Set();
     const id = (value) => {
         const result = typeof value === "string" && value && !ids.has(value) ? value : createId();
@@ -121,13 +122,21 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages,
             newPerDay: number(settings.newPerDay, 0, 1000, defaults.settings.newPerDay),
             reverse: settings.reverse === true,
             sound: settings.sound !== false,
+            haptics: settings.haptics !== false,
+            speechRate: oneOf(settings.speechRate, ["slow", "normal", "fast"], "normal"),
+            motion: settings.motion !== false,
+            backupReminder: settings.backupReminder !== false,
             accent: oneOf(settings.accent, owned, "mellow"),
             autoSpeak: settings.autoSpeak === true,
-            ...(settings.native !== settings.target && libraryLanguages.includes(settings.native) && libraryLanguages.includes(settings.target)
+            ...(studyLanguages.includes(settings.native) && studyLanguages.includes(settings.target)
                 ? { native: settings.native, target: settings.target }
                 : { native: defaults.settings.native, target: defaults.settings.target }),
         },
-        activeDictionaryId: dictionaries.some((d) => d.id === raw.activeDictionaryId) ? raw.activeDictionaryId : null,
+        profiles: listProfiles(
+            (Array.isArray(raw.profiles) ? raw.profiles : []).filter((p) => isObject(p) && studyLanguages.includes(p.from) && studyLanguages.includes(p.to)),
+            dictionaries,
+            studyLanguages.includes(settings.native) && studyLanguages.includes(settings.target) ? [{ from: settings.native, to: settings.target }] : []),
+        removedTopics: (Array.isArray(raw.removedTopics) ? raw.removedTopics : []).filter((x) => typeof x === "string" && x.length <= 80).slice(0, 500),
         totalTimeActive: number(raw.totalTimeActive, 0, 1e10, 0),
         lastBackup: null,
         records: Object.fromEntries(["pairs", "sprint"].filter((name) => Number.isFinite(raw.records?.[name])).map((name) => [name, number(raw.records[name], 0, 1e5, 0)])),

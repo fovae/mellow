@@ -15,6 +15,7 @@ export function openTest(sources, options) {
     const build = () => sources
         .flatMap(({ dictId, only }) => buildQuiz(getDictionary(dictId).words, { ...options, reverse: isReverse(), only }).map((q) => ({ ...q, dict: getDictionary(dictId) })))
         .filter((q) => options.mode === "typing" || q.options.length > 1)
+        .sort(() => (sources.length > 1 ? Math.random() - 0.5 : 0))
         .slice(0, options.count);
     let questions = build();
     // Too few words to choose from: ask to type instead.

@@ -1,3 +1,4 @@
+import { art } from "./art.js";
 import { t } from "../core/i18n.js";
 
 const SEEN_KEY = "mellow_loader_seen";
@@ -5,6 +6,7 @@ const SEEN_KEY = "mellow_loader_seen";
 // Full splash once per session; later reloads skip straight to the app.
 export function playLoader() {
     const loader = document.getElementById("loader");
+    loader.querySelectorAll("[data-art]").forEach((el) => { el.append(art(el.dataset.art)); });
     loader.querySelectorAll("[data-t]").forEach((el) => { el.textContent = t(el.dataset.t); });
 
     if (sessionStorage.getItem(SEEN_KEY)) {

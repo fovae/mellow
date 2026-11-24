@@ -2,20 +2,20 @@ import { dayKey, startOfDay } from "./dates.js";
 import { studyLanguages } from "../data/languages.js";
 import { accents, freeAccents } from "./accents.js";
 import { DIFFICULT_MISSES } from "./advice.js";
-import { LIBRARY_LANGUAGES } from "./library.js";
 import { DROPS, FREEZE, XP, daysToFreeze, emptyDay, levelOf, newRewards, streakOf, totalXp } from "./rewards.js";
+import { currentTopic, listProfiles, samePair } from "./profiles.js";
 import { cleanState, toBackup } from "./transfer.js";
 import { schedule, getQueue, getStatus, strength } from "./srs.js";
 
 const uiLanguages = ["en", "ru"];
 const KEY = "mellow_state";
-const VERSION = 3;
+const VERSION = 5;
 const listeners = new Set();
 
 export const createId = () =>
     globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
-const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, accent: "mellow", native: "English", target: "Spanish" });
+const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, haptics: true, speechRate: "normal", motion: true, backupReminder: true, accent: "mellow", native: "English", target: "Spanish" });
 
 const defaultRewards = () => ({
     drops: 20,
@@ -30,7 +30,8 @@ const createState = () => ({
     version: VERSION,
     username: "",
     settings: defaultSettings(),
-    activeDictionaryId: null,
+    profiles: [], // { from, to }; the current one is settings.native -> settings.target
+    removedTopics: [], // library keys that must not come back by themselves
     totalTimeActive: 0, // seconds
     lastBackup: null, // ms
     log: {}, // "YYYY-MM-DD" -> see emptyDay() in rewards.js
@@ -56,6 +57,18 @@ const migrations = {
         const log = Object.fromEntries(Object.entries(old.log ?? {}).map(([key, day]) =>
             [key, { ...emptyDay(), ...day, xp: (day.correct ?? 0) * XP.answer }]));
         return { ...old, ...defaultRewards(), log, rewardedLevel: levelOf(totalXp(log)) };
+    },
+    // v4: vibration is a setting of its own.
+    3: (old) => ({ ...old, settings: { ...old.settings, haptics: old.settings?.sound !== false } }),
+    // v5: learning profiles instead of the active dictionary, which becomes the first topic of the current profile.
+    4: ({ activeDictionaryId, ...old }) => {
+        const active = old.dictionaries.find((d) => d.id === activeDictionaryId) ?? old.dictionaries[0];
+        const settings = { ...old.settings, ...(active ? { native: active.from, target: active.to } : {}) };
+        return {
+            ...old, settings, removedTopics: [],
+            dictionaries: active ? [active, ...old.dictionaries.filter((d) => d !== active)] : [],
+            profiles: listProfiles(old.dictionaries, active || old.username ? [{ from: settings.native ?? "English", to: settings.target ?? "Spanish" }] : []),
+        };
     },
 };
 
@@ -128,7 +141,10 @@ function commit(type) {
 
 // Selectors
 export const getDictionary = (id) => state.dictionaries.find((d) => d.id === id);
-export const getActiveDictionary = () => getDictionary(state.activeDictionaryId);
+export const getProfile = () => ({ from: state.settings.native, to: state.settings.target });
+// Everything that is learned belongs to one profile; the others wait.
+export const getDictionaries = (profile = getProfile()) => state.dictionaries.filter((d) => samePair(d, profile));
+export const getCurrentTopic = () => currentTopic(getDictionaries());
 export const getProgress = (dict) =>
     dict.words.length ? Math.round((dict.words.reduce((sum, w) => sum + strength(w.srs), 0) / dict.words.length) * 100) : 0;
 
@@ -138,12 +154,12 @@ export function countStatuses(words) {
     return counts;
 }
 
-export const allWords = () => state.dictionaries.flatMap((d) => d.words);
+export const allWords = () => getDictionaries().flatMap((d) => d.words);
 
+// Of all profiles together.
 export function getTotals() {
-    const words = allWords();
+    const words = state.dictionaries.flatMap((d) => d.words);
     return {
-        dictionaries: state.dictionaries.length,
         words: words.length,
         favourites: words.filter((w) => w.isFavourite).length,
         seconds: state.totalTimeActive,
@@ -155,11 +171,10 @@ export const getDay = (date) => state.log[dayKey(date)] ?? emptyDay();
 export const getNewLeft = () => Math.max(0, state.settings.newPerDay - getDay().fresh);
 
 // A scope is a dictionary id, or null for everything.
-export const getScopeDictionaries = (scope) => (scope ? state.dictionaries.filter((d) => d.id === scope) : state.dictionaries);
+export const getScopeDictionaries = (scope) => (scope ? state.dictionaries.filter((d) => d.id === scope) : getDictionaries());
 
-// In the mixed scope new words come only from the active dictionary, so topics are not started all at once.
-export const getScopeWords = (scope) => getScopeDictionaries(scope)
-    .flatMap((d) => (scope || d.id === state.activeDictionaryId ? d.words : d.words.filter((w) => w.srs)));
+// New words come topic by topic: the order of the dictionaries is the order of the course.
+export const getScopeWords = (scope) => getScopeDictionaries(scope).flatMap((d) => d.words);
 
 export const getScopeQueue = (scope) => getQueue(getScopeWords(scope), getNewLeft());
 
@@ -182,7 +197,6 @@ export const getQuizSources = (words) => {
 
 export const getLibraryKeys = () => new Set(state.dictionaries.map((d) => d.libraryKey).filter(Boolean));
 export const getAnswers = () => Object.values(state.log).reduce((sum, d) => sum + d.answers, 0);
-export const getDictQueue = (dict) => getQueue(dict.words, getNewLeft());
 
 export const getStreak = (now = Date.now()) => streakOf(state.log, state.frozen, now);
 
@@ -192,9 +206,10 @@ export function setUsername(name) {
     commit("user");
 }
 
-export function updateSettings(changes) {
+// type "switch": the control has already moved, the screen does not need a redraw.
+export function updateSettings(changes, type = "settings") {
     Object.assign(state.settings, changes);
-    commit("settings");
+    commit(type);
 }
 
 const today = () => (state.log[dayKey()] = { ...emptyDay(), ...state.log[dayKey()] });
@@ -309,9 +324,27 @@ export function protectStreak() {
     rewardListeners.forEach((listener) => listener([{ type: "freeze", drops: 0 }]));
 }
 
-export function setActiveDictionary(id) {
-    state.activeDictionaryId = id;
+// Moves a topic to the beginning of the course.
+export function learnFirst(id) {
+    const dict = getDictionary(id);
+    if (!dict) return;
+    state.dictionaries = [dict, ...state.dictionaries.filter((d) => d !== dict)];
     commit("dictionaries");
+}
+
+export function switchProfile({ from, to }) {
+    state.profiles = listProfiles(state.profiles, [{ from, to }]);
+    Object.assign(state.settings, { native: from, target: to });
+    commit("profile");
+}
+
+// The last profile stays.
+export function removeProfile(profile) {
+    if (state.profiles.length < 2) return;
+    state.profiles = state.profiles.filter((p) => !samePair(p, profile));
+    state.dictionaries = state.dictionaries.filter((d) => !samePair(d, profile));
+    if (samePair(getProfile(), profile)) Object.assign(state.settings, { native: state.profiles[0].from, target: state.profiles[0].to });
+    commit("profile");
 }
 
 const createWord = ({ word, translation, example = "" }) => ({
@@ -329,7 +362,6 @@ export function addDictionaries(list) {
     const added = list.map(({ words = [], ...data }) => ({ id: createId(), ...data, words: words.map(createWord) }));
     if (!added.length) return added;
     state.dictionaries.push(...added);
-    if (!getActiveDictionary()) state.activeDictionaryId = added[0].id;
     commit("dictionaries");
     return added;
 }
@@ -353,15 +385,14 @@ export function fillExamples(examplesOf) {
 export function updateDictionary(id, changes) {
     const dict = getDictionary(id);
     if (!dict) return;
-    // Another language pair: no longer a copy of the library topic.
-    if ((changes.from ?? dict.from) !== dict.from || (changes.to ?? dict.to) !== dict.to) delete dict.libraryKey;
     Object.assign(dict, changes);
     commit("dictionaries");
 }
 
 export function removeDictionary(id) {
+    const key = getDictionary(id)?.libraryKey;
+    if (key) state.removedTopics = [...new Set([...state.removedTopics, key])];
     state.dictionaries = state.dictionaries.filter((d) => d.id !== id);
-    if (state.activeDictionaryId === id) state.activeDictionaryId = null;
     commit("dictionaries");
 }
 
@@ -412,7 +443,7 @@ export function readBackup(text) {
     try {
         const { app, state: saved } = JSON.parse(text);
         const upgraded = app === "mellow" ? upgrade(saved) : null;
-        return upgraded && cleanState(upgraded, createState(), createId, { languages: uiLanguages, studyLanguages, libraryLanguages: LIBRARY_LANGUAGES });
+        return upgraded && cleanState(upgraded, createState(), createId, { languages: uiLanguages, studyLanguages });
     } catch {
         return null;
     }

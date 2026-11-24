@@ -1,3 +1,4 @@
+import { art } from "./art.js";
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
 import { GRADES, schedule, pickNext } from "../core/srs.js";
@@ -146,7 +147,7 @@ export function openStudy(scope) {
             onClick: () => { letters++; hint.textContent = hintMask(sides[1].text, letters); },
         }, icon("bulb"), t("study.help"));
         if (word.example) back.append(h("p", { class: "example" }, word.example));
-        if (!scope) front.prepend(h("span", { class: "badge" }, `${dict.emoji} ${dict.name}`));
+        if (!scope) front.prepend(h("span", { class: "badge" }, art(dict.emoji), dict.name));
         attachSwipe(card, () => flipped, answer);
         screen.draw(header(), card, hint, help, h("p", { class: "muted session-hint" }, t("study.hint")), h("div", { class: "session-footer" }, show, grades));
         show.focus({ preventScroll: true, focusVisible: false });

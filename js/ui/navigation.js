@@ -6,6 +6,7 @@ import { attachScrollbar } from "./scrollbar.js";
 const views = new Map();
 let current = null;
 let bar;
+let enterTimer;
 
 // screens: { name: render }. render() returns the nodes of the screen.
 export function initNavigation(screens) {
@@ -44,9 +45,10 @@ export function navigate(name) {
         else tab.removeAttribute("aria-current");
     });
     refresh();
+    // Later redraws of the same screen must stay still.
+    clearTimeout(enterTimer);
+    enterTimer = setTimeout(() => views.get(name).section.classList.remove("is-entering"), 900);
 }
-
-export const getCurrentScreen = () => current;
 
 export const screenHeader = (eyebrow, title, action) =>
     h("header", { class: "screen-header" },

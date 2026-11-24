@@ -5,10 +5,11 @@ import { applyTheme } from "./core/theme.js";
 import { libraryExamples, loadLibrary } from "./core/library.js";
 import { showRewards } from "./ui/rewards.js";
 import { fillExamples, onRewards, protectStreak, getScopeQueue, getState, subscribe } from "./core/store.js";
-import { initNavigation, navigate, refresh, getCurrentScreen } from "./ui/navigation.js";
+import { initNavigation, navigate, refresh } from "./ui/navigation.js";
 import { playLoader } from "./ui/loader.js";
 import { countAll, studyAll } from "./ui/actions.js";
 import { openLibrary } from "./ui/library-modal.js";
+import { continueCourse } from "./ui/profiles.js";
 import { showOnboarding } from "./ui/onboarding.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
@@ -35,8 +36,9 @@ navigate("home");
 
 subscribe((type) => {
     // The timer must not redraw what the user is touching.
-    if (type === "time" && getCurrentScreen() !== "home") return;
+    if (type === "time") return;
     applySettings();
+    if (type === "switch") return;
     if (type === "reset") {
         navigate("home");
         showOnboarding();
@@ -73,12 +75,16 @@ playLoader().then(() => {
     loadLibrary().then(() => {
         if (document.querySelector("dialog[open]") || document.activeElement?.matches("input, textarea")) return;
         fillExamples(libraryExamples);
+        continueCourse();
         refresh();
     });
     protectStreak();
     if (!getState().username) showOnboarding();
     else runShortcut();
 });
+
+// A session ends with its dialog; "close" does not bubble.
+document.addEventListener("close", () => setTimeout(continueCourse), true);
 
 // Shortcuts of the installed app (manifest.json).
 function runShortcut() {

@@ -1,33 +1,19 @@
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
-import { getActiveDictionary, getDictQueue, getState } from "../core/store.js";
 import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
-import { countAll, studyAll } from "./actions.js";
 import { openLibrary } from "./library-modal.js";
-import { openDictionaryPicker } from "./dictionary-picker.js";
-import { openDictionary } from "./dictionary-modals.js";
-import { openStudy } from "./study.js";
+import { quickAdd } from "./actions.js";
+import { getDictionaries } from "../core/store.js";
 
-// The main card: what to do right now.
-export function heroCard() {
-    const dict = getActiveDictionary();
-    const button = (name, label, onClick) => h("button", { class: "btn hero-btn", type: "button", onClick }, icon(name), label);
-    const hero = (emoji, title, text, action, mood = "calm") => h("section", { class: "hero" },
-        h("div", { class: "hero-top" },
-            h("span", { class: "eyebrow" }, t("hero.active")),
-            dict && h("button", { class: "hero-change", type: "button", onClick: openDictionaryPicker }, t("hero.change"))),
-        h("div", { class: "hero-mascot" }, mascot(mood)),
-        h("h2", { class: "hero-title" }, h("span", { "aria-hidden": "true" }, `${emoji} `), title),
-        h("p", { class: "hero-text" }, text),
-        action);
-
-    if (!dict) return hero("📚", t("hero.none"), t("hero.noneText"), button("dictionaries", t(getState().dictionaries.length ? "hero.none" : "library.title"), getState().dictionaries.length ? openDictionaryPicker : openLibrary));
-    if (!dict.words.length) return hero(dict.emoji, dict.name, t("hero.empty"), button("plus", t("word.add"), () => openDictionary(dict.id)));
-
-    const { due, soon, fresh } = getDictQueue(dict);
-    const reviews = due.length + soon.length;
-    return reviews + fresh.length
-        ? hero(dict.emoji, dict.name, t("hero.ready", { due: reviews, fresh: fresh.length }), button("play", t("hero.start"), () => openStudy(dict.id)))
-        : hero(dict.emoji, dict.name, t("hero.rest"), countAll() > 0 && button("layers", t("home.reviewAll"), studyAll), "sleepy");
+// Shown instead of a screen while the profile has no words.
+export function emptyHero() {
+    const has = getDictionaries().length > 0;
+    return h("section", { class: "hero today-hero" },
+        h("div", { class: "today-top" },
+            h("div", { class: "today-text" }, h("h2", { class: "hero-title" }, t("hero.hello")), h("p", { class: "hero-text" }, t(has ? "hero.empty" : "hero.noneText"))),
+            h("span", { class: "mello-btn" }, mascot("calm"))),
+        has
+            ? h("button", { class: "btn hero-btn", type: "button", onClick: quickAdd }, icon("plus"), t("word.add"))
+            : h("button", { class: "btn hero-btn", type: "button", onClick: openLibrary }, icon("dictionaries"), t("library.title")));
 }

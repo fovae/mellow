@@ -1,15 +1,15 @@
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
-import { loadLibrary, LIBRARY_LANGUAGES } from "../core/library.js";
-import { getState, setUsername, updateSettings } from "../core/store.js";
+import { LIBRARY_LANGUAGES } from "../core/library.js";
+import { getState, setUsername, switchProfile } from "../core/store.js";
 import { languageCode } from "../data/languages.js";
 import { mascot } from "./mascot.js";
 import { openModal, field, requireValue } from "./modal.js";
-import { addTopics, languageSelect } from "./library-modal.js";
+import { languageSelect } from "./library-modal.js";
+import { addFirstTopics } from "./profiles.js";
 
 const guests = ["Mystic Leaf", "Happy Pebble", "Silver Fox", "Cloud Jumper", "Little Fern",
     "Blue Owl", "Calm River", "Sunny Ray", "Night Owl", "Forest Friend"];
-const FIRST_TOPICS = 2;
 
 export function showOnboarding() {
     const isNew = !getState().dictionaries.length;
@@ -23,15 +23,13 @@ export function showOnboarding() {
         title: t("onboarding.title"),
         dismissible: false,
         build: (close) => {
-            const save = async (name) => {
+            const save = (name) => {
                 error.textContent = isNew && from.value === to.value ? t("onboarding.same") : "";
                 if (error.textContent) return;
                 close();
-                if (isNew) updateSettings({ native: from.value, target: to.value });
+                if (isNew) switchProfile({ from: from.value, to: to.value });
                 setUsername(name);
-                if (!isNew) return;
-                const topics = await loadLibrary();
-                if (topics) addTopics(topics.slice(0, FIRST_TOPICS), from.value, to.value);
+                if (isNew) addFirstTopics({ from: from.value, to: to.value });
             };
             return h("form", { class: "form", onSubmit: (event) => { event.preventDefault(); if (requireValue(input)) save(input.value.trim()); } },
                 h("div", { class: "welcome" }, mascot("happy", "mascot-large")),

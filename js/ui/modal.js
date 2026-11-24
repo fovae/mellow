@@ -1,25 +1,29 @@
+import { art } from "./art.js";
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
+import { calmMotion } from "../core/theme.js";
 import { icon } from "./icons.js";
 
 // The only modal in the app. Native <dialog> provides focus trapping and Escape.
 // build(close) returns the body nodes.
-export function openModal({ title, build, dismissible = true, className = "", actions = [] }) {
+export function openModal({ title, emoji, build, dismissible = true, className = "", actions = [] }) {
     const dialog = h("dialog", { class: `modal ${className}`, "aria-label": title });
     // Plays the exit animation, then closes.
     const close = () => {
         if (dialog.classList.contains("is-closing")) return;
         dialog.classList.add("is-closing");
-        setTimeout(() => dialog.close(), matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
+        setTimeout(() => dialog.close(), calmMotion() ? 0 : 180);
     };
 
     dialog.append(h("div", { class: "modal-panel" },
+        dismissible && h("span", { class: "modal-grip", "aria-hidden": "true" }),
         h("header", { class: "modal-header" },
-            h("h2", { class: "modal-title" }, title),
+            h("h2", { class: "modal-title" }, emoji && art(emoji), title),
             ...actions,
             dismissible && h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: close }, icon("close"))),
         h("div", { class: "modal-body" }, build(close))));
 
+    if (dismissible) swipeToClose(dialog, close);
     dialog.addEventListener("close", () => dialog.remove());
     dialog.addEventListener("click", (event) => {
         if (dismissible && event.target === dialog) close();
@@ -38,6 +42,25 @@ export function openModal({ title, build, dismissible = true, className = "", ac
     document.body.append(dialog);
     dialog.showModal();
     return close;
+}
+
+// A quick swipe down on the header, or anywhere while the sheet is at the top.
+function swipeToClose(dialog, close) {
+    const panel = dialog.firstElementChild;
+    let start = null;
+    dialog.addEventListener("touchstart", (event) => {
+        const [touch] = event.touches;
+        const onField = event.target.closest("input, textarea");
+        const onTop = panel.scrollTop <= 0 || event.target.closest(".modal-header, .modal-grip");
+        start = event.touches.length === 1 && !onField && onTop ? { x: touch.clientX, y: touch.clientY, time: Date.now() } : null;
+    }, { passive: true });
+    dialog.addEventListener("touchend", (event) => {
+        if (!start) return;
+        const [touch] = event.changedTouches;
+        const down = touch.clientY - start.y;
+        if (down > 70 && down > Math.abs(touch.clientX - start.x) * 2 && Date.now() - start.time < 700) close();
+        start = null;
+    });
 }
 
 export function confirmModal({ title, text, action, onConfirm }) {

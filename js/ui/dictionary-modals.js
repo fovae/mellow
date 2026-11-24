@@ -1,3 +1,4 @@
+import { art } from "./art.js";
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
 import * as store from "../core/store.js";
@@ -5,10 +6,10 @@ import { getStatus } from "../core/srs.js";
 import { normalize } from "../core/quiz.js";
 import { MAX_EXAMPLE, MAX_TEXT, wordKey } from "../core/transfer.js";
 import { loadLibrary, suggest } from "../core/library.js";
-import { studyLanguages, dictionaryIcons, languageFlag, languageName } from "../data/languages.js";
+import { dictionaryIcons, languageFlag, languageName } from "../data/languages.js";
 import { openModal, confirmModal, form, field, requireValue } from "./modal.js";
 import { exportWords, openWordImport } from "./transfer-modals.js";
-import { dropdown } from "./dropdown.js";
+import { cell, group } from "./cells.js";
 import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
 import { segmented, speakButton, statusBar, statusLegend } from "./parts.js";
@@ -20,9 +21,9 @@ function iconPicker(initial) {
     let selected = initial;
     const el = h("div", { class: "icon-grid" });
     const draw = () => el.replaceChildren(...dictionaryIcons.map((emoji) => h("button", {
-        class: `icon-choice ${emoji === selected ? "is-active" : ""}`, type: "button", "aria-pressed": String(emoji === selected),
+        class: `icon-choice ${emoji === selected ? "is-active" : ""}`, type: "button", "aria-label": emoji, "aria-pressed": String(emoji === selected),
         onClick: () => { selected = emoji; draw(); },
-    }, emoji)));
+    }, art(emoji))));
     draw();
     return { el, get: () => selected, set: (emoji) => { selected = emoji; draw(); } };
 }
@@ -31,15 +32,8 @@ function iconPicker(initial) {
 export function openDictionaryForm(dict) {
     const name = textInput(dict?.name, t("dict.namePlaceholder"));
     const description = textInput(dict?.description, t("dict.descriptionPlaceholder"), 140);
-    const picker = iconPicker(dict?.emoji ?? languageFlag(store.getState().settings.target));
-    const { native, target } = store.getState().settings;
-    const select = (label, value) => dropdown({
-        label, value, options: studyLanguages.map((lang) => ({ value: lang, name: languageName(lang, getLocale()), emoji: languageFlag(lang) })),
-    });
-    const from = select(t("dict.from"), dict?.from ?? native);
-    const to = select(t("dict.to"), dict?.to ?? target);
-    if (!dict) to.addEventListener("change", () => picker.set(languageFlag(to.value)));
-    const label = (el) => languageName(el.value, getLocale());
+    const { from, to } = dict ?? store.getProfile();
+    const picker = iconPicker(dict?.emoji ?? languageFlag(to));
 
     openModal({
         title: dict ? t("dict.settings") : t("dict.new"),
@@ -47,16 +41,15 @@ export function openDictionaryForm(dict) {
             onCancel: close,
             onSubmit: () => {
                 const data = {
-                    name: name.value.trim() || `${label(from)} → ${label(to)}`,
+                    name: name.value.trim() || t("dict.new"),
                     description: description.value.trim(),
-                    emoji: picker.get(), from: from.value, to: to.value,
+                    emoji: picker.get(), from, to,
                 };
                 close();
                 if (dict) store.updateDictionary(dict.id, data);
                 else openDictionary(store.addDictionary(data).id);
             },
         },
-            h("div", { class: "field-pair" }, field(t("dict.from"), from), field(t("dict.to"), to)),
             field(t("dict.name"), name),
             field(t("dict.description"), description),
             h("div", { class: "field" }, h("span", { class: "field-label" }, t("dict.icon")), picker.el)),
@@ -159,30 +152,31 @@ export function openDictionary(dictId) {
     function draw() {
         const dict = store.getDictionary(dictId);
         if (!dict) return close?.();
-        const isActive = store.getState().activeDictionaryId === dictId;
+        const isCurrent = store.getCurrentTopic()?.id === dictId || dict.words.every((w) => w.srs);
         top.replaceChildren(...[
             dict.description && h("p", { class: "muted" }, dict.description),
             h("div", { class: "card" }, statusBar(dict.words), statusLegend(dict.words)),
-            h("div", { class: "actions" },
-                !isActive && h("button", { class: "btn btn-soft", type: "button", onClick: () => store.setActiveDictionary(dictId) }, t("dict.use")),
-                h("button", { class: "btn btn-primary", type: "button", onClick: () => openWordForm(dictId) }, icon("plus"), t("word.add"))),
-            h("div", { class: "actions" },
-                h("button", { class: "btn btn-soft", type: "button", onClick: () => openWordImport(dictId) }, icon("download"), t("import.short")),
-                dict.words.length > 0 && h("button", { class: "btn btn-soft", type: "button", onClick: () => exportWords(dict) }, icon("share"), t("export.short"))),
+            h("button", { class: "btn btn-primary btn-wide", type: "button", onClick: () => openWordForm(dictId) }, icon("plus"), t("word.add")),
+            group(null, [
+                !isCurrent && cell({ icon: "play", tint: 1, label: t("dict.use"), chevron: false, onClick: () => store.learnFirst(dictId) }),
+                cell({ icon: "download", tint: 2, label: t("import.title"), onClick: () => openWordImport(dictId) }),
+                dict.words.length > 0 && cell({ icon: "share", tint: 3, label: t("export.title"), onClick: () => exportWords(dict) }),
+            ]),
         ].filter(Boolean));
         filters.replaceChildren(segmented(t("profile.words"),
             ["all", "new", "learning", "mastered"].map((value) => ({ value, label: t(value === "all" ? "dict.all" : `status.${value}`) })),
             filter, (value) => { filter = value; draw(); }));
         drawList();
         const title = top.closest("dialog")?.querySelector(".modal-title");
-        if (title) title.textContent = `${dict.emoji} ${dict.name}`;
+        if (title) title.replaceChildren(art(dict.emoji), dict.name);
     }
 
     draw();
     const dict = store.getDictionary(dictId);
     const unsubscribe = store.subscribe((type) => type !== "time" && draw());
     close = openModal({
-        title: `${dict.emoji} ${dict.name}`,
+        title: dict.name,
+        emoji: dict.emoji,
         className: "modal-page",
         actions: [h("button", { class: "icon-btn", type: "button", "aria-label": t("dict.settings"), onClick: () => openDictionaryForm(store.getDictionary(dictId)) }, icon("settings"))],
         build: () => h("div", { class: "stack" }, top, search, filters, list),

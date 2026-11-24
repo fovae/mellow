@@ -5,9 +5,9 @@ const tunes = { right: [[660, 0], [880, 0.08]], wrong: [[220, 0]], done: [[523, 
 let context = null;
 
 export function play(name) {
-    const { sound } = getState().settings;
+    const { sound, haptics } = getState().settings;
+    if (haptics) navigator.vibrate?.(name === "wrong" ? 40 : 12);
     if (!sound) return;
-    navigator.vibrate?.(name === "wrong" ? 40 : 12);
     try {
         context ??= new (window.AudioContext ?? window.webkitAudioContext)();
         context.resume?.();

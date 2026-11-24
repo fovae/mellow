@@ -1,19 +1,28 @@
+import { art } from "../ui/art.js";
 import { h } from "../core/dom.js";
 import { t, getLocale, languages, formatTime } from "../core/i18n.js";
-import { lastDays } from "../core/dates.js";
-import { getState, getTotals, getDay, getStreak, allWords, updateSettings, setUsername, resetAll } from "../core/store.js";
+import { allWords, getState, getTotals, getStreak, updateSettings, setUsername, resetAll } from "../core/store.js";
 import { APP_VERSION } from "../core/version.js";
 import { getAchievements } from "../core/achievements.js";
-import { canSpeak } from "../core/speech.js";
+import { levelInfo, totalXp } from "../core/rewards.js";
+import { play } from "../core/sound.js";
+import { canSpeak, speak } from "../core/speech.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
 import { saveBackup, restoreBackup } from "../ui/transfer-modals.js";
-import { dropdown } from "../ui/dropdown.js";
-import { accentPicker, dropsChip, levelCard } from "../ui/rewards.js";
+import { cell, choiceCell, group } from "../ui/cells.js";
+import { dropsChip, openAccents, openShop } from "../ui/rewards.js";
 import { icon } from "../ui/icons.js";
-import { section, segmented, statTile, statusBar, statusLegend, weekChart } from "../ui/parts.js";
+import { profilesGroup } from "../ui/profiles.js";
+import { mascot } from "../ui/mascot.js";
+import { segmented } from "../ui/parts.js";
+import { accuracy, openStats } from "../ui/stats.js";
 
-const line = (label, control) => h("div", { class: "row" }, h("span", { class: "row-main" }, label), control);
+const CONTACTS = [
+    { id: "instagram", name: "Instagram", handle: "vfovae", href: "https://www.instagram.com/vfovae/" },
+    { id: "telegram", name: "Telegram", handle: "fovae", href: "https://t.me/fovae" },
+    { id: "discord", name: "Discord", handle: "fovae", href: "https://discord.com/users/1468713991852396557" },
+];
 
 function editName() {
     const input = h("input", { class: "input", value: getState().username, maxlength: 30, autocomplete: "given-name" });
@@ -26,63 +35,109 @@ function editName() {
     });
 }
 
-const select = (label, key, options) => dropdown({
-    label, options, value: getState().settings[key], className: "input-inline", onChange: (value) => updateSettings({ [key]: value }),
+const badges = () => {
+    const { log, settings } = getState();
+    const { mastered, words } = getTotals();
+    return getAchievements({ log, mastered, words, dailyGoal: settings.dailyGoal });
+};
+
+function profileCard() {
+    const { username, log } = getState();
+    const { level, done, need } = levelInfo(totalXp(log));
+    const stat = (value, label) => h("div", { class: "profile-stat" }, h("strong", {}, value), h("small", { class: "muted" }, label));
+    return h("section", { class: "card profile-card" },
+        h("div", { class: "profile-head" },
+            h("span", { class: "profile-avatar" }, mascot("happy")),
+            h("div", { class: "row-main" }, h("h2", { class: "profile-name" }, username), h("span", { class: "badge" }, t("level.title", { level }))),
+            h("button", { class: "icon-btn icon-btn-soft", type: "button", "aria-label": t("profile.name"), onClick: editName }, icon("edit"))),
+        h("div", { class: "profile-level" },
+            h("div", { class: "bar" }, h("div", { class: "bar-fill", style: { width: `${(done / need) * 100}%` } })),
+            h("small", { class: "muted" }, t("level.left", { count: need - done }))),
+        h("div", { class: "profile-stats" },
+            stat([art("🔥"), ` ${getStreak()}`], t("profile.streak")),
+            stat(accuracy(), t("profile.accuracyShort")),
+            stat(formatTime(getTotals().seconds), t("profile.time"))));
+}
+
+const openBadges = () => openModal({
+    title: t("profile.badges"),
+    build: () => group(null, [...badges()].sort((a, b) => b.done - a.done).map((b) => cell({
+        emoji: b.emoji, label: t(`badge.${b.id}`), className: b.done ? "" : "is-locked",
+        sub: b.done ? t("badge.done") : h("span", { class: "cell-progress" }, h("span", { class: "bar" }, h("span", { class: "bar-fill", style: { width: `${Math.min(100, (b.value / b.goal) * 100)}%` } })), h("small", {}, `${b.value} / ${b.goal}`)),
+        value: b.done && icon("check"),
+    }))),
 });
 
-const toggle = (label, key) => h("input", {
-    class: "switch", type: "checkbox", role: "switch", "aria-label": label, checked: getState().settings[key],
-    onChange: (event) => updateSettings({ [key]: event.target.checked }),
-});
-
+const set = (key) => (value) => updateSettings({ [key]: value });
 const numbers = (...values) => values.map((value) => ({ value, name: String(value) }));
 
+// A switch moves by itself, so the screen is not redrawn.
+const toggle = (key, rest, onChange) => cell({
+    ...rest,
+    control: h("input", {
+        class: "switch", type: "checkbox", role: "switch", "aria-label": rest.label, checked: getState().settings[key],
+        onChange: (event) => { updateSettings({ [key]: event.target.checked }, "switch"); onChange?.(event.target.checked); },
+    }),
+});
+
+const choose = (key, rest, options) => choiceCell({ ...rest, options, value: getState().settings[key], onPick: set(key) });
+
 export function renderProfile() {
-    const { username, settings, lastBackup, log } = getState();
-    const totals = getTotals();
-    const week = lastDays(7).map(getDay);
-    const answers = week.reduce((sum, d) => sum + d.answers, 0);
-    const badges = getAchievements({ log, mastered: totals.mastered, words: totals.words, dailyGoal: settings.dailyGoal });
-    const correct = week.reduce((sum, d) => sum + d.correct, 0);
+    const { settings, lastBackup, drops } = getState();
+    const list = badges();
+    const sample = () => speak(t("settings.speechSample"), getLocale() === "ru" ? "Russian" : "English");
 
     return [
-        screenHeader(t("profile.eyebrow"), username, h("div", { class: "header-actions" }, dropsChip(),
-            h("button", { class: "icon-btn icon-btn-soft", type: "button", "aria-label": t("profile.name"), onClick: editName }, icon("edit")))),
-        levelCard(),
-        h("div", { class: "stats-grid stats-grid-3" },
-            statTile(`🔥 ${getStreak()}`, t("profile.streak"), "stat-card"),
-            statTile(answers ? `${Math.round((correct / answers) * 100)}%` : "—", t("profile.accuracy"), "stat-card"),
-            statTile(formatTime(totals.seconds), t("profile.time"), "stat-card")),
-        section(t("home.week"), weekChart()),
-        section(t("profile.words"), statusBar(allWords()), statusLegend(allWords())),
-        section(`${t("profile.badges")} · ${badges.filter((b) => b.done).length}/${badges.length}`,
-            h("div", { class: "badges" }, badges.map((b) => h("div", { class: `achievement ${b.done ? "is-done" : ""}` },
-                h("span", { class: "achievement-emoji", "aria-hidden": "true" }, b.emoji),
-                h("strong", {}, t(`badge.${b.id}`)),
-                h("small", { class: "muted" }, b.done ? t("badge.done") : `${b.value} / ${b.goal}`))))),
-        section(t("profile.learning"),
-            line(t("profile.goal"), select(t("profile.goal"), "dailyGoal", numbers(10, 20, 30, 50, 100))),
-            line(t("profile.newPerDay"), select(t("profile.newPerDay"), "newPerDay", numbers(5, 10, 15, 20, 30))),
-            line(t("profile.reverse"), toggle(t("profile.reverse"), "reverse")),
-            canSpeak() && line(t("profile.autoSpeak"), toggle(t("profile.autoSpeak"), "autoSpeak")),
-            line(t("profile.sound"), toggle(t("profile.sound"), "sound"))),
-        section(t("profile.appearance"),
-            segmented(t("profile.theme"), ["auto", "light", "dark"].map((value) => ({ value, label: t(`theme.${value}`) })), settings.theme, (theme) => updateSettings({ theme })),
-            accentPicker(),
-            line(t("profile.language"), select(t("profile.language"), "language", languages.map(({ code, name }) => ({ value: code, name }))))),
-        section(t("profile.data"),
-            h("p", { class: "muted" }, t("backup.text")),
-            line(t("backup.last"), h("span", { class: "muted" }, lastBackup ? new Date(lastBackup).toLocaleDateString(getLocale(), { day: "numeric", month: "short", year: "numeric" }) : t("backup.never"))),
-            h("div", { class: "actions" },
-                h("button", { class: "btn btn-soft", type: "button", onClick: restoreBackup }, t("backup.restore")),
-                h("button", { class: "btn btn-primary", type: "button", onClick: saveBackup }, t("backup.save"))),
-            h("button", {
-                class: "btn btn-danger-soft btn-wide form-extra", type: "button",
-                onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),
-            }, t("profile.reset"))),
-        section(t("profile.about"),
-            h("a", { class: "row", href: "privacy.html" }, h("span", { class: "row-main" }, t("profile.privacy")), icon("chevron")),
-            h("a", { class: "row", href: "terms.html" }, h("span", { class: "row-main" }, t("profile.terms")), icon("chevron")),
-            line(t("profile.version"), h("span", { class: "muted" }, APP_VERSION))),
+        screenHeader(t("profile.eyebrow"), t("tab.profile"), dropsChip()),
+        profileCard(),
+        group(t("settings.progress"), [
+            cell({ icon: "chart", tint: 1, label: t("profile.stats"), value: t("words.count", { count: allWords().length }), attrs: { "aria-haspopup": "dialog" }, onClick: openStats }),
+            cell({ icon: "trophy", tint: 2, label: t("profile.badges"), value: `${list.filter((b) => b.done).length} / ${list.length}`, attrs: { "aria-haspopup": "dialog" }, onClick: openBadges }),
+            cell({ icon: "drop", tint: 3, label: t("shop.title"), value: String(drops), attrs: { "aria-haspopup": "dialog" }, onClick: openShop }),
+        ]),
+        profilesGroup(),
+        group(t("profile.learning"), [
+            choose("dailyGoal", { icon: "target", tint: 3, label: t("profile.goal") }, numbers(10, 20, 30, 50, 100)),
+            choose("newPerDay", { icon: "plus", tint: 4, label: t("profile.newPerDay") }, numbers(5, 10, 15, 20, 30)),
+            toggle("reverse", { icon: "swap", tint: 5, label: t("profile.reverse") }),
+        ], { foot: t("settings.reverseNote") }),
+        group(t("settings.sound"), [
+            toggle("sound", { icon: "sound", tint: 1, label: t("profile.sound") }, (on) => on && play("right")),
+            "vibrate" in navigator && toggle("haptics", { icon: "phone", tint: 2, label: t("settings.haptics") }, (on) => on && navigator.vibrate(20)),
+            canSpeak() && toggle("autoSpeak", { icon: "speech", tint: 3, label: t("profile.autoSpeak") }),
+            canSpeak() && choiceCell({
+                icon: "timer", tint: 4, label: t("settings.speechRate"), value: settings.speechRate,
+                options: ["slow", "normal", "fast"].map((value) => ({ value, name: t(`speechRate.${value}`) })),
+                onPick: (value) => { set("speechRate")(value); sample(); },
+            }),
+        ]),
+        group(t("profile.appearance"), [
+            cell({
+                icon: "moon", tint: 1, label: t("profile.theme"), tall: true,
+                control: segmented(t("profile.theme"), ["auto", "light", "dark"].map((value) => ({ value, label: t(`theme.${value}`) })), settings.theme, set("theme")),
+            }),
+            cell({ icon: "palette", tint: 2, label: t("accent.title"), value: t(`accent.${settings.accent}`), attrs: { "aria-haspopup": "dialog" }, onClick: openAccents }),
+            choose("language", { icon: "text", tint: 3, label: t("profile.language") }, languages.map(({ code, name }) => ({ value: code, name }))),
+            toggle("motion", { icon: "spark", tint: 4, label: t("settings.motion") }),
+        ]),
+        group(t("profile.data"), [
+            cell({
+                icon: "share", tint: 1, label: t("settings.backup"), onClick: saveBackup,
+                sub: lastBackup ? new Date(lastBackup).toLocaleDateString(getLocale(), { day: "numeric", month: "long", year: "numeric" }) : t("backup.never"),
+            }),
+            cell({ icon: "download", tint: 2, label: t("settings.restore"), onClick: restoreBackup }),
+            toggle("backupReminder", { icon: "bell", tint: 3, label: t("settings.backupReminder") }),
+        ], { foot: t("backup.text") }),
+        group(null, [cell({
+            icon: "trash", danger: true, label: t("profile.reset"),
+            onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),
+        })]),
+        group(t("settings.contacts"), CONTACTS.map(({ id, name, handle, href }, i) => cell({ icon: id, tint: i + 1, label: name, value: handle, href })), { foot: t("settings.contactsNote") }),
+        group(t("profile.about"), [
+            cell({ icon: "shield", tint: 1, label: t("profile.privacy"), href: "privacy.html" }),
+            cell({ icon: "layers", tint: 2, label: t("profile.terms"), href: "terms.html" }),
+            cell({ icon: "info", tint: 3, label: t("profile.version"), value: APP_VERSION }),
+        ]),
+        h("p", { class: "credits" }, `${t("loader.created")} `, h("strong", { class: "gradient-text" }, "fovae")),
     ];
 }

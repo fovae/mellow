@@ -1,12 +1,13 @@
-// Level, quests, shop and reward messages.
+// Shop and reward messages.
+import { art, withDrop } from "./art.js";
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
 import { accents } from "../core/accents.js";
-import { FREEZE, DROPS, dailyQuests, levelInfo, totalXp } from "../core/rewards.js";
-import { dayKey } from "../core/dates.js";
+import { FREEZE } from "../core/rewards.js";
 import { play } from "../core/sound.js";
-import { buyAccent, buyFreeze, getDay, getState, subscribe, updateSettings } from "../core/store.js";
+import { buyAccent, buyFreeze, getState, subscribe, updateSettings } from "../core/store.js";
 import { openModal } from "./modal.js";
+import { cell, group } from "./cells.js";
 import { icon } from "./icons.js";
 import { mascot } from "./mascot.js";
 import { section } from "./parts.js";
@@ -25,33 +26,7 @@ export function showRewards(events) {
 }
 
 export const dropsChip = () => h("button", { class: "chip-stat", type: "button", "aria-label": `${t("drops.title")}: ${getState().drops}`, onClick: openShop },
-    h("span", { "aria-hidden": "true" }, "💧"), h("strong", {}, getState().drops));
-
-export function levelCard() {
-    const { level, done, need } = levelInfo(totalXp(getState().log));
-    return h("section", { class: "card level-card" },
-        mascot("happy"),
-        h("div", { class: "row-main" },
-            h("h2", { class: "section-title" }, t("level.title", { level })),
-            h("div", { class: "bar" }, h("div", { class: "bar-fill", style: { width: `${(done / need) * 100}%` } })),
-            h("small", { class: "muted" }, t("level.left", { count: need - done }))));
-}
-
-export function questsSection() {
-    const { quests } = getState();
-    const key = dayKey();
-    const day = getDay();
-    const rewarded = quests.day === key ? quests.done : [];
-    return section(t("quest.title"), dailyQuests(key).map((quest) => {
-        const value = Math.min(quest.goal, day[quest.field] ?? 0);
-        const done = rewarded.includes(quest.id);
-        return h("div", { class: `row quest ${done ? "is-done" : ""}` },
-            h("span", { class: "quest-icon" }, icon(done ? "check" : "target")),
-            h("span", { class: "row-main" }, h("strong", {}, t(`quest.${quest.id}`, { count: quest.goal })),
-                h("span", { class: "bar" }, h("span", { class: "bar-fill", style: { width: `${(value / quest.goal) * 100}%` } }))),
-            h("small", { class: "muted" }, done ? `+${DROPS.quest} 💧` : `${value} / ${quest.goal}`));
-    }));
-}
+    art("💧"), h("strong", {}, getState().drops));
 
 // Swatches of colour styles. Locked ones are bought with drops.
 export function accentPicker() {
@@ -68,7 +43,7 @@ export function accentPicker() {
                 play("done");
             },
         }, h("span", { class: "swatch-dot", "data-accent": id }, isActive && icon("check")),
-            h("span", {}, t(`accent.${id}`)), locked && h("small", { class: "muted" }, `${price} 💧`));
+            h("span", {}, t(`accent.${id}`)), locked && h("small", { class: "muted" }, withDrop(price)));
     }));
 }
 
@@ -78,19 +53,28 @@ export function openShop() {
         const { drops, freezes } = getState();
         const full = freezes >= FREEZE.max;
         body.replaceChildren(
-            h("section", { class: "hero shop-hero" }, mascot("happy"), h("div", {}, h("strong", { class: "hero-title" }, `${drops} 💧`), h("p", { class: "hero-text" }, t("drops.how")))),
-            section(t("freeze.title"),
-                h("p", { class: "muted" }, t("freeze.text")),
-                h("div", { class: "row" }, h("span", { class: "row-emoji" }, "🧊"),
-                    h("span", { class: "row-main" }, h("strong", {}, t("freeze.have", { count: freezes, max: FREEZE.max }))),
-                    h("button", {
-                        class: "btn btn-soft btn-small", type: "button", disabled: full || drops < FREEZE.price,
-                        onClick: () => { buyFreeze(); play("right"); },
-                    }, full ? t("freeze.full") : `${FREEZE.price} 💧`))),
+            h("section", { class: "hero shop-hero" }, mascot("happy"), h("div", {}, h("strong", { class: "hero-title" }, withDrop(drops)), h("p", { class: "hero-text" }, t("drops.how")))),
+            group(t("freeze.title"), [cell({
+                emoji: "🧊", label: t("freeze.have", { count: freezes, max: FREEZE.max }),
+                control: h("button", {
+                    class: "btn btn-soft btn-small", type: "button", disabled: full || drops < FREEZE.price,
+                    onClick: () => { buyFreeze(); play("right"); },
+                }, full ? t("freeze.full") : withDrop(FREEZE.price)),
+            })], { foot: t("freeze.text") }),
             section(t("accent.title"), accentPicker()));
     };
+    openLive(t("shop.title"), body, draw);
+}
+
+// A sheet that follows the state while it is open.
+function openLive(title, body, draw) {
     draw();
     const unsubscribe = subscribe((type) => type !== "time" && draw());
-    openModal({ title: t("shop.title"), build: () => body });
+    openModal({ title, build: () => body });
     body.closest("dialog").addEventListener("close", unsubscribe);
+}
+
+export function openAccents() {
+    const body = h("div", { class: "stack" });
+    openLive(t("accent.title"), body, () => body.replaceChildren(h("div", { class: "card" }, accentPicker()), h("p", { class: "group-foot" }, t("drops.how"))));
 }

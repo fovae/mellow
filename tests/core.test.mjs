@@ -6,7 +6,8 @@ import { parseWords, toCSV, cleanState } from "../js/core/transfer.js";
 import { loadLibrary, suggest, nextTopic, libraryKey, topicWords, LIBRARY_LANGUAGES } from "../js/core/library.js";
 import { libraryLanguages } from "../js/data/library.js";
 import { getAchievements, bestStreak } from "../js/core/achievements.js";
-import { getAdvice } from "../js/core/advice.js";
+import { currentTopic, listProfiles } from "../js/core/profiles.js";
+import { needsBackup } from "../js/core/advice.js";
 import { pickPairs, tokens, buildSentences, isSentence, buildStatement } from "../js/core/games.js";
 import { dailyQuests, daysToFreeze, emptyDay, levelInfo, levelOf, newRewards, streakOf } from "../js/core/rewards.js";
 import { buildLesson, buildPath, splitLessons } from "../js/core/lessons.js";
@@ -81,16 +82,18 @@ test("export and import return the same words", () => {
     assert.deepEqual(parseWords(toCSV(words)).words, words);
 });
 test("a damaged backup is cleaned", () => {
-    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, accent: "mellow", native: "English", target: "Spanish" } };
+    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, haptics: true, speechRate: "normal", motion: true, backupReminder: true, accent: "mellow", native: "English", target: "Spanish" } };
     let n = 0;
     const clean = cleanState({
-        username: 5, settings: { theme: "x", dailyGoal: "a" }, activeDictionaryId: "gone", log: { bad: {}, "2026-11-24": { answers: "x", correct: 2 } },
+        username: 5, profiles: [5, { from: "Elvish", to: "Spanish" }, { from: "Spanish", to: "English" }], removedTopics: [1, "a:b:c"], settings: { theme: "x", dailyGoal: "a" }, log: { bad: {}, "2026-11-24": { answers: "x", correct: 2 } },
         dictionaries: [null, { id: "d", name: {}, from: "Elvish", words: [null, { id: "w", word: "a", translation: "b", srs: { due: 1, interval: "x" } }, { id: "w", word: "c", translation: "d", srs: 5 }, { word: "", translation: "x" }] }],
-    }, defaults, () => `new${n++}`, { languages: ["en"], studyLanguages: ["English", "Spanish"], libraryLanguages: ["English", "Spanish"] });
+    }, defaults, () => `new${n++}`, { languages: ["en"], studyLanguages: ["English", "Spanish"] });
     assert.deepEqual(clean.settings, defaults.settings);
     assert.deepEqual(clean.log, { "2026-11-24": { ...emptyDay(), correct: 2 } });
     const [dict] = clean.dictionaries;
-    assert.deepEqual([clean.username, clean.activeDictionaryId, dict.name, dict.from, dict.words.length], ["", null, "Dictionary", "English", 2]);
+    assert.deepEqual([clean.username, dict.name, dict.from, dict.words.length], ["", "Dictionary", "English", 2]);
+    assert.deepEqual(clean.profiles, [{ from: "Spanish", to: "English" }, { from: "English", to: "Spanish" }]);
+    assert.deepEqual(clean.removedTopics, ["a:b:c"]);
     assert.notEqual(dict.words[0].id, dict.words[1].id);
     assert.deepEqual([dict.words[0].srs.interval, dict.words[1].srs], [0, null]);
 });
@@ -123,16 +126,23 @@ test("library: six filled columns, unique words, suggestions, next topic", async
     assert.equal(nextTopic("English", "Spanish", new Set([libraryKey("basics", "English", "Spanish")])).id, "phrases");
     assert.ok(topicWords(topics.find((x) => x.id === "verbs"), "English", "German").every((w) => w.example));
 });
-test("achievements and advice", () => {
+test("achievements and the backup reminder", () => {
     const day = (answers, correct = answers) => ({ answers, correct, fresh: 0, seconds: 0 });
     const log = { "2026-02-27": day(5), "2026-02-28": day(20), "2026-03-01": day(1, 0), "2026-03-05": day(1), "2026-03-06": day(0) };
     assert.equal(bestStreak(log), 3);
     const done = getAchievements({ log, mastered: 9, words: 200, dailyGoal: 20 }).filter((b) => b.done).map((b) => b.id);
     assert.deepEqual(done, ["first", "streak3", "words200", "sharp"]);
-    const facts = { hasActive: true, hasDictionaries: true, dueElsewhere: 0, difficult: 0, activeFinished: false, hasNextTopic: true, answers: 0, lastBackup: null };
-    assert.deepEqual(getAdvice(facts), []);
-    assert.deepEqual(getAdvice({ ...facts, dueElsewhere: 2, difficult: 3, answers: 99 }), ["review", "difficult"]);
-    assert.deepEqual(getAdvice({ ...facts, activeFinished: true, answers: 99 }), ["next", "backup"]);
+    const now = Date.now();
+    assert.ok(needsBackup({ answers: 50, lastBackup: null }) && needsBackup({ answers: 50, lastBackup: now - 15 * 86400000, now }));
+    assert.ok(!needsBackup({ answers: 49, lastBackup: null }) && !needsBackup({ answers: 99, lastBackup: now - 86400000, now }));
+});
+test("profiles: unique pairs, topics go in order", () => {
+    const pair = (from, to) => ({ from, to });
+    assert.deepEqual(listProfiles([pair("a", "b")], [{ ...pair("a", "b"), id: 1 }, pair("b", "a")]), [pair("a", "b"), pair("b", "a")]);
+    const dict = (id, ...started) => ({ id, words: started.map((s) => ({ srs: s ? {} : null })) });
+    assert.equal(currentTopic([dict(1, true), dict(2, true, false), dict(3, false)]).id, 2);
+    assert.equal(currentTopic([dict(1, true), dict(2, true), dict(3)]).id, 2);
+    assert.equal(currentTopic([]), undefined);
 });
 test("both interface languages have the same keys", () => assert.deepEqual(Object.keys(en).sort(), Object.keys(ru).sort()));
 test("games: unique pairs, sentences, statements", async () => {
@@ -222,4 +232,10 @@ test("colour styles have readable contrast", async () => {
         assert.ok(contrast(accent, mix(accent, white, 0.12)) >= 4.5, `${id} light`);
         assert.ok(contrast(dark, mix(dark, rgb("#1a1b26"), 0.18)) >= 4.5, `${id} dark`);
     }
+});
+test("every emoji in the data has a picture", async () => {
+    const { hasArt } = await import("../js/ui/art.js");
+    const { dictionaryIcons } = await import("../js/data/languages.js");
+    const names = [...(await loadLibrary()).map((x) => x.emoji), ...dictionaryIcons, ...getAchievements({ log: {}, mastered: 0, words: 0, dailyGoal: 1 }).map((b) => b.emoji)];
+    assert.deepEqual(names.filter((name) => !hasArt(name)), []);
 });

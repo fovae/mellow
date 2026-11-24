@@ -9,12 +9,13 @@ import { icon } from "./icons.js";
 export const sessionHeader = (onClose, fill, count = "") => h("header", { class: "session-header" },
     h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: onClose }, icon("close")),
     h("div", { class: "bar" }, h("div", { class: "bar-fill", style: { width: `${fill * 100}%` } })),
-    h("span", { class: "muted session-count" }, count));
+    h("span", { class: "muted session-count" }, ...[count].flat()));
 
 export const statTile = (value, label, className = "") => h("div", { class: `stat ${className}` },
     h("span", { class: "stat-value" }, value), h("span", { class: "muted" }, label));
 
-export const section = (title, ...children) => h("section", { class: "card" }, title && h("h2", { class: "section-title" }, title), ...children);
+// A small title outside, the content in a card.
+export const section = (title, ...children) => h("section", { class: "group" }, title && h("h2", { class: "group-title" }, title), h("div", { class: "card" }, ...children));
 
 export function segmented(label, options, value, onChange) {
     return h("div", { class: "segmented", role: "group", "aria-label": label }, options.map((option) => h("button", {
@@ -38,9 +39,9 @@ export function statusLegend(words) {
         h("span", {}, h("i", { class: `dot is-${key}` }), `${t(`status.${key}`)} `, h("strong", {}, counts[key]))));
 }
 
-export function ring(done, goal) {
+export function ring(done, goal, content) {
     const percent = Math.min(100, Math.round((done / goal) * 100));
-    const el = h("div", { class: "ring", role: "img", "aria-label": `${percent}%` }, h("span", {}, `${percent}%`));
+    const el = h("div", { class: "ring", role: "img", "aria-label": `${percent}%` }, h("span", {}, content ?? `${percent}%`));
     el.style.setProperty("--value", `${percent}%`);
     return el;
 }

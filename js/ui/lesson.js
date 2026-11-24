@@ -1,3 +1,4 @@
+import { art, withDrop } from "./art.js";
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
 import { buildLesson } from "../core/lessons.js";
@@ -30,7 +31,7 @@ export function openLesson(dictId, wordIds) {
         confirmModal({ title: t("path.exitTitle"), text: t("path.exitText"), action: t("path.exit"), onConfirm: screen.close });
     }
 
-    const header = () => sessionHeader(confirmExit, index / steps.length, combo >= COMBO ? `✦ ${combo}` : "");
+    const header = () => sessionHeader(confirmExit, index / steps.length, combo >= COMBO ? [art("✦", "art-inline"), ` ${combo}`] : "");
     const answer = (wordId, correct) => {
         combo = correct ? combo + 1 : 0;
         if (!correct) mistakes.set(wordId, mistakes.get(wordId) + 1);
@@ -85,7 +86,7 @@ export function openLesson(dictId, wordIds) {
                 h("h2", { class: "screen-title" }, t(total ? "path.done" : "path.perfect")),
                 h("p", { class: "muted" }, t("study.doneText")),
                 h("div", { class: "stats-grid stats-grid-3" },
-                    statTile(`+${xp}`, t("xp.title")), statTile(`+${drops} 💧`, t("drops.title")), statTile(total, t("games.mistakes")))),
+                    statTile(`+${xp}`, t("xp.title")), statTile(withDrop(`+${drops}`), t("drops.title")), statTile(total, t("games.mistakes")))),
             h("div", { class: "session-footer" }, h("button", { class: "btn btn-primary", type: "button", onClick: screen.close }, t("common.done"))));
         play("done");
         confetti(screen.body);

@@ -57,9 +57,9 @@ async function start() {
 
 test("the first start adds topics for the chosen pair", async () => {
     await start();
-    const { dictionaries, activeDictionaryId, settings } = await state();
+    const { dictionaries, profiles, settings } = await state();
     assert.deepEqual([settings.native, settings.target], ["English", "Spanish"]);
-    assert.equal(activeDictionaryId, dictionaries[0].id);
+    assert.deepEqual(profiles, [{ from: "English", to: "Spanish" }]);
     assert.equal(dictionaries[0].words[0].translation, "hola");
 });
 
@@ -89,18 +89,94 @@ test("library: search and add", async () => {
 
 test("add a word with a suggestion", async () => {
     await start();
-    await page.click(".quick:nth-child(4)");
+    await active(".widget").filter({ hasText: "Add word" }).click();
     await page.locator("dialog .input").first().fill("dog");
     await page.click("dialog .tag-btn");
     await page.click("dialog .btn-primary");
     assert.equal((await state()).dictionaries[0].words.at(-1).translation, "el perro");
 });
 
+test("home: the word of the day opens, Mello gives a tip, the lesson starts", async () => {
+    await start();
+    const { dictionaries } = await state();
+    const word = await active(".word-main > strong").textContent();
+    await active(".word-main").click();
+    assert.equal(await active(".word-meaning").textContent(), dictionaries[0].words.find((w) => w.translation === word).word);
+    await active(".mello-btn").click();
+    await page.waitForSelector(".toast");
+    await active(".widget-lesson").click();
+    await page.waitForSelector(".intro");
+});
+
+test("profiles: another language has its own course, switching back keeps the first", async () => {
+    await start();
+    await tab(5);
+    const row = (name) => active(".cell").filter({ hasText: name }).first();
+    await row("Add a language").click();
+    await page.click("dialog .dropdown >> nth=1");
+    await page.locator("dialog").last().locator('[data-value="German"]').click();
+    await page.locator("dialog").first().locator(".btn-primary").click();
+    await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries.length === 4);
+    await page.waitForFunction(() => !document.querySelector("dialog"));
+    const after = await state();
+    assert.deepEqual([after.settings.native, after.settings.target, after.profiles.length], ["English", "German", 2]);
+    await tab(2);
+    assert.equal(await active(".dict-card").count(), 2);
+    await active(".dict-card").first().click();
+    await page.waitForSelector('dialog :text("hallo")');
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.querySelector("dialog"));
+    await tab(5);
+    await active(".profile-row").nth(0).click();
+    assert.equal((await state()).settings.target, "Spanish");
+    await row("Delete a profile").click();
+    await page.click('dialog [data-value="1"]');
+    await page.locator("dialog").last().locator(".btn-danger").click();
+    await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries.length === 2);
+    assert.deepEqual((await state()).profiles, [{ from: "English", to: "Spanish" }]);
+});
+
+test("the course continues by itself and does not bring back a deleted topic", async () => {
+    await start();
+    await page.evaluate(() => {
+        const s = JSON.parse(localStorage.mellow_state);
+        for (const d of s.dictionaries) for (const w of d.words) w.srs = { due: Date.now() + 9e9, interval: 30, ease: 2.5, step: 0, lapses: 0 };
+        s.removedTopics = ["numbers:English:Spanish"];
+        localStorage.mellow_state = JSON.stringify(s);
+    });
+    await page.reload();
+    await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries.length === 3);
+    assert.equal((await state()).dictionaries[2].libraryKey, "time:English:Spanish");
+});
+
+test("data of the previous version becomes profiles", async () => {
+    await start();
+    await page.evaluate(() => {
+        const s = JSON.parse(localStorage.mellow_state);
+        s.version = 4;
+        s.activeDictionaryId = s.dictionaries[1].id;
+        s.dictionaries[0].to = "French";
+        delete s.profiles;
+        delete s.removedTopics;
+        localStorage.mellow_state = JSON.stringify(s);
+    });
+    await page.reload();
+    await page.waitForSelector(".is-ready");
+    await tab(5);
+    assert.equal(await active(".profile-row").count(), 2);
+    await active(".profile-row").nth(0).click();
+    const { profiles, settings, dictionaries } = await state();
+    assert.deepEqual(profiles.map((p) => p.to), ["French", "Spanish"]);
+    assert.equal(settings.target, "French");
+    assert.equal(dictionaries[0].to, "Spanish");
+    assert.ok(dictionaries.length === 2 && dictionaries.every((d) => d.words.length));
+});
+
 test("typing test accepts a word", async () => {
     await start();
     await tab(4);
     await active(".segmented").nth(0).locator("button").nth(1).click();
-    await active(".card .btn-primary").click();
+    await active(".btn-primary").click();
     const { dictionaries } = await state();
     const prompt = await page.textContent(".question-word");
     await page.fill(".input-large", dictionaries[0].words.find((w) => w.word === prompt).translation);
@@ -112,7 +188,7 @@ test("user text is never parsed as HTML", async () => {
     await start();
     await tab(2);
     await active(".dict-card").first().click();
-    await page.click('dialog .btn:has-text("Import")');
+    await page.click('dialog .cell:has-text("Import")');
     await page.locator("dialog").last().locator("textarea").fill("<img src=x onerror=window.hacked=1>;<b>x</b>");
     await page.locator("dialog").last().locator(".btn-primary").click();
     await page.waitForTimeout(300);
@@ -202,7 +278,7 @@ test("a freeze covers a missed day", async () => {
     await page.waitForSelector(".toast");
     const { freezes, frozen } = await state();
     assert.deepEqual([freezes, Object.keys(frozen).length], [0, 1]);
-    assert.equal(await active("div.chip-stat strong").textContent(), "2");
+    assert.equal(await active(".streak-value strong").textContent(), "2");
 });
 
 test("themes, languages and a narrow screen", async () => {
@@ -210,13 +286,28 @@ test("themes, languages and a narrow screen", async () => {
     await tab(5);
     await active(".segmented button").nth(2).click();
     assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark");
-    await active(".dropdown").nth(2).click();
+    const row = (name) => active(".cell").filter({ hasText: name }).first();
+    // A switch must not redraw the screen: its animation would be lost.
+    await page.evaluate(() => { document.querySelector(".screen.is-active .profile-card").dataset.kept = "1"; });
+    await row("Animations").click();
+    assert.equal((await state()).settings.motion, false);
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.motion), "off");
+    assert.equal(await active('[data-kept="1"]').count(), 1);
+    for (const name of ["Statistics", "Achievements", "Colour style"]) {
+        await row(name).click();
+        await page.waitForSelector("dialog .modal-body > *");
+        await page.keyboard.press("Escape");
+        await page.waitForFunction(() => !document.querySelector("dialog"));
+    }
+    await row("App language").click();
     await page.click('dialog [data-value="ru"]');
     await page.waitForFunction(() => !document.querySelector("dialog"));
     await page.setViewportSize({ width: 320, height: 568 });
     for (let i = 1; i <= 5; i++) {
         await tab(i);
-        assert.ok(await page.evaluate(() => [...document.querySelectorAll(".screen.is-active .screen-scroll *")].every((el) => el.getBoundingClientRect().right <= 321)), `tab ${i}`);
+        const gaps = await page.evaluate(() => [...document.querySelectorAll(".screen.is-active .screen-scroll > *")].map((el) => el.getBoundingClientRect()).map((r, i, all) => (i ? r.top - all[i - 1].bottom : 99)));
+        assert.ok(gaps.every((gap) => gap >= 12), `tab ${i} gaps ${gaps}`);
+        assert.ok(await page.evaluate(() => [...document.querySelectorAll(".screen.is-active .screen-scroll *")].filter((el) => !el.closest(".topics")).every((el) => el.getBoundingClientRect().right <= 321)), `tab ${i}`);
     }
     for (const name of ["privacy", "terms"]) {
         await page.goto(`${url}${name}.html`);
