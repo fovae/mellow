@@ -1,0 +1,33 @@
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node --test tests/*.mjs
+  browser:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+        working-directory: tests/e2e
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+        working-directory: tests/e2e
+      - run: npm test
+        working-directory: tests/e2e
+        env:
+          BROWSER: ${{ matrix.browser }}

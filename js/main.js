@@ -6,6 +6,8 @@ import { libraryExamples, loadLibrary } from "./core/library.js";
 import { fillExamples, getScopeQueue, getState, subscribe } from "./core/store.js";
 import { initNavigation, navigate, refresh, getCurrentScreen } from "./ui/navigation.js";
 import { playLoader } from "./ui/loader.js";
+import { countAll, studyAll } from "./ui/actions.js";
+import { openLibrary } from "./ui/library-modal.js";
 import { showOnboarding } from "./ui/onboarding.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
@@ -70,7 +72,17 @@ playLoader().then(() => {
         refresh();
     });
     if (!getState().username) showOnboarding();
+    else runShortcut();
 });
+
+// Shortcuts of the installed app (manifest.json).
+function runShortcut() {
+    const go = new URLSearchParams(location.search).get("go");
+    if (!go) return;
+    history.replaceState(null, "", location.pathname);
+    if (go === "library") openLibrary();
+    if (go === "review" && countAll()) studyAll();
+}
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch((error) => console.warn("Mellow: service worker failed", error));

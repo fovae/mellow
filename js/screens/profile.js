@@ -2,6 +2,7 @@ import { h } from "../core/dom.js";
 import { t, getLocale, languages, formatTime } from "../core/i18n.js";
 import { lastDays } from "../core/dates.js";
 import { getState, getTotals, getDay, getStreak, allWords, updateSettings, setUsername, resetAll } from "../core/store.js";
+import { APP_VERSION } from "../core/version.js";
 import { getAchievements } from "../core/achievements.js";
 import { canSpeak } from "../core/speech.js";
 import { screenHeader } from "../ui/navigation.js";
@@ -75,5 +76,9 @@ export function renderProfile() {
                 class: "btn btn-danger-soft btn-wide form-extra", type: "button",
                 onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),
             }, t("profile.reset"))),
+        section(t("profile.about"),
+            h("a", { class: "row", href: "privacy.html" }, h("span", { class: "row-main" }, t("profile.privacy")), icon("chevron")),
+            h("a", { class: "row", href: "terms.html" }, h("span", { class: "row-main" }, t("profile.terms")), icon("chevron")),
+            line(t("profile.version"), h("span", { class: "muted" }, APP_VERSION))),
     ];
 }

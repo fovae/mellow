@@ -11,8 +11,8 @@ achievements, daily goal, streak, statistics, light/dark/auto theme, EN/RU, offl
 
 - More topics and examples, transcription; vocabulary should be proofread by native speakers
 - Notifications (needs a server on iOS)
-- Privacy policy and terms, maskable icon, social preview image, CI, hosting
+- Legal review of privacy.html and terms.html
 
 ## Not verified
 
-Real iPhone and Safari: gestures, speech voices, safe areas, installed mode, share sheet, icon badge.
+WebKit engine passes the browser tests. A real iPhone is not checked: gestures, speech voices, safe areas, installed mode, share sheet, icon badge.

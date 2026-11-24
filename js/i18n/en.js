@@ -234,4 +234,8 @@ export default {
     "games.right": "Right",
     "games.mistakes": "Mistakes",
     "games.record": "New record!",
+    "profile.about": "About",
+    "profile.privacy": "Privacy policy",
+    "profile.terms": "Terms of use",
+    "profile.version": "Version",
 };

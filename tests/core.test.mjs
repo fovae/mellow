@@ -149,3 +149,12 @@ test("games: unique pairs, sentences, statements", async () => {
         for (const s of buildSentences(topicWords(topic, "English", to), 999)) assert.ok(isSentence(s, s.parts));
     }
 });
+test("the offline list matches the files", async () => {
+    const { readFile, readdir, access } = await import("node:fs/promises");
+    const root = new URL("../", import.meta.url);
+    const listed = [...(await readFile(new URL("sw.js", root), "utf8")).matchAll(/"\.\/([^"]+)"/g)].map((m) => m[1]);
+    for (const path of listed) await access(new URL(path, root));
+    for (const dir of ["js", "css"]) for (const path of await readdir(new URL(dir, root), { recursive: true })) {
+        if (/\.(js|css)$/.test(path)) assert.ok(listed.includes(`${dir}/${path}`), `${dir}/${path} is not in sw.js`);
+    }
+});

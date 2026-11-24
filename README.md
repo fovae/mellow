@@ -11,6 +11,7 @@ python3 -m http.server 8000
 Open http://localhost:8000. ES modules do not work from `file://`.
 
 Unit tests: `node --test tests/*.mjs`.
+Browser tests: `cd tests/e2e && npm ci && npx playwright install chromium webkit && BROWSER=webkit npm test`.
 
 ## Documentation
 

@@ -234,4 +234,8 @@ export default {
     "games.right": "Верно",
     "games.mistakes": "Ошибки",
     "games.record": "Новый рекорд!",
+    "profile.about": "О приложении",
+    "profile.privacy": "Конфиденциальность",
+    "profile.terms": "Условия использования",
+    "profile.version": "Версия",
 };

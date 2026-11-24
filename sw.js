@@ -1,10 +1,11 @@
 // Bump the version whenever the file list changes.
-const CACHE = "mellow-v6";
+const CACHE = "mellow-v7";
 const ASSETS = [
     "./",
     "./css/base.css",
     "./css/components.css",
     "./css/layout.css",
+    "./css/legal.css",
     "./css/loader.css",
     "./fonts/manrope-cyrillic-ext.woff2",
     "./fonts/manrope-cyrillic.woff2",
@@ -16,7 +17,9 @@ const ASSETS = [
     "./img/icons/32.png",
     "./img/icons/48.png",
     "./img/icons/512.png",
+    "./img/icons/maskable.png",
     "./index.html",
+    "./js/boot.js",
     "./js/core/achievements.js",
     "./js/core/activity.js",
     "./js/core/advice.js",
@@ -31,6 +34,7 @@ const ASSETS = [
     "./js/core/store.js",
     "./js/core/theme.js",
     "./js/core/transfer.js",
+    "./js/core/version.js",
     "./js/core/viewport.js",
     "./js/data/languages.js",
     "./js/data/library.js",
@@ -60,6 +64,8 @@ const ASSETS = [
     "./js/ui/test-session.js",
     "./js/ui/transfer-modals.js",
     "./manifest.json",
+    "./privacy.html",
+    "./terms.html",
 ];
 
 self.addEventListener("install", (event) => {

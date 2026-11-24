@@ -1,0 +1,9 @@
+html, body { height: auto; overflow: auto; }
+.legal { max-width: 680px; margin: 0 auto; padding: calc(16px + env(safe-area-inset-top, 0px)) 20px calc(40px + env(safe-area-inset-bottom, 0px)); line-height: 1.6; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
+.legal h1 { margin: 20px 0 4px; font-size: 1.75rem; font-weight: 800; line-height: 1.2; }
+.legal h2 { margin: 24px 0 6px; font-size: 1.1rem; }
+.legal p, .legal li { margin: 0 0 8px; }
+.legal a { color: var(--accent); }
+.legal article + article { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--line); }
+.legal nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.legal nav a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
