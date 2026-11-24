@@ -1,14 +1,15 @@
 // Bump the version whenever the file list changes.
-const CACHE = "mellow-v4";
+const CACHE = "mellow-v5";
 const ASSETS = [
     "./",
     "./css/base.css",
     "./css/components.css",
     "./css/layout.css",
     "./css/loader.css",
-    "./fonts/comfortaa-cyrillic.woff2",
-    "./fonts/comfortaa-latin-ext.woff2",
-    "./fonts/comfortaa-latin.woff2",
+    "./fonts/manrope-cyrillic-ext.woff2",
+    "./fonts/manrope-cyrillic.woff2",
+    "./fonts/manrope-latin-ext.woff2",
+    "./fonts/manrope-latin.woff2",
     "./img/icons/16.png",
     "./img/icons/180.png",
     "./img/icons/192.png",

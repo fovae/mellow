@@ -19,4 +19,4 @@ Unit tests: `node --test tests/*.mjs`.
 
 ## License
 
-All rights reserved. The Comfortaa font in `fonts/` is licensed under the SIL Open Font License.
+All rights reserved. The Manrope font in `fonts/` is licensed under the SIL Open Font License (`fonts/OFL.txt`).

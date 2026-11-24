@@ -18,7 +18,7 @@ details .muted { line-height: 1.5; }
 .hero-top { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
 .hero-change { position: relative; padding: 7px 14px; border-radius: 999px; font-size: .84rem; font-weight: 600; background: rgba(20, 10, 60, .28); }
 .hero-change::after { content: ""; position: absolute; inset: -7px; }
-.hero-title { margin: 8px 0 6px; font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.hero-title { margin: 8px 0 6px; font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; overflow-wrap: anywhere; }
 .hero-text { font-size: .95rem; }
 .hero-btn { width: 100%; margin-top: 18px; color: #4a22b8; background: #fff; }
 
@@ -133,7 +133,7 @@ details .muted { line-height: 1.5; }
 .modal-panel { max-height: calc(var(--app-height) - var(--safe-top) - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 0 16px calc(20px + var(--safe-bottom)); border-radius: 28px 28px 0 0; background: var(--page); }
 .modal-page .modal-panel { height: calc(var(--app-height) - var(--safe-top) - 24px); }
 .modal-header { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 4px; min-height: 64px; background: var(--page); }
-.modal-title { flex: 1; min-width: 0; font-family: var(--font-display); font-size: 1.15rem; overflow-wrap: anywhere; }
+.modal-title { flex: 1; min-width: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
 @keyframes sheet-in { from { opacity: .4; transform: translateY(60px); } }
 @keyframes sheet-out { to { opacity: 0; transform: translateY(40px); } }
 @keyframes fade { from { opacity: 0; } }
@@ -165,7 +165,7 @@ details .muted { line-height: 1.5; }
 .flashcard[data-swipe="good"] .flashcard-face { border-color: var(--success); }
 .flashcard[data-swipe="again"] .flashcard-face { border-color: var(--danger); }
 .flashcard-label { font-size: .76rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.flashcard-word, .question-word { max-width: 100%; font-size: 2.1rem; /* system font: Cyrillic "т" of Comfortaa looks like "m" */ font-weight: 700; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+.flashcard-word, .question-word { max-width: 100%; font-size: 2.1rem; font-weight: 700; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
 .grades { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .grade { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 64px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft); }
 .grade strong { font-size: .88rem; }
@@ -202,7 +202,7 @@ details .muted { line-height: 1.5; }
 .topic > .icon-btn, .topic > .badge { align-self: flex-end; }
 .topic > .badge { margin: 8px 0; }
 .sheet-footer { position: sticky; z-index: 1; bottom: calc(-20px - var(--safe-bottom)); margin-bottom: calc(-20px - var(--safe-bottom)); padding: 12px 0 calc(20px + var(--safe-bottom)); background: var(--page); }
-.example { font-size: .82rem; line-height: 1.4; font-style: italic; color: var(--muted); }
+.example { font-size: .82rem; line-height: 1.4; color: var(--muted); }
 .flashcard .example { font-size: .95rem; text-align: center; }
 .tag-btn { min-height: 44px; color: var(--text); background: var(--accent-soft); }
 .tags:empty { display: none; }
