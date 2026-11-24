@@ -1,9 +1,10 @@
 import { h } from "../core/dom.js";
-import { t, languages, formatTime } from "../core/i18n.js";
+import { t, getLocale, languages, formatTime } from "../core/i18n.js";
 import { lastDays } from "../core/dates.js";
 import { getState, getTotals, getDay, getStreak, allWords, updateSettings, setUsername, resetAll } from "../core/store.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
+import { saveBackup, restoreBackup } from "../ui/transfer-modals.js";
 import { icon } from "../ui/icons.js";
 import { section, segmented, statTile, statusBar, statusLegend, weekChart } from "../ui/parts.js";
 
@@ -28,7 +29,7 @@ const select = (label, key, options) => h("select", {
 const numbers = (...values) => values.map((value) => ({ value, name: String(value) }));
 
 export function renderProfile() {
-    const { username, settings } = getState();
+    const { username, settings, lastBackup } = getState();
     const totals = getTotals();
     const week = lastDays(7).map(getDay);
     const answers = week.reduce((sum, d) => sum + d.answers, 0);
@@ -54,8 +55,13 @@ export function renderProfile() {
             segmented(t("profile.theme"), ["auto", "light", "dark"].map((value) => ({ value, label: t(`theme.${value}`) })), settings.theme, (theme) => updateSettings({ theme })),
             line(t("profile.language"), select(t("profile.language"), "language", languages.map(({ code, name }) => ({ value: code, name }))))),
         section(t("profile.data"),
+            h("p", { class: "muted" }, t("backup.text")),
+            line(t("backup.last"), h("span", { class: "muted" }, lastBackup ? new Date(lastBackup).toLocaleDateString(getLocale(), { day: "numeric", month: "short", year: "numeric" }) : t("backup.never"))),
+            h("div", { class: "actions" },
+                h("button", { class: "btn btn-soft", type: "button", onClick: restoreBackup }, t("backup.restore")),
+                h("button", { class: "btn btn-primary", type: "button", onClick: saveBackup }, t("backup.save"))),
             h("button", {
-                class: "btn btn-danger-soft btn-wide", type: "button",
+                class: "btn btn-danger-soft btn-wide form-extra", type: "button",
                 onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),
             }, t("profile.reset"))),
     ];

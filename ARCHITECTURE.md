@@ -46,4 +46,6 @@ A wrong test answer makes a word that is already in study due now; right test an
 - Build DOM with `h()`. Do not use `innerHTML`: user text must stay text.
 - All interface text goes through `t()`, in every file of `js/i18n/`.
 - Every modal uses `openModal()`.
+- Data from files goes through `core/transfer.js` (`parseWords`, `cleanState`) before it reaches the store. A new state field must be added to `cleanState` too.
+- Files are saved and picked through `ui/files.js`.
 - When adding, removing or renaming a file, update `ASSETS` and the version in `sw.js`.

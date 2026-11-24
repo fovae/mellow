@@ -35,6 +35,9 @@ subscribe((type) => {
     if (type === "reset") {
         navigate("home");
         showOnboarding();
+    } else if (type === "restore") {
+        navigate("home");
+        if (!getState().username) showOnboarding();
     } else {
         refresh();
     }
@@ -44,6 +47,9 @@ subscribe((type) => {
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !document.activeElement?.matches("select, input")) refresh();
 });
+
+// Ask the browser not to clear the data when space is low.
+navigator.storage?.persist?.().catch(() => {});
 
 playLoader().then(() => {
     document.body.classList.add("is-ready");

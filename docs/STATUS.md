@@ -3,11 +3,11 @@
 ## Works
 
 Onboarding, dictionaries and words (search, filters, speech), spaced repetition with undo, swipes and keyboard,
-tests (choice, typing, both directions), daily goal, streak, 7-day statistics, light/dark/auto theme, EN/RU, offline.
+tests (choice, typing, both directions), daily goal, streak, 7-day statistics, light/dark/auto theme, EN/RU, offline,
+word import/export (CSV and pasted text), full backup and restore.
 
 ## Next candidates
 
-- Import/export and backup: data lives only in this browser
 - Achievements
 - Bigger starter dictionaries, example sentences, transcription
 - Notifications (needs a server on iOS)
@@ -15,4 +15,4 @@ tests (choice, typing, both directions), daily goal, streak, 7-day statistics, l
 
 ## Not verified
 
-Real iPhone and Safari: gestures, speech voices, safe areas, installed mode.
+Real iPhone and Safari: gestures, speech voices, safe areas, installed mode, share sheet.

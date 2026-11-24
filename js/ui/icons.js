@@ -15,6 +15,9 @@ const shapes = {
     undo: "M9 14l-5-5 5-5 M4 9h11a5 5 0 0 1 0 10h-4",
     chevron: "M9 6l6 6-6 6",
     settings: "M4 7h10 M18 7h2 M4 17h2 M10 17h10 M16 5v4 M8 15v4",
+    download: "M12 4v11 M7 10l5 5 5-5 M5 20h14",
+    share: "M12 15V4 M7 9l5-5 5 5 M5 20h14",
+    folder: "M3 6h6l2 3h10v10H3z",
     check: "M5 12l5 5L20 7",
     close: "M18 6L6 18 M6 6l12 12",
 };

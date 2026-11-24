@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { schedule, pickNext, getStatus, getQueue } from "../js/core/srs.js";
 import { startOfDay } from "../js/core/dates.js";
+import { parseWords, toCSV, cleanState } from "../js/core/transfer.js";
 import { buildQuiz, isCorrect, normalize } from "../js/core/quiz.js";
 
 const now = new Date(2026, 10, 24, 15).getTime();
@@ -55,4 +56,31 @@ test("accents are optional, й is not и", () => {
     assert.equal(normalize("Adiós"), "adios");
     assert.notEqual(normalize("мой"), normalize("мои"));
     assert.notEqual(normalize("が"), normalize("か"));
+});
+test("import: delimiters, quotes, duplicates, bad lines", () => {
+    const pairs = (text) => parseWords(text).words.map((w) => [w.word, w.translation]);
+    const expected = [["cat", "gato"], ["well-known", "conocido"]];
+    for (const d of ["\t", ";", ",", " - ", " — "]) assert.deepEqual(pairs(`cat${d}gato\r\nwell-known${d}conocido\n\n`), expected, d);
+    assert.deepEqual(pairs("big - grande, gran"), [["big", "grande, gran"]]);
+    const result = parseWords("cat;gato\nCat;Gato\nsun;sol\nbroken\n;x", [{ word: "sun", translation: "sol" }]);
+    assert.deepEqual([result.words.length, result.duplicates, result.invalid], [1, 2, 2]);
+    assert.equal(parseWords("").words.length, 0);
+});
+test("export and import return the same words", () => {
+    const words = [["a, b", "c; d"], ['say "hi"', "привет"], ["x - y", "z"], ["cat", "gato"]].map(([word, translation]) => ({ word, translation }));
+    assert.deepEqual(parseWords(toCSV(words)).words, words);
+});
+test("a damaged backup is cleaned", () => {
+    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false } };
+    let n = 0;
+    const clean = cleanState({
+        username: 5, settings: { theme: "x", dailyGoal: "a" }, activeDictionaryId: "gone", log: { bad: {}, "2026-11-24": { answers: "x", correct: 2 } },
+        dictionaries: [null, { id: "d", name: {}, from: "Elvish", words: [null, { id: "w", word: "a", translation: "b", srs: { due: 1, interval: "x" } }, { id: "w", word: "c", translation: "d", srs: 5 }, { word: "", translation: "x" }] }],
+    }, defaults, () => `new${n++}`, { languages: ["en"], studyLanguages: ["English", "Spanish"] });
+    assert.deepEqual(clean.settings, defaults.settings);
+    assert.deepEqual(clean.log, { "2026-11-24": { answers: 0, correct: 2, fresh: 0, seconds: 0 } });
+    const [dict] = clean.dictionaries;
+    assert.deepEqual([clean.username, clean.activeDictionaryId, dict.name, dict.from, dict.words.length], ["", null, "Dictionary", "English", 2]);
+    assert.notEqual(dict.words[0].id, dict.words[1].id);
+    assert.deepEqual([dict.words[0].srs.interval, dict.words[1].srs], [0, null]);
 });

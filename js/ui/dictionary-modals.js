@@ -3,8 +3,10 @@ import { t, getLocale } from "../core/i18n.js";
 import * as store from "../core/store.js";
 import { getStatus } from "../core/srs.js";
 import { normalize } from "../core/quiz.js";
+import { MAX_TEXT, wordKey } from "../core/transfer.js";
 import { studyLanguages, dictionaryIcons, languageFlag, languageName } from "../data/languages.js";
 import { openModal, confirmModal, form, field, requireValue } from "./modal.js";
+import { exportWords, openWordImport } from "./transfer-modals.js";
 import { icon } from "./icons.js";
 import { segmented, speakButton, statusBar, statusLegend } from "./parts.js";
 
@@ -65,8 +67,8 @@ export function openDictionaryForm(dict) {
 
 function openWordForm(dictId, word) {
     const dict = store.getDictionary(dictId);
-    const original = textInput(word?.word, "", 120);
-    const translation = textInput(word?.translation, "", 120);
+    const original = textInput(word?.word, "", MAX_TEXT);
+    const translation = textInput(word?.translation, "", MAX_TEXT);
     const error = h("p", { class: "feedback is-wrong", role: "status" });
     openModal({
         title: word ? t("word.edit") : t("word.add"),
@@ -75,7 +77,7 @@ function openWordForm(dictId, word) {
             onSubmit: () => {
                 if (!requireValue(original) || !requireValue(translation)) return;
                 const data = { word: original.value.trim(), translation: translation.value.trim() };
-                const same = (w) => w.id !== word?.id && normalize(w.word) === normalize(data.word) && normalize(w.translation) === normalize(data.translation);
+                const same = (w) => w.id !== word?.id && wordKey(w) === wordKey(data);
                 error.textContent = store.getDictionary(dictId).words.some(same) ? t("word.duplicate") : "";
                 if (error.textContent) return;
                 if (word) {
@@ -140,6 +142,9 @@ export function openDictionary(dictId) {
             h("div", { class: "actions" },
                 !isActive && h("button", { class: "btn btn-soft", type: "button", onClick: () => store.setActiveDictionary(dictId) }, t("dict.use")),
                 h("button", { class: "btn btn-primary", type: "button", onClick: () => openWordForm(dictId) }, icon("plus"), t("word.add"))),
+            h("div", { class: "actions" },
+                h("button", { class: "btn btn-soft", type: "button", onClick: () => openWordImport(dictId) }, icon("download"), t("import.short")),
+                dict.words.length > 0 && h("button", { class: "btn btn-soft", type: "button", onClick: () => exportWords(dict) }, icon("share"), t("export.short"))),
         ].filter(Boolean));
         filters.replaceChildren(segmented(t("profile.words"),
             ["all", "new", "learning", "mastered"].map((value) => ({ value, label: t(value === "all" ? "dict.all" : `status.${value}`) })),

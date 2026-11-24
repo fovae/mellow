@@ -1,7 +1,10 @@
 import { createStarterDictionaries } from "../data/starter.js";
 import { dayKey, startOfDay } from "./dates.js";
+import { studyLanguages } from "../data/languages.js";
+import { cleanState, toBackup } from "./transfer.js";
 import { schedule, getQueue, getStatus, strength } from "./srs.js";
 
+const uiLanguages = ["en", "ru"];
 const KEY = "mellow_state";
 const VERSION = 2;
 const listeners = new Set();
@@ -17,6 +20,7 @@ const createState = () => ({
     settings: defaultSettings(),
     activeDictionaryId: null,
     totalTimeActive: 0, // seconds
+    lastBackup: null, // ms
     log: {}, // "YYYY-MM-DD" -> { answers, correct, fresh, seconds }
     dictionaries: createStarterDictionaries(createId),
 });
@@ -36,16 +40,29 @@ const migrations = {
     }),
 };
 
+// Returns null when the data is not a Mellow state of a known version.
+function upgrade(saved) {
+    if (!Array.isArray(saved?.dictionaries)) return null;
+    for (let v = saved.version; v < VERSION; v++) {
+        if (!migrations[v]) return null;
+        saved = { ...migrations[v](saved), version: v + 1 };
+    }
+    return saved.version === VERSION ? saved : null;
+}
+
 function load() {
+    let raw = null;
     try {
-        let saved = JSON.parse(localStorage.getItem(KEY));
-        if (Array.isArray(saved?.dictionaries)) {
-            for (let v = saved.version; v < VERSION; v++) saved = { ...migrations[v](saved), version: v + 1 };
-            if (saved.version === VERSION) return { ...saved, settings: { ...defaultSettings(), ...saved.settings } };
-        }
+        raw = localStorage.getItem(KEY);
+        const saved = upgrade(JSON.parse(raw));
+        if (saved) return { ...saved, settings: { ...defaultSettings(), ...saved.settings } };
     } catch (error) {
         console.warn("Mellow: could not read saved data", error);
     }
+    // Keep data that could not be read instead of overwriting it.
+    try {
+        if (raw) localStorage.setItem(`${KEY}_unreadable`, raw);
+    } catch { /* no storage */ }
     return createState();
 }
 
@@ -190,6 +207,13 @@ export function addWord(dictId, data) {
     commit("dictionaries");
 }
 
+export function addWords(dictId, list) {
+    const dict = getDictionary(dictId);
+    if (!dict || !list.length) return;
+    dict.words.push(...list.map(createWord));
+    commit("dictionaries");
+}
+
 export function updateWord(dictId, wordId, changes) {
     const word = getDictionary(dictId)?.words.find((w) => w.id === wordId);
     if (!word) return;
@@ -210,9 +234,34 @@ export function addActiveTime(seconds) {
     commit("time");
 }
 
+// Backup
+export const getBackup = () => toBackup(state);
+
+export function markBackup() {
+    state.lastBackup = Date.now();
+    commit("settings");
+}
+
+// Returns a checked state, or null when the file is not a Mellow backup.
+export function readBackup(text) {
+    try {
+        const { app, state: saved } = JSON.parse(text);
+        const upgraded = app === "mellow" ? upgrade(saved) : null;
+        return upgraded && cleanState(upgraded, createState(), createId, { languages: uiLanguages, studyLanguages });
+    } catch {
+        return null;
+    }
+}
+
+export function restore(next) {
+    state = next;
+    commit("restore");
+}
+
 // Removes only Mellow's key: other apps may share the same origin.
 export function resetAll() {
     localStorage.removeItem(KEY);
+    localStorage.removeItem(`${KEY}_unreadable`);
     state = createState();
     notify("reset");
 }
