@@ -1,0 +1,24 @@
+.main { position: relative; width: 100%; max-width: 560px; height: var(--app-height); margin: 0 auto; opacity: 0; transition: opacity .6s var(--ease); }
+.is-ready .main { opacity: 1; }
+
+.screen { position: absolute; inset: 0; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity .28s var(--ease-out), transform .28s var(--ease-out), visibility .28s; }
+.screen.is-active { opacity: 1; visibility: visible; transform: none; }
+.screen-scroll { height: 100%; display: flex; flex-direction: column; gap: 16px; overflow: hidden auto; overscroll-behavior: none; scrollbar-width: none; padding: calc(20px + var(--safe-top)) 20px calc(112px + var(--safe-bottom)); }
+.screen-scroll::-webkit-scrollbar { display: none; }
+.screen-scroll > * { flex-shrink: 0; }
+.scroll-thumb { position: absolute; top: 0; right: 6px; width: 3px; height: 40px; border-radius: 999px; background: rgba(0, 0, 0, .3); opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
+.scroll-thumb.is-scrolling { opacity: 1; }
+
+.screen-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.screen-header > div { min-width: 0; }
+.screen-title { font-size: 1.45rem; font-weight: 700; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.screen-header .muted { margin-top: 4px; font-size: .92rem; }
+
+.tab-bar-wrap { position: fixed; inset: auto 0 0; z-index: 10; display: flex; justify-content: center; padding: 0 16px calc(14px + var(--safe-bottom)); pointer-events: none; opacity: 0; visibility: hidden; transform: translateY(40px); transition: opacity .6s var(--ease-out), transform .6s var(--ease-out), visibility .6s; }
+.is-ready .tab-bar-wrap { opacity: 1; visibility: visible; transform: none; }
+.tab-bar { display: flex; width: 100%; max-width: 520px; height: 64px; padding: 0 12px; pointer-events: auto; border: 1px solid rgba(255, 255, 255, .4); border-radius: 999px; background: rgba(255, 255, 255, .85); box-shadow: 0 8px 32px rgba(0, 0, 0, .08); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); }
+.tab { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #6e6e73; transition: color .2s, transform .1s; }
+.tab:active { transform: scale(.94); }
+.tab.is-active { color: var(--violet); }
+.tab .icon { width: 20px; height: 20px; }
+.tab-label { font-size: .62rem; font-weight: 700; }
