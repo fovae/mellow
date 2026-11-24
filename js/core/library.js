@@ -44,6 +44,14 @@ export function toDictionary(topic, from, to, locale) {
     };
 }
 
+// "topic:from:to" -> Map of "word\ntranslation" -> example
+export function libraryExamples(key) {
+    const [id, from, to] = key.split(":");
+    const topic = pack?.find((x) => x.id === id);
+    if (!topic || !isSupported(from, to)) return null;
+    return new Map(topicWords(topic, from, to).filter((w) => w.example).map((w) => [`${w.word}\n${w.translation}`, w.example]));
+}
+
 const plain = (text) => normalize(stripArticle(text.replace(/\s*\(.*?\)/g, "")));
 
 // Pairs whose `side` starts with the query; exact matches first.

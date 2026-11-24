@@ -122,6 +122,7 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages,
         activeDictionaryId: dictionaries.some((d) => d.id === raw.activeDictionaryId) ? raw.activeDictionaryId : null,
         totalTimeActive: number(raw.totalTimeActive, 0, 1e10, 0),
         lastBackup: null,
+        records: Object.fromEntries(["pairs", "sprint"].filter((name) => Number.isFinite(raw.records?.[name])).map((name) => [name, number(raw.records[name], 0, 1e5, 0)])),
         log: Object.fromEntries(days.map(([key, day]) => [key, Object.fromEntries(
             ["answers", "correct", "fresh", "seconds"].map((name) => [name, number(day[name], 0, 1e6, 0)]))])),
         dictionaries,

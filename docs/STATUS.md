@@ -2,9 +2,9 @@
 
 ## Works
 
-Onboarding with automatic first topics, library (26 topics, 617 words, 30 examples, 6 languages in any direction),
+Onboarding with automatic first topics, library (33 topics, 756 words, 86 examples, 6 languages in any direction),
 dictionaries and words (search, filters, speech, examples, translation suggestions), spaced repetition with undo, swipes,
-hints and keyboard, mixed review, difficult words, tests (choice, typing, listening, hints), advice, word and tip of the day,
+hints and keyboard, mixed review, difficult words, tests (choice, typing, listening, hints), games (pairs, phrase, sprint), advice, word and tip of the day,
 achievements, daily goal, streak, statistics, light/dark/auto theme, EN/RU, offline, import/export, backup, icon badge.
 
 ## Next candidates

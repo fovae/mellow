@@ -80,5 +80,5 @@ export function openFullscreen(label, onKey) {
     dialog.addEventListener("close", () => dialog.remove());
     document.body.append(dialog);
     dialog.showModal();
-    return { draw: (...nodes) => body.replaceChildren(...nodes.filter(Boolean)), close: () => dialog.close() };
+    return { draw: (...nodes) => body.replaceChildren(...nodes.filter(Boolean)), close: () => dialog.close(), isOpen: () => dialog.open };
 }

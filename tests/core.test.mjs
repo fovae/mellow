@@ -7,6 +7,7 @@ import { loadLibrary, suggest, nextTopic, libraryKey, topicWords, LIBRARY_LANGUA
 import { libraryLanguages } from "../js/data/library.js";
 import { getAchievements, bestStreak } from "../js/core/achievements.js";
 import { getAdvice } from "../js/core/advice.js";
+import { pickPairs, tokens, buildSentences, isSentence, buildStatement } from "../js/core/games.js";
 import en from "../js/i18n/en.js";
 import ru from "../js/i18n/ru.js";
 import { buildQuiz, hintMask, isCorrect, normalize } from "../js/core/quiz.js";
@@ -131,3 +132,20 @@ test("achievements and advice", () => {
     assert.deepEqual(getAdvice({ ...facts, activeFinished: true, answers: 99 }), ["next", "backup"]);
 });
 test("both interface languages have the same keys", () => assert.deepEqual(Object.keys(en).sort(), Object.keys(ru).sort()));
+test("games: unique pairs, sentences, statements", async () => {
+    const make = (list) => list.map(([word, translation, example], id) => ({ id, word, translation, example }));
+    const words = make([["cat", "gato"], ["cat", "minino"], ["sun", "sol"], ["Sun", "sol"], ["go", "ir", "Vamos a casa. — We go home."]]);
+    for (let i = 0; i < 50; i++) {
+        const pairs = pickPairs(words, 5);
+        assert.equal(pairs.length, 3);
+        const s = buildStatement(words, 0);
+        if (!s.truth) assert.ok(!words.some((w) => normalize(w.word) === normalize(s.word.word) && normalize(w.translation) === normalize(s.shown)));
+        const [sentence] = buildSentences(words, 5);
+        assert.equal(sentence.prompt, "We go home.");
+        assert.ok(isSentence(sentence, sentence.parts) && !isSentence(sentence, sentence.shuffled));
+    }
+    assert.deepEqual(tokens("Tu es libre ?"), ["Tu", "es", "libre ?"]);
+    for (const topic of await loadLibrary()) for (const to of LIBRARY_LANGUAGES.slice(1)) {
+        for (const s of buildSentences(topicWords(topic, "English", to), 999)) assert.ok(isSentence(s, s.parts));
+    }
+});

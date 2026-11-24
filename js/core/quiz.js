@@ -1,5 +1,5 @@
 // Test logic. Pure functions.
-const shuffle = (list) => {
+export const shuffle = (list) => {
     const copy = [...list];
     for (let i = copy.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

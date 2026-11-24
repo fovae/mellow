@@ -5,12 +5,12 @@ index.html      shell: loader, <main>, tab bar
 sw.js           offline cache (network first)
 css/            base (tokens, fonts), loader, layout, components
 js/main.js      boot
-js/core/        store, srs, quiz, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
+js/core/        store, srs, quiz, games, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
 js/ui/          navigation, modal, dictionary modals, icons, scrollbar, loader, onboarding,
-                hero, parts (shared blocks), study, test-session, library-modal, transfer-modals,
+                hero, parts (shared blocks), study, test-session, games, library-modal, transfer-modals,
                 files, actions (shortcuts)
 js/screens/     one render function per tab
-js/data/        library (26 topics, 6 languages, lazy), study languages
+js/data/        library (33 topics, 6 languages, lazy), study languages
 js/i18n/        interface translations
 tests/          node --test tests/*.mjs
 ```
@@ -28,7 +28,7 @@ Never write to localStorage or mutate state outside the store.
 ```text
 version (2), username, activeDictionaryId, totalTimeActive (seconds)
 settings: language, theme, dailyGoal, newPerDay, reverse, autoSpeak, native, target
-lastBackup (ms)
+lastBackup (ms), records { pairs: seconds, sprint: score }
 log["YYYY-MM-DD"]: answers, correct, fresh, seconds
 dictionaries[]: id, name, description, emoji, from, to, libraryKey?
   words[]: id, word, translation, isFavourite, example?, misses?

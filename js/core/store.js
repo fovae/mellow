@@ -206,6 +206,15 @@ export function recordTestAnswer(dictId, wordId, correct) {
     commit("study");
 }
 
+// Returns true when the result is a new record (not the first result).
+export function saveRecord(name, value, isBetter) {
+    const previous = state.records?.[name];
+    if (previous !== undefined && !isBetter(value, previous)) return false;
+    state.records = { ...state.records, [name]: value };
+    commit("study");
+    return previous !== undefined;
+}
+
 export function setActiveDictionary(id) {
     state.activeDictionaryId = id;
     commit("dictionaries");
@@ -229,6 +238,22 @@ export function addDictionaries(list) {
     if (!getActiveDictionary()) state.activeDictionaryId = added[0].id;
     commit("dictionaries");
     return added;
+}
+
+// Adds examples that appeared in the library later. Never replaces the user's own text.
+export function fillExamples(examplesOf) {
+    let changed = false;
+    for (const dict of state.dictionaries) {
+        const examples = dict.libraryKey && examplesOf(dict.libraryKey);
+        if (!examples) continue;
+        for (const word of dict.words) {
+            const example = examples.get(`${word.word}\n${word.translation}`);
+            if (word.example || !example) continue;
+            word.example = example;
+            changed = true;
+        }
+    }
+    if (changed) commit("dictionaries");
 }
 
 export function updateDictionary(id, changes) {

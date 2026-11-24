@@ -2,8 +2,8 @@ import { initViewport } from "./core/viewport.js";
 import { startActivityTracker } from "./core/activity.js";
 import { getLocale } from "./core/i18n.js";
 import { applyTheme } from "./core/theme.js";
-import { loadLibrary } from "./core/library.js";
-import { getScopeQueue, getState, subscribe } from "./core/store.js";
+import { libraryExamples, loadLibrary } from "./core/library.js";
+import { fillExamples, getScopeQueue, getState, subscribe } from "./core/store.js";
 import { initNavigation, navigate, refresh, getCurrentScreen } from "./ui/navigation.js";
 import { playLoader } from "./ui/loader.js";
 import { showOnboarding } from "./ui/onboarding.js";
@@ -64,7 +64,11 @@ playLoader().then(() => {
     document.body.classList.add("is-ready");
     startActivityTracker();
     // Loaded when idle: suggestions and the next topic need it.
-    loadLibrary().then(() => !document.querySelector("dialog[open]") && !document.activeElement?.matches("select, input") && refresh());
+    loadLibrary().then(() => {
+        if (document.querySelector("dialog[open]") || document.activeElement?.matches("select, input")) return;
+        fillExamples(libraryExamples);
+        refresh();
+    });
     if (!getState().username) showOnboarding();
 });
 
