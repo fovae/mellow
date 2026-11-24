@@ -3,14 +3,17 @@ import { t, getLocale } from "../core/i18n.js";
 import * as store from "../core/store.js";
 import { normalize } from "../core/quiz.js";
 import { LIBRARY_LANGUAGES, loadLibrary, libraryKey, topicWords, toDictionary } from "../core/library.js";
-import { languageName } from "../data/languages.js";
+import { languageFlag, languageName } from "../data/languages.js";
 import { openModal } from "./modal.js";
+import { dropdown } from "./dropdown.js";
 import { icon } from "./icons.js";
 import { speakButton } from "./parts.js";
 import { openDictionary } from "./dictionary-modals.js";
 
-export const languageSelect = (value, onChange) => h("select", { class: "input", onChange },
-    LIBRARY_LANGUAGES.map((name) => h("option", { value: name, selected: name === value }, languageName(name, getLocale()))));
+export const languageSelect = (label, value, onChange) => dropdown({
+    label, value, onChange,
+    options: LIBRARY_LANGUAGES.map((name) => ({ value: name, name: languageName(name, getLocale()), emoji: languageFlag(name) })),
+});
 
 export const topicTitle = (topic) => topic.title[getLocale()] ?? topic.title.en;
 
@@ -53,15 +56,15 @@ export async function openLibrary() {
 
     const body = h("div", { class: "stack" });
     const search = h("input", { class: "input", type: "search", placeholder: t("library.search"), "aria-label": t("library.search"), onInput: () => draw() });
-    const fromSelect = languageSelect(from, () => change(fromSelect.value, to));
-    const toSelect = languageSelect(to, () => change(from, toSelect.value));
+    const fromSelect = languageSelect(t("library.native"), from, () => change(fromSelect.value, to));
+    const toSelect = languageSelect(t("library.target"), to, () => change(from, toSelect.value));
 
     // Choosing the same language twice swaps the pair.
     function change(nextFrom, nextTo) {
         if (nextFrom === nextTo) [nextFrom, nextTo] = nextFrom === from ? [to, from] : [to, from];
         [from, to] = [nextFrom, nextTo];
-        fromSelect.value = from;
-        toSelect.value = to;
+        fromSelect.select(from);
+        toSelect.select(to);
         store.updateSettings({ native: from, target: to });
         draw();
     }

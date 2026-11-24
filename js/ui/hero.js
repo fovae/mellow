@@ -1,6 +1,7 @@
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
 import { getActiveDictionary, getDictQueue, getState } from "../core/store.js";
+import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
 import { countAll, studyAll } from "./actions.js";
 import { openLibrary } from "./library-modal.js";
@@ -12,10 +13,11 @@ import { openStudy } from "./study.js";
 export function heroCard() {
     const dict = getActiveDictionary();
     const button = (name, label, onClick) => h("button", { class: "btn hero-btn", type: "button", onClick }, icon(name), label);
-    const hero = (emoji, title, text, action) => h("section", { class: "hero" },
+    const hero = (emoji, title, text, action, mood = "calm") => h("section", { class: "hero" },
         h("div", { class: "hero-top" },
             h("span", { class: "eyebrow" }, t("hero.active")),
             dict && h("button", { class: "hero-change", type: "button", onClick: openDictionaryPicker }, t("hero.change"))),
+        h("div", { class: "hero-mascot" }, mascot(mood)),
         h("h2", { class: "hero-title" }, h("span", { "aria-hidden": "true" }, `${emoji} `), title),
         h("p", { class: "hero-text" }, text),
         action);
@@ -27,5 +29,5 @@ export function heroCard() {
     const reviews = due.length + soon.length;
     return reviews + fresh.length
         ? hero(dict.emoji, dict.name, t("hero.ready", { due: reviews, fresh: fresh.length }), button("play", t("hero.start"), () => openStudy(dict.id)))
-        : hero(dict.emoji, dict.name, t("hero.rest"), countAll() > 0 && button("layers", t("home.reviewAll"), studyAll));
+        : hero(dict.emoji, dict.name, t("hero.rest"), countAll() > 0 && button("layers", t("home.reviewAll"), studyAll), "sleepy");
 }

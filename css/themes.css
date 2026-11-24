@@ -1,0 +1,36 @@
+/* Colour styles. --g1/--g2: gradient under white text; --accent: text and icons. Checked for contrast in tests. */
+:root, [data-accent="mellow"] { --g1: #2f6fe4; --g2: #7b3ff2; --accent: #6a35d9; }
+:root[data-theme="dark"], :root[data-theme="dark"][data-accent="mellow"] { --accent: #b69cff; }
+[data-accent="ocean"] { --g1: #0b6fb8; --g2: #0a7a80; --accent: #0b5f9e; }
+:root[data-theme="dark"][data-accent="ocean"] { --accent: #7cc7ff; }
+[data-accent="forest"] { --g1: #1f7a3f; --g2: #4a7416; --accent: #1c6b38; }
+:root[data-theme="dark"][data-accent="forest"] { --accent: #86dfa0; }
+[data-accent="sunset"] { --g1: #c03f1a; --g2: #b3245f; --accent: #a83314; }
+:root[data-theme="dark"][data-accent="sunset"] { --accent: #ffab8a; }
+[data-accent="rose"] { --g1: #c02a78; --g2: #8f3fd1; --accent: #aa246c; }
+:root[data-theme="dark"][data-accent="rose"] { --accent: #ff9ccd; }
+[data-accent="aurora"] { --g1: #0a776a; --g2: #6a4be0; --accent: #0b665b; }
+:root[data-theme="dark"][data-accent="aurora"] { --accent: #7fe0cf; }
+[data-accent="coffee"] { --g1: #875727; --g2: #6b3f24; --accent: #7a4d22; }
+:root[data-theme="dark"][data-accent="coffee"] { --accent: #e0b58a; }
+[data-accent="graphite"] { --g1: #4a5568; --g2: #2d3748; --accent: #3b4657; }
+:root[data-theme="dark"][data-accent="graphite"] { --accent: #c3cbd8; }
+
+:root, [data-accent] { --gradient: linear-gradient(135deg, var(--g1), var(--g2)); }
+:root[data-accent] {
+    --violet: var(--g2);
+    --text-gradient: linear-gradient(135deg, var(--g1), var(--g2));
+    --accent-soft: color-mix(in srgb, var(--accent) 12%, #fff);
+    --page: color-mix(in srgb, var(--g1) 5%, #f8f9fd);
+    --inner: color-mix(in srgb, var(--g2) 5%, #f7f7fb);
+}
+:root[data-theme="dark"][data-accent] {
+    --text-gradient: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #fff));
+    --violet: color-mix(in srgb, var(--g2) 70%, #fff);
+    --accent-soft: color-mix(in srgb, var(--accent) 18%, #1a1b26);
+    --glass: color-mix(in srgb, var(--surface) 80%, transparent);
+    --line: color-mix(in srgb, var(--g2) 14%, #2a2b38);
+    --page: color-mix(in srgb, var(--g2) 8%, #0d0e14);
+    --surface: color-mix(in srgb, var(--g2) 9%, #191a23);
+    --inner: color-mix(in srgb, var(--g2) 11%, #23242f);
+}

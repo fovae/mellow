@@ -120,12 +120,99 @@ test("user text is never parsed as HTML", async () => {
     assert.equal((await state()).dictionaries[0].words.at(-1).translation, "<b>x</b>");
 });
 
+test("a lesson: every exercise, rewards, the path moves", async () => {
+    await start();
+    await tab(3);
+    await active(".path-node.is-current").click();
+    const { dictionaries } = await state();
+    const [dict] = dictionaries;
+    const pair = (text) => dict.words.find((w) => w.word === text || w.translation === text);
+    const answers = (text) => dict.words.filter((w) => w.word === text || w.translation === text).flatMap((w) => [w.word, w.translation]);
+    for (let i = 0; i < 60 && !(await page.locator(".session-summary").count()); i++) {
+        if (await page.locator(".intro").count()) {
+            await page.click(".session-footer .btn");
+        } else if (await page.locator(".pairs").count()) {
+            for (const el of await page.locator(".pairs-column").nth(0).locator("button").all()) {
+                await el.click();
+                await page.locator(".pairs-column").nth(1).getByText(pair(await el.textContent()).translation, { exact: true }).click();
+            }
+            await page.waitForFunction(() => !document.querySelector(".pairs"));
+        } else {
+            const prompt = await page.locator(".question-word").textContent();
+            if (await page.locator("#answerForm").count()) {
+                await page.fill(".input-large", pair(prompt).translation);
+                await page.keyboard.press("Enter");
+            } else {
+                for (const option of await page.locator(".option").all()) {
+                    const text = await option.textContent();
+                    if (text !== prompt && answers(prompt).includes(text)) { await option.click(); break; }
+                }
+            }
+            await page.waitForSelector(".feedback.is-correct");
+            await page.click(".session-footer .btn");
+        }
+    }
+    const after = await state();
+    const day = Object.values(after.log)[0];
+    assert.deepEqual([day.lessons, day.perfect, day.fresh], [1, 1, 6]);
+    assert.ok(after.dictionaries[0].words.slice(0, 6).every((w) => w.srs.interval === 1));
+    assert.ok(after.drops >= 25 && after.rewardedLevel >= 2, `${after.drops} ${after.rewardedLevel}`);
+    await page.waitForSelector(".toast");
+    await page.click(".session-footer .btn");
+    await page.waitForFunction(() => !document.querySelector("dialog"));
+    assert.equal(await active(".path-node.is-done").count(), 1);
+});
+
+test("leaving a lesson asks first; the shop sells only when there are drops", async () => {
+    await start();
+    await tab(3);
+    await active(".path-node.is-current").click();
+    await page.click(".session-footer .btn");
+    await page.keyboard.press("Escape");
+    await page.locator("dialog").last().locator(".btn-danger").click();
+    await page.waitForFunction(() => !document.querySelector("dialog"));
+    assert.equal(Object.values((await state()).log)[0]?.lessons ?? 0, 0);
+    await tab(5);
+    await active(".chip-stat").click();
+    assert.ok(await page.locator("dialog .btn-small").isDisabled());
+    await page.locator("dialog .swatch").nth(4).click();
+    assert.equal((await state()).settings.accent, "mellow");
+    await page.locator("dialog .swatch").nth(1).click();
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.accent), "ocean");
+    await page.evaluate(() => { const s = JSON.parse(localStorage.mellow_state); s.drops = 100; localStorage.mellow_state = JSON.stringify(s); });
+    await page.reload();
+    await page.waitForSelector(".is-ready");
+    await tab(5);
+    await active(".chip-stat").click();
+    await page.locator("dialog .btn-small").click();
+    await page.locator("dialog .swatch").nth(4).click();
+    const { drops, freezes, settings } = await state();
+    assert.deepEqual([drops, freezes, settings.accent], [0, 2, "rose"]);
+});
+
+test("a freeze covers a missed day", async () => {
+    await start();
+    await page.evaluate(() => {
+        const s = JSON.parse(localStorage.mellow_state);
+        const key = (days) => { const d = new Date(); d.setDate(d.getDate() - days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+        s.log = { [key(2)]: { answers: 5, correct: 5 }, [key(3)]: { answers: 5, correct: 5 } };
+        localStorage.mellow_state = JSON.stringify(s);
+    });
+    await page.reload();
+    await page.waitForSelector(".toast");
+    const { freezes, frozen } = await state();
+    assert.deepEqual([freezes, Object.keys(frozen).length], [0, 1]);
+    assert.equal(await active("div.chip-stat strong").textContent(), "2");
+});
+
 test("themes, languages and a narrow screen", async () => {
     await start();
     await tab(5);
     await active(".segmented button").nth(2).click();
     assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark");
-    await active("select").nth(2).selectOption({ label: "Русский" });
+    await active(".dropdown").nth(2).click();
+    await page.click('dialog [data-value="ru"]');
+    await page.waitForFunction(() => !document.querySelector("dialog"));
     await page.setViewportSize({ width: 320, height: 568 });
     for (let i = 1; i <= 5; i++) {
         await tab(i);

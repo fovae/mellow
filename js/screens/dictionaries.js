@@ -3,6 +3,7 @@ import { t, getLocale } from "../core/i18n.js";
 import { getState, getProgress } from "../core/store.js";
 import { languageName } from "../data/languages.js";
 import { screenHeader } from "../ui/navigation.js";
+import { mascot } from "../ui/mascot.js";
 import { icon } from "../ui/icons.js";
 import { section, statusBar } from "../ui/parts.js";
 import { openLibrary } from "../ui/library-modal.js";
@@ -26,6 +27,6 @@ export function renderDictionaries() {
             h("span", { class: "eyebrow" }, t("library.eyebrow")),
             h("strong", { class: "hero-title" }, t("library.title")),
             h("span", { class: "hero-text" }, t("library.text"))),
-        ...(dictionaries.length ? [...dictionaries].sort((a, b) => (b.id === activeDictionaryId) - (a.id === activeDictionaryId)).map(card) : [section(null, h("p", { class: "muted" }, t("dict.empty")))]),
+        ...(dictionaries.length ? [...dictionaries].sort((a, b) => (b.id === activeDictionaryId) - (a.id === activeDictionaryId)).map(card) : [h("div", { class: "card empty" }, mascot("sleepy"), h("p", { class: "muted" }, t("dict.empty")))]),
     ];
 }

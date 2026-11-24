@@ -8,6 +8,9 @@ import { libraryLanguages } from "../js/data/library.js";
 import { getAchievements, bestStreak } from "../js/core/achievements.js";
 import { getAdvice } from "../js/core/advice.js";
 import { pickPairs, tokens, buildSentences, isSentence, buildStatement } from "../js/core/games.js";
+import { dailyQuests, daysToFreeze, emptyDay, levelInfo, levelOf, newRewards, streakOf } from "../js/core/rewards.js";
+import { buildLesson, buildPath, splitLessons } from "../js/core/lessons.js";
+import { accents } from "../js/core/accents.js";
 import en from "../js/i18n/en.js";
 import ru from "../js/i18n/ru.js";
 import { buildQuiz, hintMask, isCorrect, normalize } from "../js/core/quiz.js";
@@ -78,14 +81,14 @@ test("export and import return the same words", () => {
     assert.deepEqual(parseWords(toCSV(words)).words, words);
 });
 test("a damaged backup is cleaned", () => {
-    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, native: "English", target: "Spanish" } };
+    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, accent: "mellow", native: "English", target: "Spanish" } };
     let n = 0;
     const clean = cleanState({
         username: 5, settings: { theme: "x", dailyGoal: "a" }, activeDictionaryId: "gone", log: { bad: {}, "2026-11-24": { answers: "x", correct: 2 } },
         dictionaries: [null, { id: "d", name: {}, from: "Elvish", words: [null, { id: "w", word: "a", translation: "b", srs: { due: 1, interval: "x" } }, { id: "w", word: "c", translation: "d", srs: 5 }, { word: "", translation: "x" }] }],
     }, defaults, () => `new${n++}`, { languages: ["en"], studyLanguages: ["English", "Spanish"], libraryLanguages: ["English", "Spanish"] });
     assert.deepEqual(clean.settings, defaults.settings);
-    assert.deepEqual(clean.log, { "2026-11-24": { answers: 0, correct: 2, fresh: 0, seconds: 0 } });
+    assert.deepEqual(clean.log, { "2026-11-24": { ...emptyDay(), correct: 2 } });
     const [dict] = clean.dictionaries;
     assert.deepEqual([clean.username, clean.activeDictionaryId, dict.name, dict.from, dict.words.length], ["", null, "Dictionary", "English", 2]);
     assert.notEqual(dict.words[0].id, dict.words[1].id);
@@ -156,5 +159,67 @@ test("the offline list matches the files", async () => {
     for (const path of listed) await access(new URL(path, root));
     for (const dir of ["js", "css"]) for (const path of await readdir(new URL(dir, root), { recursive: true })) {
         if (/\.(js|css)$/.test(path)) assert.ok(listed.includes(`${dir}/${path}`), `${dir}/${path} is not in sw.js`);
+    }
+});
+test("levels, quests and rewards", () => {
+    assert.deepEqual([0, 49, 50, 149, 150, 300].map(levelOf), [1, 1, 2, 2, 3, 4]);
+    assert.deepEqual(levelInfo(60), { level: 2, done: 10, need: 100 });
+    const key = "2026-11-24";
+    const quests = dailyQuests(key);
+    assert.deepEqual(quests, dailyQuests(key));
+    assert.equal(new Set(quests.map((q) => q.id)).size, 3);
+    const day = { ...emptyDay(), answers: 20, ...Object.fromEntries(quests.map((q) => [q.field, q.goal])) };
+    const facts = { key, day, done: [], xp: 50, rewardedLevel: 1, dailyGoal: 20 };
+    const first = newRewards(facts);
+    assert.deepEqual(first.events.map((e) => e.type), ["quest", "quest", "quest", "chest", "goal", "level"]);
+    assert.deepEqual(newRewards({ ...facts, done: first.done, rewardedLevel: 2 }).events, []);
+});
+test("streak and freezes", () => {
+    const day = { ...emptyDay(), answers: 1 };
+    const log = { "2026-11-20": day, "2026-11-21": day };
+    assert.equal(streakOf(log, {}, now), 0);
+    assert.deepEqual(daysToFreeze(log, {}, 2, now), ["2026-11-23", "2026-11-22"]);
+    assert.deepEqual(daysToFreeze(log, {}, 1, now), []);
+    assert.deepEqual(daysToFreeze({}, {}, 3, now), []);
+    assert.deepEqual(daysToFreeze({ "2026-11-23": day }, {}, 3, now), []);
+    const frozen = { "2026-11-22": true, "2026-11-23": true };
+    assert.equal(streakOf(log, frozen, now), 2);
+    assert.equal(streakOf({ ...log, "2026-11-24": day }, frozen, now), 3);
+    assert.deepEqual(daysToFreeze(log, frozen, 3, now), []);
+});
+test("path and lessons", async () => {
+    const words = (n) => Array.from({ length: n }, (_, id) => ({ id: `w${id}`, word: `a${id}`, translation: `b${id}`, srs: null }));
+    assert.deepEqual([1, 6, 7, 8, 9, 13].map((n) => splitLessons(words(n)).map((l) => l.length).join()), ["1", "6", "7", "8", "6,3", "6,7"]);
+    assert.deepEqual(buildPath([]), []);
+    const list = words(30);
+    list.slice(0, 6).forEach((w) => { w.srs = { interval: 30 }; });
+    const path = buildPath(list);
+    assert.deepEqual(path.map((n) => n.type).join(), "lesson,lesson,lesson,lesson,test,lesson");
+    assert.ok(path[0].mastered && path[1].current && !path[2].current && !path[4].done);
+    for (const n of [1, 2, 6]) for (const speech of [true, false]) {
+        const steps = buildLesson(words(n), words(n), { speech });
+        assert.equal(steps.filter((s) => s.type === "intro").length, n);
+        for (const s of steps) if (s.type === "question") assert.ok(s.mode === "typing" || s.question.options.length > 1);
+        for (const w of words(n)) assert.ok(steps.filter((s) => s.wordId === w.id).length >= 3);
+    }
+    for (const topic of await loadLibrary()) {
+        const all = topicWords(topic, "Russian", "Italian").map((w, id) => ({ ...w, id: `x${id}`, srs: null }));
+        for (const lesson of splitLessons(all)) buildLesson(lesson, all, { speech: true });
+    }
+});
+test("colour styles have readable contrast", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const css = await readFile(new URL("../css/themes.css", import.meta.url), "utf8");
+    const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    const mix = (a, b, part) => a.map((x, i) => x * part + b[i] * (1 - part));
+    const light = (c) => c.map((x) => x / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)).reduce((s, x, i) => s + x * [0.2126, 0.7152, 0.0722][i], 0);
+    const contrast = (a, b) => { const [x, y] = [light(a), light(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+    const white = [255, 255, 255];
+    for (const { id } of accents) {
+        const [, g1, g2, accent] = css.match(new RegExp(`\\[data-accent="${id}"\\] \\{ --g1: (#\\w+); --g2: (#\\w+); --accent: (#\\w+)`)).map((x, i) => (i ? rgb(x) : x));
+        const dark = rgb(css.match(new RegExp(`dark"\\]\\[data-accent="${id}"\\] \\{ --accent: (#\\w+)`))[1]);
+        assert.ok(contrast(white, g1) >= 4.5 && contrast(white, g2) >= 4.5, `${id} gradient`);
+        assert.ok(contrast(accent, mix(accent, white, 0.12)) >= 4.5, `${id} light`);
+        assert.ok(contrast(dark, mix(dark, rgb("#1a1b26"), 0.18)) >= 4.5, `${id} dark`);
     }
 });

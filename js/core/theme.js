@@ -2,12 +2,14 @@ import { getState } from "./store.js";
 
 const dark = window.matchMedia("(prefers-color-scheme: dark)");
 
-// index.html repeats this inline so the first frame already has the right colours.
+// js/boot.js does this earlier, so the first frame already has the right colours.
 export function applyTheme() {
-    const { theme } = getState().settings;
+    const { theme, accent } = getState().settings;
     const value = theme === "auto" ? (dark.matches ? "dark" : "light") : theme;
-    document.documentElement.dataset.theme = value;
-    document.querySelector('meta[name="theme-color"]').content = value === "dark" ? "#0f1018" : "#f4f6fd";
+    const root = document.documentElement;
+    root.dataset.theme = value;
+    root.dataset.accent = accent;
+    document.querySelector('meta[name="theme-color"]').content = getComputedStyle(root).getPropertyValue("--page").trim();
 }
 
 dark.addEventListener("change", applyTheme);

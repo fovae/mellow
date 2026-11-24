@@ -3,11 +3,12 @@
 ```text
 index.html      shell: loader, <main>, tab bar
 sw.js           offline cache (network first)
-css/            base (tokens, fonts), loader, layout, components
+css/            base (tokens, fonts), themes (colour styles), loader, layout, components, play, legal
 js/main.js      boot
-js/core/        store, srs, quiz, games, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
+js/core/        store, srs, quiz, games, lessons, rewards, accents, sound, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
 js/ui/          navigation, modal, dictionary modals, icons, scrollbar, loader, onboarding,
-                hero, parts (shared blocks), study, test-session, games, library-modal, transfer-modals,
+                hero, parts (shared blocks), study, exercises, test-session, games, lesson, path,
+                rewards (quests, level, shop), mascot, toast, dropdown, library-modal, transfer-modals,
                 files, actions (shortcuts)
 js/screens/     one render function per tab
 js/data/        library (33 topics, 6 languages, lazy), study languages
@@ -26,10 +27,11 @@ Never write to localStorage or mutate state outside the store.
 ## State (`localStorage.mellow_state`)
 
 ```text
-version (2), username, activeDictionaryId, totalTimeActive (seconds)
-settings: language, theme, dailyGoal, newPerDay, reverse, autoSpeak, native, target
+version (3), username, activeDictionaryId, totalTimeActive (seconds)
+settings: language, theme, dailyGoal, newPerDay, reverse, autoSpeak, sound, accent, native, target
 lastBackup (ms), records { pairs: seconds, sprint: score }
-log["YYYY-MM-DD"]: answers, correct, fresh, seconds
+drops, freezes, frozen["YYYY-MM-DD"], owned[], quests { day, done[] }, rewardedLevel
+log["YYYY-MM-DD"]: see emptyDay() in core/rewards.js
 dictionaries[]: id, name, description, emoji, from, to, libraryKey?
   words[]: id, word, translation, isFavourite, example?, misses?
     srs: null | { due, interval (days), ease, step, lapses }
@@ -42,6 +44,14 @@ When this shape changes, raise `VERSION` and add a step to `migrations` in the s
 `core/srs.js` is pure and based on SM-2. New words: two "good" answers (10 minutes, then 1 day) or one "easy" (4 days).
 Then the interval grows by `ease`; "again" returns the word to learning. Intervals of 21+ days count as mastered.
 A wrong test answer makes a word that is already in study due now; right test answers do not move the schedule.
+
+## Play
+
+- The path is built from any dictionary (`core/lessons.js`). It stores nothing: progress comes from the words.
+- Experience is the sum of `log[day].xp`. Quests, the daily goal and levels are checked in `commit()`; rewards arrive by themselves.
+- A streak freeze is spent automatically (`protectStreak`). There are no lives: mistakes only bring words back.
+- Use `dropdown()` instead of `<select>`, `toast()` for messages, `mascot()` for empty and final screens.
+- A new colour style: `core/accents.js`, `css/themes.css`, two texts. The tests check contrast.
 
 ## Automation
 

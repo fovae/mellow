@@ -3,7 +3,8 @@ import { startActivityTracker } from "./core/activity.js";
 import { getLocale } from "./core/i18n.js";
 import { applyTheme } from "./core/theme.js";
 import { libraryExamples, loadLibrary } from "./core/library.js";
-import { fillExamples, getScopeQueue, getState, subscribe } from "./core/store.js";
+import { showRewards } from "./ui/rewards.js";
+import { fillExamples, onRewards, protectStreak, getScopeQueue, getState, subscribe } from "./core/store.js";
 import { initNavigation, navigate, refresh, getCurrentScreen } from "./ui/navigation.js";
 import { playLoader } from "./ui/loader.js";
 import { countAll, studyAll } from "./ui/actions.js";
@@ -20,6 +21,7 @@ const applySettings = () => {
     applyTheme();
 };
 
+onRewards(showRewards);
 initViewport();
 applySettings();
 initNavigation({
@@ -32,7 +34,7 @@ initNavigation({
 navigate("home");
 
 subscribe((type) => {
-    // The timer must not close an open <select>.
+    // The timer must not redraw what the user is touching.
     if (type === "time" && getCurrentScreen() !== "home") return;
     applySettings();
     if (type === "reset") {
@@ -48,7 +50,9 @@ subscribe((type) => {
 
 // Due words and the date may change while the app is in the background.
 document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && !document.activeElement?.matches("select, input")) refresh();
+    if (document.hidden) return;
+    protectStreak();
+    if (!document.activeElement?.matches("input, textarea")) refresh();
 });
 
 // The number on the icon of the installed app, where supported.
@@ -67,10 +71,11 @@ playLoader().then(() => {
     startActivityTracker();
     // Loaded when idle: suggestions and the next topic need it.
     loadLibrary().then(() => {
-        if (document.querySelector("dialog[open]") || document.activeElement?.matches("select, input")) return;
+        if (document.querySelector("dialog[open]") || document.activeElement?.matches("input, textarea")) return;
         fillExamples(libraryExamples);
         refresh();
     });
+    protectStreak();
     if (!getState().username) showOnboarding();
     else runShortcut();
 });

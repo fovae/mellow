@@ -1,11 +1,14 @@
 // Classic script in <head>: runs before the first paint. js/core/theme.js takes over later.
 (function () {
-    var theme;
+    var theme, accent;
     try {
-        theme = JSON.parse(localStorage.getItem("mellow_state")).settings.theme;
+        var settings = JSON.parse(localStorage.getItem("mellow_state")).settings;
+        theme = settings.theme;
+        accent = settings.accent;
     } catch (e) {}
     if (theme !== "light" && theme !== "dark") theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.accent = accent || "mellow";
 
     // A module that failed to load leaves an empty page: try again once.
     addEventListener("error", function (event) {

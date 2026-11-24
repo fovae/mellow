@@ -7,6 +7,7 @@ import { dayKey } from "../core/dates.js";
 import { addTopics, openLibrary, topicTitle } from "../ui/library-modal.js";
 import { quickAdd, studyAll, countAll, trainDifficult } from "../ui/actions.js";
 import { saveBackup } from "../ui/transfer-modals.js";
+import { dropsChip, questsSection } from "../ui/rewards.js";
 import { icon } from "../ui/icons.js";
 import { screenHeader } from "../ui/navigation.js";
 import { heroCard } from "../ui/hero.js";
@@ -68,9 +69,10 @@ export function renderHome() {
 
     return [
         screenHeader(date, [`${t("home.greeting")} `, h("span", { class: "gradient-text" }, username)],
-            h("div", { class: "streak", role: "img", "aria-label": `${t("profile.streak")}: ${streak}` }, h("span", {}, "🔥"), h("strong", {}, streak))),
+            h("div", { class: "header-actions" }, dropsChip(), h("div", { class: "chip-stat", role: "img", "aria-label": `${t("profile.streak")}: ${streak}` }, h("span", {}, "🔥"), h("strong", {}, streak)))),
         heroCard(),
         quickMenu(),
+        questsSection(),
         ...adviceCards(),
         h("section", { class: "card goal" }, ring(answers, settings.dailyGoal),
             h("div", { class: "row-main" }, h("h2", { class: "section-title" }, t("home.goal")),

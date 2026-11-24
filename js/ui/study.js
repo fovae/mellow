@@ -3,9 +3,11 @@ import { t, getLocale } from "../core/i18n.js";
 import { GRADES, schedule, pickNext } from "../core/srs.js";
 import { findWord, getScopeDictionaries, getScopeQueue, getScopeWords, getNewLeft, getState, gradeWord } from "../core/store.js";
 import { hintMask } from "../core/quiz.js";
+import { play } from "../core/sound.js";
 import { speak } from "../core/speech.js";
 import { openFullscreen } from "./modal.js";
 import { languageName } from "../data/languages.js";
+import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
 import { speakButton, statTile } from "./parts.js";
 
@@ -71,6 +73,7 @@ export function openStudy(scope) {
 
     function answer(grade) {
         const undo = gradeWord(dictId, word.id, grade);
+        play(grade === "again" ? "wrong" : "right");
         if (undo) history.push({ wordId: word.id, grade, undo });
         next();
     }
@@ -153,7 +156,7 @@ export function openStudy(scope) {
         const correct = history.filter((x) => x.grade !== "again").length;
         screen.draw(header(),
             h("div", { class: "session-summary" },
-                h("div", { class: "summary-emoji" }, "✨"),
+                mascot("happy", "mascot-large"),
                 h("h2", { class: "screen-title" }, t("study.doneTitle")),
                 h("p", { class: "muted" }, t("study.doneText")),
                 h("div", { class: "stats-grid" },

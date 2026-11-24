@@ -1,4 +1,6 @@
 // Import and export formats. Pure functions: no DOM, no storage.
+import { accents, freeAccents } from "./accents.js";
+import { emptyDay, levelOf, totalXp } from "./rewards.js";
 import { normalize } from "./quiz.js";
 
 export const MAX_TEXT = 120;
@@ -105,6 +107,10 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages,
     }));
     const settings = isObject(raw.settings) ? raw.settings : {};
     const days = Object.entries(isObject(raw.log) ? raw.log : {}).filter(([key, day]) => /^\d{4}-\d\d-\d\d$/.test(key) && isObject(day));
+    const log = Object.fromEntries(days.map(([key, day]) => [key, Object.fromEntries(
+        Object.keys(emptyDay()).map((name) => [name, number(day[name], 0, 1e6, 0)]))]));
+    const owned = accents.map((a) => a.id).filter((name) => freeAccents.includes(name) || (Array.isArray(raw.owned) && raw.owned.includes(name)));
+    const frozen = Object.keys(isObject(raw.frozen) ? raw.frozen : {}).filter((key) => /^\d{4}-\d\d-\d\d$/.test(key));
     return {
         version: defaults.version,
         username: text(raw.username, 30),
@@ -114,6 +120,8 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages,
             dailyGoal: number(settings.dailyGoal, 1, 1000, defaults.settings.dailyGoal),
             newPerDay: number(settings.newPerDay, 0, 1000, defaults.settings.newPerDay),
             reverse: settings.reverse === true,
+            sound: settings.sound !== false,
+            accent: oneOf(settings.accent, owned, "mellow"),
             autoSpeak: settings.autoSpeak === true,
             ...(settings.native !== settings.target && libraryLanguages.includes(settings.native) && libraryLanguages.includes(settings.target)
                 ? { native: settings.native, target: settings.target }
@@ -123,8 +131,15 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages,
         totalTimeActive: number(raw.totalTimeActive, 0, 1e10, 0),
         lastBackup: null,
         records: Object.fromEntries(["pairs", "sprint"].filter((name) => Number.isFinite(raw.records?.[name])).map((name) => [name, number(raw.records[name], 0, 1e5, 0)])),
-        log: Object.fromEntries(days.map(([key, day]) => [key, Object.fromEntries(
-            ["answers", "correct", "fresh", "seconds"].map((name) => [name, number(day[name], 0, 1e6, 0)]))])),
+        log,
+        drops: Math.floor(number(raw.drops, 0, 1e7, 0)),
+        freezes: Math.floor(number(raw.freezes, 0, 3, 0)),
+        frozen: Object.fromEntries(frozen.map((key) => [key, true])),
+        owned,
+        quests: isObject(raw.quests) && typeof raw.quests.day === "string" && Array.isArray(raw.quests.done)
+            ? { day: raw.quests.day, done: raw.quests.done.filter((x) => typeof x === "string").slice(0, 10) }
+            : { day: "", done: [] },
+        rewardedLevel: Math.max(levelOf(totalXp(log)), 1),
         dictionaries,
     };
 }

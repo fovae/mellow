@@ -6,6 +6,11 @@ import { lastDays } from "../core/dates.js";
 import { canSpeak, speak } from "../core/speech.js";
 import { icon } from "./icons.js";
 
+export const sessionHeader = (onClose, fill, count = "") => h("header", { class: "session-header" },
+    h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: onClose }, icon("close")),
+    h("div", { class: "bar" }, h("div", { class: "bar-fill", style: { width: `${fill * 100}%` } })),
+    h("span", { class: "muted session-count" }, count));
+
 export const statTile = (value, label, className = "") => h("div", { class: `stat ${className}` },
     h("span", { class: "stat-value" }, value), h("span", { class: "muted" }, label));
 

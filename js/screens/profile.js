@@ -8,6 +8,8 @@ import { canSpeak } from "../core/speech.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
 import { saveBackup, restoreBackup } from "../ui/transfer-modals.js";
+import { dropdown } from "../ui/dropdown.js";
+import { accentPicker, dropsChip, levelCard } from "../ui/rewards.js";
 import { icon } from "../ui/icons.js";
 import { section, segmented, statTile, statusBar, statusLegend, weekChart } from "../ui/parts.js";
 
@@ -24,10 +26,9 @@ function editName() {
     });
 }
 
-const select = (label, key, options) => h("select", {
-    class: "input input-inline", "aria-label": label,
-    onChange: (event) => updateSettings({ [key]: options[event.target.selectedIndex].value }),
-}, options.map(({ value, name }) => h("option", { selected: value === getState().settings[key] }, name)));
+const select = (label, key, options) => dropdown({
+    label, options, value: getState().settings[key], className: "input-inline", onChange: (value) => updateSettings({ [key]: value }),
+});
 
 const toggle = (label, key) => h("input", {
     class: "switch", type: "checkbox", role: "switch", "aria-label": label, checked: getState().settings[key],
@@ -45,8 +46,9 @@ export function renderProfile() {
     const correct = week.reduce((sum, d) => sum + d.correct, 0);
 
     return [
-        screenHeader(t("profile.eyebrow"), username,
-            h("button", { class: "icon-btn icon-btn-soft", type: "button", "aria-label": t("profile.name"), onClick: editName }, icon("edit"))),
+        screenHeader(t("profile.eyebrow"), username, h("div", { class: "header-actions" }, dropsChip(),
+            h("button", { class: "icon-btn icon-btn-soft", type: "button", "aria-label": t("profile.name"), onClick: editName }, icon("edit")))),
+        levelCard(),
         h("div", { class: "stats-grid stats-grid-3" },
             statTile(`🔥 ${getStreak()}`, t("profile.streak"), "stat-card"),
             statTile(answers ? `${Math.round((correct / answers) * 100)}%` : "—", t("profile.accuracy"), "stat-card"),
@@ -62,9 +64,11 @@ export function renderProfile() {
             line(t("profile.goal"), select(t("profile.goal"), "dailyGoal", numbers(10, 20, 30, 50, 100))),
             line(t("profile.newPerDay"), select(t("profile.newPerDay"), "newPerDay", numbers(5, 10, 15, 20, 30))),
             line(t("profile.reverse"), toggle(t("profile.reverse"), "reverse")),
-            canSpeak() && line(t("profile.autoSpeak"), toggle(t("profile.autoSpeak"), "autoSpeak"))),
+            canSpeak() && line(t("profile.autoSpeak"), toggle(t("profile.autoSpeak"), "autoSpeak")),
+            line(t("profile.sound"), toggle(t("profile.sound"), "sound"))),
         section(t("profile.appearance"),
             segmented(t("profile.theme"), ["auto", "light", "dark"].map((value) => ({ value, label: t(`theme.${value}`) })), settings.theme, (theme) => updateSettings({ theme })),
+            accentPicker(),
             line(t("profile.language"), select(t("profile.language"), "language", languages.map(({ code, name }) => ({ value: code, name }))))),
         section(t("profile.data"),
             h("p", { class: "muted" }, t("backup.text")),

@@ -8,6 +8,8 @@ import { loadLibrary, suggest } from "../core/library.js";
 import { studyLanguages, dictionaryIcons, languageFlag, languageName } from "../data/languages.js";
 import { openModal, confirmModal, form, field, requireValue } from "./modal.js";
 import { exportWords, openWordImport } from "./transfer-modals.js";
+import { dropdown } from "./dropdown.js";
+import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
 import { segmented, speakButton, statusBar, statusLegend } from "./parts.js";
 
@@ -29,11 +31,13 @@ function iconPicker(initial) {
 export function openDictionaryForm(dict) {
     const name = textInput(dict?.name, t("dict.namePlaceholder"));
     const description = textInput(dict?.description, t("dict.descriptionPlaceholder"), 140);
-    const picker = iconPicker(dict?.emoji ?? languageFlag("Spanish"));
-    const select = (value) => h("select", { class: "input" },
-        studyLanguages.map((lang) => h("option", { value: lang, selected: lang === value }, languageName(lang, getLocale()))));
-    const from = select(dict?.from ?? "English");
-    const to = select(dict?.to ?? "Spanish");
+    const picker = iconPicker(dict?.emoji ?? languageFlag(store.getState().settings.target));
+    const { native, target } = store.getState().settings;
+    const select = (label, value) => dropdown({
+        label, value, options: studyLanguages.map((lang) => ({ value: lang, name: languageName(lang, getLocale()), emoji: languageFlag(lang) })),
+    });
+    const from = select(t("dict.from"), dict?.from ?? native);
+    const to = select(t("dict.to"), dict?.to ?? target);
     if (!dict) to.addEventListener("change", () => picker.set(languageFlag(to.value)));
     const label = (el) => languageName(el.value, getLocale());
 
@@ -149,7 +153,7 @@ export function openDictionary(dictId) {
             (!query || normalize(w.word).includes(query) || normalize(w.translation).includes(query)));
         list.replaceChildren(...(words.length
             ? words.map((word) => wordRow(dict, word))
-            : [h("p", { class: "muted" }, dict.words.length ? t("dict.notFound") : t("dict.noWords"))]));
+            : [h("div", { class: "empty" }, mascot(dict.words.length ? "sad" : "sleepy"), h("p", { class: "muted" }, dict.words.length ? t("dict.notFound") : t("dict.noWords")))]));
     }
 
     function draw() {

@@ -1,19 +1,30 @@
 import { dayKey, startOfDay } from "./dates.js";
 import { studyLanguages } from "../data/languages.js";
+import { accents, freeAccents } from "./accents.js";
 import { DIFFICULT_MISSES } from "./advice.js";
 import { LIBRARY_LANGUAGES } from "./library.js";
+import { DROPS, FREEZE, XP, daysToFreeze, emptyDay, levelOf, newRewards, streakOf, totalXp } from "./rewards.js";
 import { cleanState, toBackup } from "./transfer.js";
 import { schedule, getQueue, getStatus, strength } from "./srs.js";
 
 const uiLanguages = ["en", "ru"];
 const KEY = "mellow_state";
-const VERSION = 2;
+const VERSION = 3;
 const listeners = new Set();
 
 export const createId = () =>
     globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
-const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, native: "English", target: "Spanish" });
+const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, accent: "mellow", native: "English", target: "Spanish" });
+
+const defaultRewards = () => ({
+    drops: 20,
+    freezes: 1,
+    frozen: {}, // "YYYY-MM-DD" -> true, days covered by a freeze
+    owned: [...freeAccents],
+    quests: { day: "", done: [] },
+    rewardedLevel: 1,
+});
 
 const createState = () => ({
     version: VERSION,
@@ -22,7 +33,8 @@ const createState = () => ({
     activeDictionaryId: null,
     totalTimeActive: 0, // seconds
     lastBackup: null, // ms
-    log: {}, // "YYYY-MM-DD" -> { answers, correct, fresh, seconds }
+    log: {}, // "YYYY-MM-DD" -> see emptyDay() in rewards.js
+    ...defaultRewards(),
     dictionaries: [],
 });
 
@@ -39,6 +51,12 @@ const migrations = {
             })),
         })),
     }),
+    // v3: experience, quests and drops. Earlier answers count as experience.
+    2: (old) => {
+        const log = Object.fromEntries(Object.entries(old.log ?? {}).map(([key, day]) =>
+            [key, { ...emptyDay(), ...day, xp: (day.correct ?? 0) * XP.answer }]));
+        return { ...old, ...defaultRewards(), log, rewardedLevel: levelOf(totalXp(log)) };
+    },
 };
 
 // Returns null when the data is not a Mellow state of a known version.
@@ -78,14 +96,34 @@ export function subscribe(listener) {
 
 const notify = (type) => listeners.forEach((listener) => listener(type));
 
+const rewardListeners = new Set();
+export const onRewards = (listener) => rewardListeners.add(listener);
+
+// Quests, the daily goal and levels are checked after every answer, so nothing has to be claimed by hand.
+function settleRewards() {
+    const key = dayKey();
+    if (state.quests.day !== key) state.quests = { day: key, done: [] };
+    const { events, done } = newRewards({
+        key, day: getDay(), done: state.quests.done, xp: totalXp(state.log), rewardedLevel: state.rewardedLevel, dailyGoal: state.settings.dailyGoal,
+    });
+    state.quests.done = done;
+    for (const event of events) {
+        state.drops += event.drops;
+        if (event.type === "level") state.rewardedLevel = event.level;
+    }
+    return events;
+}
+
 // The single place where state is written.
 function commit(type) {
+    const events = type === "study" ? settleRewards() : [];
     try {
         localStorage.setItem(KEY, JSON.stringify(state));
     } catch (error) {
         console.warn("Mellow: could not save data", error);
     }
     notify(type);
+    if (events.length) rewardListeners.forEach((listener) => listener(events));
 }
 
 // Selectors
@@ -113,7 +151,6 @@ export function getTotals() {
     };
 }
 
-const emptyDay = () => ({ answers: 0, correct: 0, fresh: 0, seconds: 0 });
 export const getDay = (date) => state.log[dayKey(date)] ?? emptyDay();
 export const getNewLeft = () => Math.max(0, state.settings.newPerDay - getDay().fresh);
 
@@ -147,12 +184,7 @@ export const getLibraryKeys = () => new Set(state.dictionaries.map((d) => d.libr
 export const getAnswers = () => Object.values(state.log).reduce((sum, d) => sum + d.answers, 0);
 export const getDictQueue = (dict) => getQueue(dict.words, getNewLeft());
 
-// Days in a row with at least one answer. Today may still be empty.
-export function getStreak(now = Date.now()) {
-    let streak = 0;
-    for (let i = getDay(now).answers ? 0 : -1; getDay(startOfDay(now, i)).answers; i--) streak++;
-    return streak;
-}
+export const getStreak = (now = Date.now()) => streakOf(state.log, state.frozen, now);
 
 // Actions
 export function setUsername(name) {
@@ -165,12 +197,15 @@ export function updateSettings(changes) {
     commit("settings");
 }
 
-const today = () => (state.log[dayKey()] ??= emptyDay());
+const today = () => (state.log[dayKey()] = { ...emptyDay(), ...state.log[dayKey()] });
 
 function logAnswer(correct) {
     const day = today();
     day.answers++;
-    if (correct) day.correct++;
+    if (correct) {
+        day.correct++;
+        day.xp += XP.answer;
+    }
     return day;
 }
 
@@ -183,7 +218,8 @@ export function gradeWord(dictId, wordId, grade) {
     const key = dayKey();
     const before = { srs: word.srs, misses: word.misses ?? 0, day: { ...getDay() } };
     const day = logAnswer(grade !== "again");
-    if (!word.srs) day.fresh++;
+    if (word.srs) day.reviews++;
+    else day.fresh++;
     countMiss(word, grade !== "again");
     word.srs = schedule(word.srs, grade);
     commit("study");
@@ -213,6 +249,64 @@ export function saveRecord(name, value, isBetter) {
     state.records = { ...state.records, [name]: value };
     commit("study");
     return previous !== undefined;
+}
+
+export function countGame() {
+    const day = today();
+    day.games++;
+    day.xp += XP.game;
+    commit("study");
+}
+
+// results: [{ id, mistakes }]. New words were shown and asked twice, so they come back tomorrow (or soon after mistakes).
+export function finishLesson(dictId, results) {
+    const day = today();
+    const perfect = results.every((r) => !r.mistakes);
+    const xp = XP.lesson + (perfect ? XP.perfect : 0);
+    for (const { id, mistakes } of results) {
+        const word = getDictionary(dictId)?.words.find((w) => w.id === id);
+        if (!word) continue;
+        if (!word.srs) {
+            day.fresh++;
+            word.srs = schedule(null, "good");
+            if (!mistakes) word.srs = schedule(word.srs, "good");
+        } else if (word.srs.due <= Date.now()) {
+            day.reviews++;
+            word.srs = schedule(word.srs, mistakes ? "again" : "good");
+        }
+    }
+    day.lessons++;
+    if (perfect) day.perfect++;
+    day.xp += xp;
+    state.drops += DROPS.lesson;
+    commit("study");
+    return { xp, drops: DROPS.lesson };
+}
+
+export function buyFreeze() {
+    if (state.drops < FREEZE.price || state.freezes >= FREEZE.max) return;
+    state.drops -= FREEZE.price;
+    state.freezes++;
+    commit("settings");
+}
+
+export function buyAccent(id) {
+    const accent = accents.find((a) => a.id === id);
+    if (!accent || state.owned.includes(id) || state.drops < accent.price) return;
+    state.drops -= accent.price;
+    state.owned.push(id);
+    state.settings.accent = id;
+    commit("settings");
+}
+
+// Missed days are covered by freezes when there are enough of them.
+export function protectStreak() {
+    const days = daysToFreeze(state.log, state.frozen, state.freezes);
+    if (!days.length) return;
+    state.freezes -= days.length;
+    for (const day of days) state.frozen[day] = true;
+    commit("settings");
+    rewardListeners.forEach((listener) => listener([{ type: "freeze", drops: 0 }]));
 }
 
 export function setActiveDictionary(id) {
