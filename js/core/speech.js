@@ -5,7 +5,7 @@ export const canSpeak = () => "speechSynthesis" in window;
 export function speak(text, language) {
     if (!canSpeak()) return;
     const code = languageCode(language);
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(text.replace(/\s*\(.*?\)/g, ""));
     utterance.lang = code;
     const voice = speechSynthesis.getVoices().find((v) => v.lang.replace("_", "-").startsWith(code));
     if (voice) utterance.voice = voice;

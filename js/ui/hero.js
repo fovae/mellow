@@ -1,7 +1,9 @@
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
-import { getActiveDictionary, getDictQueue } from "../core/store.js";
+import { getActiveDictionary, getDictQueue, getState } from "../core/store.js";
 import { icon } from "./icons.js";
+import { countAll, studyAll } from "./actions.js";
+import { openLibrary } from "./library-modal.js";
 import { openDictionaryPicker } from "./dictionary-picker.js";
 import { openDictionary } from "./dictionary-modals.js";
 import { openStudy } from "./study.js";
@@ -18,12 +20,12 @@ export function heroCard() {
         h("p", { class: "hero-text" }, text),
         action);
 
-    if (!dict) return hero("📚", t("hero.none"), t("hero.noneText"), button("dictionaries", t("hero.none"), openDictionaryPicker));
+    if (!dict) return hero("📚", t("hero.none"), t("hero.noneText"), button("dictionaries", t(getState().dictionaries.length ? "hero.none" : "library.title"), getState().dictionaries.length ? openDictionaryPicker : openLibrary));
     if (!dict.words.length) return hero(dict.emoji, dict.name, t("hero.empty"), button("plus", t("word.add"), () => openDictionary(dict.id)));
 
     const { due, soon, fresh } = getDictQueue(dict);
     const reviews = due.length + soon.length;
     return reviews + fresh.length
         ? hero(dict.emoji, dict.name, t("hero.ready", { due: reviews, fresh: fresh.length }), button("play", t("hero.start"), () => openStudy(dict.id)))
-        : hero(dict.emoji, dict.name, t("hero.rest"));
+        : hero(dict.emoji, dict.name, t("hero.rest"), countAll() > 0 && button("layers", t("home.reviewAll"), studyAll));
 }

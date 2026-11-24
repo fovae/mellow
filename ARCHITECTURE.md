@@ -5,11 +5,12 @@ index.html      shell: loader, <main>, tab bar
 sw.js           offline cache (network first)
 css/            base (tokens, fonts), loader, layout, components
 js/main.js      boot
-js/core/        store, srs, quiz, dates, i18n, theme, speech, dom, activity, viewport
+js/core/        store, srs, quiz, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
 js/ui/          navigation, modal, dictionary modals, icons, scrollbar, loader, onboarding,
-                hero, parts (shared blocks), study, test-session
+                hero, parts (shared blocks), study, test-session, library-modal, transfer-modals,
+                files, actions (shortcuts)
 js/screens/     one render function per tab
-js/data/        starter dictionaries, study languages
+js/data/        library (26 topics, 6 languages, lazy), study languages
 js/i18n/        interface translations
 tests/          node --test tests/*.mjs
 ```
@@ -26,10 +27,11 @@ Never write to localStorage or mutate state outside the store.
 
 ```text
 version (2), username, activeDictionaryId, totalTimeActive (seconds)
-settings: language, theme, dailyGoal, newPerDay, reverse
+settings: language, theme, dailyGoal, newPerDay, reverse, autoSpeak, native, target
+lastBackup (ms)
 log["YYYY-MM-DD"]: answers, correct, fresh, seconds
-dictionaries[]: id, name, description, emoji, from, to
-  words[]: id, word, translation, isFavourite
+dictionaries[]: id, name, description, emoji, from, to, libraryKey?
+  words[]: id, word, translation, isFavourite, example?, misses?
     srs: null | { due, interval (days), ease, step, lapses }
 ```
 
@@ -40,6 +42,13 @@ When this shape changes, raise `VERSION` and add a step to `migrations` in the s
 `core/srs.js` is pure and based on SM-2. New words: two "good" answers (10 minutes, then 1 day) or one "easy" (4 days).
 Then the interval grows by `ease`; "again" returns the word to learning. Intervals of 21+ days count as mastered.
 A wrong test answer makes a word that is already in study due now; right test answers do not move the schedule.
+
+## Automation
+
+- `getScopeWords(null)` is the mixed review: started words of every dictionary, new words only from the active one.
+- `misses` grows on a wrong answer and falls on a right one; from 2 a word is "difficult".
+- `core/advice.js` chooses up to two suggestions for the home screen.
+- To add vocabulary, add lines to `data/library.js`. The tests check columns and duplicates.
 
 ## Rules
 

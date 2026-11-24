@@ -3,7 +3,13 @@ import assert from "node:assert/strict";
 import { schedule, pickNext, getStatus, getQueue } from "../js/core/srs.js";
 import { startOfDay } from "../js/core/dates.js";
 import { parseWords, toCSV, cleanState } from "../js/core/transfer.js";
-import { buildQuiz, isCorrect, normalize } from "../js/core/quiz.js";
+import { loadLibrary, suggest, nextTopic, libraryKey, topicWords, LIBRARY_LANGUAGES } from "../js/core/library.js";
+import { libraryLanguages } from "../js/data/library.js";
+import { getAchievements, bestStreak } from "../js/core/achievements.js";
+import { getAdvice } from "../js/core/advice.js";
+import en from "../js/i18n/en.js";
+import ru from "../js/i18n/ru.js";
+import { buildQuiz, hintMask, isCorrect, normalize } from "../js/core/quiz.js";
 
 const now = new Date(2026, 10, 24, 15).getTime();
 
@@ -71,12 +77,12 @@ test("export and import return the same words", () => {
     assert.deepEqual(parseWords(toCSV(words)).words, words);
 });
 test("a damaged backup is cleaned", () => {
-    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false } };
+    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, native: "English", target: "Spanish" } };
     let n = 0;
     const clean = cleanState({
         username: 5, settings: { theme: "x", dailyGoal: "a" }, activeDictionaryId: "gone", log: { bad: {}, "2026-11-24": { answers: "x", correct: 2 } },
         dictionaries: [null, { id: "d", name: {}, from: "Elvish", words: [null, { id: "w", word: "a", translation: "b", srs: { due: 1, interval: "x" } }, { id: "w", word: "c", translation: "d", srs: 5 }, { word: "", translation: "x" }] }],
-    }, defaults, () => `new${n++}`, { languages: ["en"], studyLanguages: ["English", "Spanish"] });
+    }, defaults, () => `new${n++}`, { languages: ["en"], studyLanguages: ["English", "Spanish"], libraryLanguages: ["English", "Spanish"] });
     assert.deepEqual(clean.settings, defaults.settings);
     assert.deepEqual(clean.log, { "2026-11-24": { answers: 0, correct: 2, fresh: 0, seconds: 0 } });
     const [dict] = clean.dictionaries;
@@ -84,3 +90,44 @@ test("a damaged backup is cleaned", () => {
     assert.notEqual(dict.words[0].id, dict.words[1].id);
     assert.deepEqual([dict.words[0].srs.interval, dict.words[1].srs], [0, null]);
 });
+test("articles and notes are optional, a wrong article is a mistake", () => {
+    const q = (answer) => ({ accepted: [answer] });
+    assert.ok(isCorrect(q("der Hund"), "hund") && isCorrect(q("der Hund"), "Der Hund") && !isCorrect(q("der Hund"), "die Hund"));
+    assert.ok(isCorrect(q("l'amico"), "amico") && isCorrect(q("to go"), "go") && isCorrect(q("you (informal)"), "you"));
+    assert.ok(!isCorrect(q("la"), "") && isCorrect(q("la"), "la"));
+});
+test("hints open letters and keep the article", () => {
+    assert.equal(hintMask("el perro", 1), "el p••••");
+    assert.equal(hintMask("по дороге", 2), "по ••••••");
+    assert.equal(hintMask("l'eau", 1), "l'e••");
+});
+test("library: six filled columns, unique words, suggestions, next topic", async () => {
+    const topics = await loadLibrary();
+    assert.deepEqual(libraryLanguages, LIBRARY_LANGUAGES);
+    assert.equal(new Set(topics.map((x) => x.id)).size, topics.length);
+    for (const topic of topics) {
+        assert.ok(topic.title.en && topic.title.ru);
+        for (const { cells, example } of topic.rows) for (const row of [cells, example].filter(Boolean)) {
+            assert.equal(row.length, 6, row.join("|"));
+            assert.ok(row.every((cell) => cell && cell === cell.trim() && cell.length <= 120));
+        }
+        for (let i = 0; i < 6; i++) assert.equal(new Set(topic.rows.map((r) => r.cells[i].toLowerCase())).size, topic.rows.length, `${topic.id} ${i}`);
+    }
+    assert.equal(suggest("dog", "word", "English", "Spanish")[0].translation, "el perro");
+    assert.equal(suggest("perro", "translation", "Russian", "Spanish")[0].word, "собака");
+    assert.deepEqual(suggest("dog", "word", "English", "Polish"), []);
+    assert.equal(nextTopic("English", "Spanish", new Set([libraryKey("basics", "English", "Spanish")])).id, "phrases");
+    assert.ok(topicWords(topics.find((x) => x.id === "verbs"), "English", "German").every((w) => w.example));
+});
+test("achievements and advice", () => {
+    const day = (answers, correct = answers) => ({ answers, correct, fresh: 0, seconds: 0 });
+    const log = { "2026-02-27": day(5), "2026-02-28": day(20), "2026-03-01": day(1, 0), "2026-03-05": day(1), "2026-03-06": day(0) };
+    assert.equal(bestStreak(log), 3);
+    const done = getAchievements({ log, mastered: 9, words: 200, dailyGoal: 20 }).filter((b) => b.done).map((b) => b.id);
+    assert.deepEqual(done, ["first", "streak3", "words200", "sharp"]);
+    const facts = { hasActive: true, hasDictionaries: true, dueElsewhere: 0, difficult: 0, activeFinished: false, hasNextTopic: true, answers: 0, lastBackup: null };
+    assert.deepEqual(getAdvice(facts), []);
+    assert.deepEqual(getAdvice({ ...facts, dueElsewhere: 2, difficult: 3, answers: 99 }), ["review", "difficult"]);
+    assert.deepEqual(getAdvice({ ...facts, activeFinished: true, answers: 99 }), ["next", "backup"]);
+});
+test("both interface languages have the same keys", () => assert.deepEqual(Object.keys(en).sort(), Object.keys(ru).sort()));

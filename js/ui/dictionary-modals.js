@@ -3,7 +3,8 @@ import { t, getLocale } from "../core/i18n.js";
 import * as store from "../core/store.js";
 import { getStatus } from "../core/srs.js";
 import { normalize } from "../core/quiz.js";
-import { MAX_TEXT, wordKey } from "../core/transfer.js";
+import { MAX_EXAMPLE, MAX_TEXT, wordKey } from "../core/transfer.js";
+import { loadLibrary, suggest } from "../core/library.js";
 import { studyLanguages, dictionaryIcons, languageFlag, languageName } from "../data/languages.js";
 import { openModal, confirmModal, form, field, requireValue } from "./modal.js";
 import { exportWords, openWordImport } from "./transfer-modals.js";
@@ -65,18 +66,36 @@ export function openDictionaryForm(dict) {
     });
 }
 
-function openWordForm(dictId, word) {
+export function openWordForm(dictId, word) {
     const dict = store.getDictionary(dictId);
     const original = textInput(word?.word, "", MAX_TEXT);
     const translation = textInput(word?.translation, "", MAX_TEXT);
+    const example = textInput(word?.example, "", MAX_EXAMPLE);
     const error = h("p", { class: "feedback is-wrong", role: "status" });
+    const tips = h("div", { class: "tags" });
+    // Translations from the built-in library: works offline, nothing is sent anywhere.
+    const drawTips = (input, side) => {
+        const list = input.value.trim() ? suggest(input.value, side, dict.from, dict.to) : [];
+        tips.replaceChildren(...list.map((pair) => h("button", {
+            class: "tag tag-btn", type: "button",
+            onClick: () => {
+                original.value = pair.word;
+                translation.value = pair.translation;
+                if (pair.example) example.value = pair.example;
+                tips.replaceChildren();
+            },
+        }, h("strong", {}, pair.word), ` ${pair.translation}`)));
+    };
+    original.addEventListener("input", () => drawTips(original, "word"));
+    translation.addEventListener("input", () => drawTips(translation, "translation"));
+    loadLibrary();
     openModal({
         title: word ? t("word.edit") : t("word.add"),
         build: (close) => [form({
             onCancel: close,
             onSubmit: () => {
                 if (!requireValue(original) || !requireValue(translation)) return;
-                const data = { word: original.value.trim(), translation: translation.value.trim() };
+                const data = { word: original.value.trim(), translation: translation.value.trim(), example: example.value.trim() };
                 const same = (w) => w.id !== word?.id && wordKey(w) === wordKey(data);
                 error.textContent = store.getDictionary(dictId).words.some(same) ? t("word.duplicate") : "";
                 if (error.textContent) return;
@@ -86,11 +105,12 @@ function openWordForm(dictId, word) {
                 } else {
                     // Stay open so several words can be added in a row.
                     store.addWord(dictId, data);
-                    original.value = translation.value = "";
+                    original.value = translation.value = example.value = "";
+                    tips.replaceChildren();
                     original.focus();
                 }
             },
-        }, field(languageName(dict.from, getLocale()), original), field(languageName(dict.to, getLocale()), translation), error),
+        }, field(languageName(dict.from, getLocale()), original), field(languageName(dict.to, getLocale()), translation), tips, field(t("word.example"), example), error),
         ...(word ? [h("button", {
             class: "btn btn-danger-soft btn-wide form-extra", type: "button",
             onClick: () => confirmModal({
@@ -113,7 +133,7 @@ export function openDictionary(dictId) {
     const wordRow = (dict, word) => h("div", { class: "row" },
         h("i", { class: `dot is-${getStatus(word.srs)}`, title: t(`status.${getStatus(word.srs)}`) }),
         h("button", { class: "row-main row-edit", type: "button", "aria-label": `${t("common.edit")}: ${word.word}`, onClick: () => openWordForm(dictId, word) },
-            h("strong", {}, word.word), h("small", { class: "muted" }, word.translation)),
+            h("strong", {}, word.word), h("small", { class: "muted" }, word.translation), word.example && h("small", { class: "example" }, word.example)),
         speakButton(word.translation, dict.to),
         h("button", {
             class: `icon-btn ${word.isFavourite ? "is-favourite" : ""}`, type: "button",

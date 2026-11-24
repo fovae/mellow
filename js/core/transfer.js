@@ -2,6 +2,7 @@
 import { normalize } from "./quiz.js";
 
 export const MAX_TEXT = 120;
+export const MAX_EXAMPLE = 240;
 export const MAX_WORDS = 5000;
 
 // Two words are the same when both sides match.
@@ -77,7 +78,7 @@ const cleanSrs = (srs) => (isObject(srs) && Number.isFinite(srs.due) ? {
 } : null);
 
 // Rebuilds a state field by field, so a damaged or edited file cannot break the app.
-export function cleanState(raw, defaults, createId, { languages, studyLanguages }) {
+export function cleanState(raw, defaults, createId, { languages, studyLanguages, libraryLanguages }) {
     const ids = new Set();
     const id = (value) => {
         const result = typeof value === "string" && value && !ids.has(value) ? value : createId();
@@ -91,10 +92,13 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages 
         emoji: text(d.emoji, 16) || "📚",
         from: oneOf(d.from, studyLanguages, "English"),
         to: oneOf(d.to, studyLanguages, "Spanish"),
+        ...(typeof d.libraryKey === "string" ? { libraryKey: d.libraryKey.slice(0, 80) } : {}),
         words: d.words.filter((w) => isObject(w) && text(w.word, MAX_TEXT).trim() && text(w.translation, MAX_TEXT).trim()).map((w) => ({
             id: id(w.id),
             word: text(w.word, MAX_TEXT),
             translation: text(w.translation, MAX_TEXT),
+            example: text(w.example, MAX_EXAMPLE),
+            misses: number(w.misses, 0, 1000, 0),
             isFavourite: w.isFavourite === true,
             srs: cleanSrs(w.srs),
         })),
@@ -110,6 +114,10 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages 
             dailyGoal: number(settings.dailyGoal, 1, 1000, defaults.settings.dailyGoal),
             newPerDay: number(settings.newPerDay, 0, 1000, defaults.settings.newPerDay),
             reverse: settings.reverse === true,
+            autoSpeak: settings.autoSpeak === true,
+            ...(settings.native !== settings.target && libraryLanguages.includes(settings.native) && libraryLanguages.includes(settings.target)
+                ? { native: settings.native, target: settings.target }
+                : { native: defaults.settings.native, target: defaults.settings.target }),
         },
         activeDictionaryId: dictionaries.some((d) => d.id === raw.activeDictionaryId) ? raw.activeDictionaryId : null,
         totalTimeActive: number(raw.totalTimeActive, 0, 1e10, 0),

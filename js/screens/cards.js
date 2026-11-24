@@ -1,8 +1,10 @@
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
 import { startOfDay } from "../core/dates.js";
-import { getActiveDictionary, getDictQueue } from "../core/store.js";
+import { getActiveDictionary, getDictQueue, getDifficult } from "../core/store.js";
 import { screenHeader } from "../ui/navigation.js";
+import { trainDifficult, studyAll, countAll } from "../ui/actions.js";
+import { icon } from "../ui/icons.js";
 import { heroCard } from "../ui/hero.js";
 import { section, statTile, statusBar, statusLegend } from "../ui/parts.js";
 
@@ -20,6 +22,12 @@ export function renderCards() {
             section(t("cards.next"), h("div", { class: "stats-grid" },
                 statTile(between(1, 2), t("cards.tomorrow")), statTile(between(1, 8), t("cards.inWeek")))));
     }
+    const difficult = getDifficult();
+    if (difficult.length) nodes.push(section(t("cards.difficult"),
+        h("p", { class: "muted" }, t("cards.difficultText")),
+        h("div", { class: "tags tags-block" }, difficult.slice(0, 8).map((w) => h("span", { class: "tag" }, h("strong", {}, w.word), ` ${w.translation}`))),
+        h("button", { class: "btn btn-soft btn-wide", type: "button", onClick: trainDifficult }, icon("star"), t("home.difficult"))));
+    nodes.push(h("button", { class: "btn btn-soft btn-wide", type: "button", disabled: !countAll(), onClick: studyAll }, icon("layers"), `${t("home.reviewAll")} · ${countAll()}`));
     nodes.push(section(null, h("details", {}, h("summary", { class: "section-title" }, t("cards.how")), h("p", { class: "muted" }, t("cards.howText")))));
     return nodes;
 }

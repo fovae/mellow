@@ -2,6 +2,8 @@ import { h } from "../core/dom.js";
 import { t, getLocale, languages, formatTime } from "../core/i18n.js";
 import { lastDays } from "../core/dates.js";
 import { getState, getTotals, getDay, getStreak, allWords, updateSettings, setUsername, resetAll } from "../core/store.js";
+import { getAchievements } from "../core/achievements.js";
+import { canSpeak } from "../core/speech.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
 import { saveBackup, restoreBackup } from "../ui/transfer-modals.js";
@@ -26,13 +28,19 @@ const select = (label, key, options) => h("select", {
     onChange: (event) => updateSettings({ [key]: options[event.target.selectedIndex].value }),
 }, options.map(({ value, name }) => h("option", { selected: value === getState().settings[key] }, name)));
 
+const toggle = (label, key) => h("input", {
+    class: "switch", type: "checkbox", role: "switch", "aria-label": label, checked: getState().settings[key],
+    onChange: (event) => updateSettings({ [key]: event.target.checked }),
+});
+
 const numbers = (...values) => values.map((value) => ({ value, name: String(value) }));
 
 export function renderProfile() {
-    const { username, settings, lastBackup } = getState();
+    const { username, settings, lastBackup, log } = getState();
     const totals = getTotals();
     const week = lastDays(7).map(getDay);
     const answers = week.reduce((sum, d) => sum + d.answers, 0);
+    const badges = getAchievements({ log, mastered: totals.mastered, words: totals.words, dailyGoal: settings.dailyGoal });
     const correct = week.reduce((sum, d) => sum + d.correct, 0);
 
     return [
@@ -44,13 +52,16 @@ export function renderProfile() {
             statTile(formatTime(totals.seconds), t("profile.time"), "stat-card")),
         section(t("home.week"), weekChart()),
         section(t("profile.words"), statusBar(allWords()), statusLegend(allWords())),
+        section(`${t("profile.badges")} · ${badges.filter((b) => b.done).length}/${badges.length}`,
+            h("div", { class: "badges" }, badges.map((b) => h("div", { class: `achievement ${b.done ? "is-done" : ""}` },
+                h("span", { class: "achievement-emoji", "aria-hidden": "true" }, b.emoji),
+                h("strong", {}, t(`badge.${b.id}`)),
+                h("small", { class: "muted" }, b.done ? t("badge.done") : `${b.value} / ${b.goal}`))))),
         section(t("profile.learning"),
             line(t("profile.goal"), select(t("profile.goal"), "dailyGoal", numbers(10, 20, 30, 50, 100))),
             line(t("profile.newPerDay"), select(t("profile.newPerDay"), "newPerDay", numbers(5, 10, 15, 20, 30))),
-            line(t("profile.reverse"), h("input", {
-                class: "switch", type: "checkbox", role: "switch", "aria-label": t("profile.reverse"), checked: settings.reverse,
-                onChange: (event) => updateSettings({ reverse: event.target.checked }),
-            }))),
+            line(t("profile.reverse"), toggle(t("profile.reverse"), "reverse")),
+            canSpeak() && line(t("profile.autoSpeak"), toggle(t("profile.autoSpeak"), "autoSpeak"))),
         section(t("profile.appearance"),
             segmented(t("profile.theme"), ["auto", "light", "dark"].map((value) => ({ value, label: t(`theme.${value}`) })), settings.theme, (theme) => updateSettings({ theme })),
             line(t("profile.language"), select(t("profile.language"), "language", languages.map(({ code, name }) => ({ value: code, name }))))),

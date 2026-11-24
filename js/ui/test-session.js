@@ -1,18 +1,30 @@
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
-import { buildQuiz, isCorrect } from "../core/quiz.js";
+import { buildQuiz, hintMask, isCorrect } from "../core/quiz.js";
 import { getDictionary, recordTestAnswer } from "../core/store.js";
+import { speak } from "../core/speech.js";
 import { openFullscreen } from "./modal.js";
 import { icon } from "./icons.js";
 import { languageName } from "../data/languages.js";
 
-export function openTest(dictId, options) {
-    const dict = getDictionary(dictId);
-    const questions = buildQuiz(dict.words, options);
+// sources: [{ dictId, only? }], where `only` is a set of word ids.
+// Listening asks by sound: the learner hears the studied language and picks the meaning.
+export function openTest(sources, options) {
+    const listen = options.mode === "listen";
+    const reverse = listen || options.reverse;
+    const build = () => sources
+        .flatMap(({ dictId, only }) => buildQuiz(getDictionary(dictId).words, { ...options, reverse, only }).map((q) => ({ ...q, dict: getDictionary(dictId) })))
+        .filter((q) => options.mode === "typing" || q.options.length > 1)
+        .slice(0, options.count);
+    let questions = build();
+    // Too few words to choose from: ask to type instead.
+    if (!questions.length && options.mode === "choice") {
+        options = { ...options, mode: "typing" };
+        questions = build();
+    }
     const mistakes = [];
     let index = 0;
     const screen = openFullscreen(t("tests.title"));
-    const targetLanguage = languageName(options.reverse ? dict.from : dict.to, getLocale());
 
     const header = () => h("header", { class: "session-header" },
         h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: screen.close }, icon("close")),
@@ -21,6 +33,10 @@ export function openTest(dictId, options) {
 
     function drawQuestion() {
         const question = questions[index];
+        const { dict } = question;
+        const answerLanguage = languageName(reverse ? dict.from : dict.to, getLocale());
+        const play = () => speak(question.prompt, dict.to);
+        const word = h("h2", { class: "question-word", hidden: listen }, question.prompt);
         const feedback = h("p", { class: "feedback", role: "status" });
         const footer = h("div", { class: "session-footer" });
         let answered = false;
@@ -30,7 +46,9 @@ export function openTest(dictId, options) {
             answered = true;
             const correct = isCorrect(question, text);
             if (!correct) mistakes.push(question);
-            recordTestAnswer(dictId, question.wordId, correct);
+            recordTestAnswer(dict.id, question.wordId, correct);
+            word.hidden = false;
+            help.hidden = true;
             feedback.textContent = correct ? t("tests.correct") : t("tests.wrong", { answer: question.answer });
             feedback.classList.add(correct ? "is-correct" : "is-wrong");
             const next = h("button", { class: "btn btn-primary", type: "button", onClick: () => { index++; draw(); } }, t("tests.next"));
@@ -39,6 +57,19 @@ export function openTest(dictId, options) {
             setTimeout(() => next.focus({ preventScroll: true }), 0);
             return true;
         };
+
+        let letters = 0;
+        const help = h("button", {
+            class: "hint-btn", type: "button",
+            onClick: () => {
+                if (options.mode === "typing") return void (feedback.textContent = hintMask(question.answer, ++letters));
+                // Leave the right answer and one wrong one.
+                const wrong = [...body.children].filter((el) => !isCorrect(question, el.textContent));
+                wrong.slice(1).forEach((el) => { el.disabled = true; el.classList.add("is-removed"); });
+                help.hidden = true;
+            },
+        }, icon("bulb"), t("study.help"));
+        if (options.mode !== "typing" && question.options.length < 3) help.hidden = true;
 
         let body;
         if (options.mode === "typing") {
@@ -68,8 +99,10 @@ export function openTest(dictId, options) {
             }, option)));
         }
         screen.draw(header(),
-            h("div", { class: "question" }, h("span", { class: "flashcard-label" }, targetLanguage), h("h2", { class: "question-word" }, question.prompt)),
-            body, feedback, footer);
+            h("div", { class: "question" }, h("span", { class: "flashcard-label" }, answerLanguage),
+                listen && h("button", { class: "listen-btn", type: "button", "aria-label": t("common.listen"), onClick: play }, icon("sound")), word),
+            body, feedback, help, footer);
+        if (listen) play();
     }
 
     function drawResult() {
@@ -83,7 +116,7 @@ export function openTest(dictId, options) {
                         mistakes.map((q) => h("div", { class: "row" }, h("span", { class: "row-main" }, h("strong", {}, q.prompt), h("small", { class: "muted" }, q.answer)))))
                     : h("p", { class: "muted" }, t("tests.perfect"))),
             h("div", { class: "session-footer" },
-                h("button", { class: "btn btn-soft", type: "button", onClick: () => { screen.close(); openTest(dictId, options); } }, t("tests.again")),
+                h("button", { class: "btn btn-soft", type: "button", onClick: () => { screen.close(); openTest(sources, options); } }, t("tests.again")),
                 h("button", { class: "btn btn-primary", type: "button", onClick: screen.close }, t("common.done"))));
     }
 

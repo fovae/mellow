@@ -1,8 +1,11 @@
 import { h } from "../core/dom.js";
-import { t } from "../core/i18n.js";
+import { t, getLocale } from "../core/i18n.js";
 import { GRADES, schedule, pickNext } from "../core/srs.js";
-import { getDictionary, getDictQueue, getNewLeft, getState, gradeWord } from "../core/store.js";
+import { findWord, getScopeDictionaries, getScopeQueue, getScopeWords, getNewLeft, getState, gradeWord } from "../core/store.js";
+import { hintMask } from "../core/quiz.js";
+import { speak } from "../core/speech.js";
 import { openFullscreen } from "./modal.js";
+import { languageName } from "../data/languages.js";
 import { icon } from "./icons.js";
 import { speakButton, statTile } from "./parts.js";
 
@@ -48,9 +51,11 @@ function attachSwipe(card, canSwipe, onGrade) {
     card.addEventListener("pointercancel", reset);
 }
 
-export function openStudy(dictId) {
+// scope: a dictionary id, or null for all dictionaries.
+export function openStudy(scope) {
     const history = []; // { wordId, grade, undo }
     let word = null;
+    let dictId = null;
     let flip = () => {};
     let flipped = false;
 
@@ -77,16 +82,17 @@ export function openStudy(dictId) {
     }
 
     function next(wordId) {
-        const dict = getDictionary(dictId);
-        if (!dict) return screen.close();
-        word = wordId ? dict.words.find((w) => w.id === wordId) : pickNext(dict.words, getNewLeft(), history.at(-1)?.wordId);
+        if (!getScopeDictionaries(scope).length) return screen.close();
+        word = wordId ? findWord(wordId)?.word : pickNext(getScopeWords(scope), getNewLeft(), history.at(-1)?.wordId);
         flipped = false;
-        if (word) drawCard(dict);
-        else drawSummary();
+        if (!word) return drawSummary();
+        const { dict } = findWord(word.id);
+        dictId = dict.id;
+        drawCard(dict);
     }
 
-    function header(dict) {
-        const { due, soon, fresh } = getDictQueue(dict);
+    function header() {
+        const { due, soon, fresh } = getScopeQueue(scope);
         const left = due.length + soon.length + fresh.length;
         return h("header", { class: "session-header" },
             h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: screen.close }, icon("close")),
@@ -106,8 +112,8 @@ export function openStudy(dictId) {
             h("span", { class: "flashcard-word" }, text), speakButton(text, lang));
         const front = face("front", sides[0], false);
         const back = face("back", sides[1], true);
-        front.firstChild.textContent = t(reverse ? "word.translation" : "word.word");
-        back.firstChild.textContent = t(reverse ? "word.word" : "word.translation");
+        front.firstChild.textContent = languageName(sides[0].lang, getLocale());
+        back.firstChild.textContent = languageName(sides[1].lang, getLocale());
 
         const card = h("div", { class: "flashcard", onClick: () => card.dataset.swiped || flip() }, h("div", { class: "flashcard-inner" }, front, back));
         const show = h("button", { class: "btn btn-primary", type: "button", onClick: () => flip() }, t("study.show"));
@@ -123,18 +129,29 @@ export function openStudy(dictId) {
             front.setAttribute("aria-hidden", String(flipped));
             back.setAttribute("aria-hidden", String(!flipped));
             // Grades stay available after the first look at the answer.
+            if (flipped && getState().settings.autoSpeak) speak(word.translation, dict.to);
+            help.hidden = flipped;
             show.hidden = true;
             grades.hidden = false;
             if (flipped) grades.children[2].focus({ preventScroll: true, focusVisible: false });
         };
+        // Each tap opens one more letter; the last one is left to the learner.
+        let letters = 0;
+        const hint = h("p", { class: "hint-text", role: "status" });
+        const help = h("button", {
+            class: "hint-btn", type: "button",
+            onClick: () => { letters++; hint.textContent = hintMask(sides[1].text, letters); },
+        }, icon("bulb"), t("study.help"));
+        if (word.example) back.append(h("p", { class: "example" }, word.example));
+        if (!scope) front.prepend(h("span", { class: "badge" }, `${dict.emoji} ${dict.name}`));
         attachSwipe(card, () => flipped, answer);
-        screen.draw(header(dict), card, h("p", { class: "muted session-hint" }, t("study.hint")), h("div", { class: "session-footer" }, show, grades));
+        screen.draw(header(), card, hint, help, h("p", { class: "muted session-hint" }, t("study.hint")), h("div", { class: "session-footer" }, show, grades));
         show.focus({ preventScroll: true, focusVisible: false });
     }
 
     function drawSummary() {
         const correct = history.filter((x) => x.grade !== "again").length;
-        screen.draw(header(getDictionary(dictId)),
+        screen.draw(header(),
             h("div", { class: "session-summary" },
                 h("div", { class: "summary-emoji" }, "✨"),
                 h("h2", { class: "screen-title" }, t("study.doneTitle")),

@@ -5,6 +5,7 @@ import { languageName } from "../data/languages.js";
 import { screenHeader } from "../ui/navigation.js";
 import { icon } from "../ui/icons.js";
 import { section, statusBar } from "../ui/parts.js";
+import { openLibrary } from "../ui/library-modal.js";
 import { openDictionary, openDictionaryForm } from "../ui/dictionary-modals.js";
 
 export function renderDictionaries() {
@@ -21,6 +22,10 @@ export function renderDictionaries() {
     return [
         screenHeader(t("dict.eyebrow"), t("dict.title"),
             h("button", { class: "icon-btn icon-btn-fill", type: "button", "aria-label": t("dict.new"), onClick: () => openDictionaryForm() }, icon("plus"))),
-        ...(dictionaries.length ? dictionaries.map(card) : [section(null, h("p", { class: "muted" }, t("dict.empty")))]),
+        h("button", { class: "hero hero-link", type: "button", onClick: openLibrary },
+            h("span", { class: "eyebrow" }, t("library.eyebrow")),
+            h("strong", { class: "hero-title" }, t("library.title")),
+            h("span", { class: "hero-text" }, t("library.text"))),
+        ...(dictionaries.length ? [...dictionaries].sort((a, b) => (b.id === activeDictionaryId) - (a.id === activeDictionaryId)).map(card) : [section(null, h("p", { class: "muted" }, t("dict.empty")))]),
     ];
 }
