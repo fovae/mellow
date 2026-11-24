@@ -5,13 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Mellow</title>
     <meta name="description" content="A minimalist offline vocabulary app.">
-    <meta name="theme-color" content="#FBFDFF">
-    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#f4f6fd">
+    <meta name="color-scheme" content="light dark">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mellow">
     <meta name="format-detection" content="telephone=no">
+
+    <script>
+        // Theme before the first paint; js/core/theme.js takes over later.
+        try {
+            var theme = (JSON.parse(localStorage.getItem("mellow_state")) || {}).settings;
+            theme = theme && theme.theme;
+        } catch (e) {}
+        if (!theme || theme === "auto") theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+    </script>
 
     <link rel="icon" type="image/png" sizes="16x16" href="img/icons/16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/icons/32.png">

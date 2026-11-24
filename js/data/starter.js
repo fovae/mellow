@@ -82,6 +82,6 @@ export const createStarterDictionaries = (createId) =>
         ...pack,
         id: createId(),
         words: words.map(([word, translation]) => ({
-            id: createId(), word, translation, isFavourite: false, learned: false,
+            id: createId(), word, translation, isFavourite: false, srs: null,
         })),
     }));

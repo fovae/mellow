@@ -1,6 +1,7 @@
 import { initViewport } from "./core/viewport.js";
 import { startActivityTracker } from "./core/activity.js";
 import { getLocale } from "./core/i18n.js";
+import { applyTheme } from "./core/theme.js";
 import { getState, subscribe } from "./core/store.js";
 import { initNavigation, navigate, refresh, getCurrentScreen } from "./ui/navigation.js";
 import { playLoader } from "./ui/loader.js";
@@ -11,29 +12,37 @@ import { renderCards } from "./screens/cards.js";
 import { renderTests } from "./screens/tests.js";
 import { renderProfile } from "./screens/profile.js";
 
-const applyLocale = () => { document.documentElement.lang = getLocale(); };
+const applySettings = () => {
+    document.documentElement.lang = getLocale();
+    applyTheme();
+};
 
 initViewport();
-applyLocale();
+applySettings();
 initNavigation({
     home: renderHome,
     dictionaries: renderDictionaries,
-    cards: () => renderCards(refresh),
+    cards: renderCards,
     tests: renderTests,
     profile: renderProfile,
 });
 navigate("home");
 
 subscribe((type) => {
-    // The timer must not flip a flashcard back or close an open <select>.
+    // The timer must not close an open <select>.
     if (type === "time" && getCurrentScreen() !== "home") return;
-    applyLocale();
+    applySettings();
     if (type === "reset") {
         navigate("home");
         showOnboarding();
     } else {
         refresh();
     }
+});
+
+// Due words and the date may change while the app is in the background.
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && !document.activeElement?.matches("select, input")) refresh();
 });
 
 playLoader().then(() => {

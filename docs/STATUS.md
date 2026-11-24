@@ -1,23 +1,18 @@
 # Status
 
-Mellow merges two prototypes: `mellow` (data and dictionary logic) and `mellow-app` (design, navigation, PWA).
-
 ## Works
 
-Onboarding, dictionaries and words (create, edit, delete, favourite), active dictionary, flashcards with
-"learned" progress, home totals, active time, EN/RU interface, scoped reset, offline mode.
+Onboarding, dictionaries and words (search, filters, speech), spaced repetition with undo, swipes and keyboard,
+tests (choice, typing, both directions), daily goal, streak, 7-day statistics, light/dark/auto theme, EN/RU, offline.
 
-## Basic, needs development
+## Next candidates
 
-- Flashcards: one "learned" flag, no spaced repetition, one direction only
-- Statistics: current totals only, no history
-- Starter dictionary names and study language names are not translated
+- Import/export and backup: data lives only in this browser
+- Achievements
+- Bigger starter dictionaries, example sentences, transcription
+- Notifications (needs a server on iOS)
+- Privacy policy and terms, maskable icon, social preview image, CI, hosting
 
-## Removed placeholders (had no logic), to decide on
+## Not verified
 
-Tests, weekly chart, streak, achievements, focus mode, dark mode, daily goal, notifications, difficulty,
-import/export, storage usage, privacy policy and terms.
-
-## Missing
-
-Maskable icon, social preview image, unit tests, CI, hosting.
+Real iPhone and Safari: gestures, speech voices, safe areas, installed mode.

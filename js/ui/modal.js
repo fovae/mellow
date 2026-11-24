@@ -4,13 +4,19 @@ import { icon } from "./icons.js";
 
 // The only modal in the app. Native <dialog> provides focus trapping and Escape.
 // build(close) returns the body nodes.
-export function openModal({ title, build, dismissible = true, className = "" }) {
+export function openModal({ title, build, dismissible = true, className = "", actions = [] }) {
     const dialog = h("dialog", { class: `modal ${className}`, "aria-label": title });
-    const close = () => dialog.close();
+    // Plays the exit animation, then closes.
+    const close = () => {
+        if (dialog.classList.contains("is-closing")) return;
+        dialog.classList.add("is-closing");
+        setTimeout(() => dialog.close(), matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
+    };
 
     dialog.append(h("div", { class: "modal-panel" },
         h("header", { class: "modal-header" },
             h("h2", { class: "modal-title" }, title),
+            ...actions,
             dismissible && h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: close }, icon("close"))),
         h("div", { class: "modal-body" }, build(close))));
 
@@ -18,7 +24,12 @@ export function openModal({ title, build, dismissible = true, className = "" }) 
     dialog.addEventListener("click", (event) => {
         if (dismissible && event.target === dialog) close();
     });
-    if (!dismissible) {
+    if (dismissible) {
+        dialog.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            close();
+        });
+    } else {
         // Chrome closes on a second Escape even when "cancel" is prevented, so block the key too.
         dialog.addEventListener("cancel", (event) => event.preventDefault());
         dialog.addEventListener("keydown", (event) => event.key === "Escape" && event.preventDefault());
@@ -59,4 +70,15 @@ export function requireValue(input) {
     input.classList.add("is-shaking");
     input.focus();
     return false;
+}
+
+// Full-screen flow (study, test). draw(nodes) replaces the content.
+export function openFullscreen(label, onKey) {
+    const body = h("div", { class: "session" });
+    const dialog = h("dialog", { class: "modal modal-full", "aria-label": label }, body);
+    if (onKey) dialog.addEventListener("keydown", onKey);
+    dialog.addEventListener("close", () => dialog.remove());
+    document.body.append(dialog);
+    dialog.showModal();
+    return { draw: (...nodes) => body.replaceChildren(...nodes.filter(Boolean)), close: () => dialog.close() };
 }

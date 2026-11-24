@@ -6,7 +6,7 @@ import { openModal } from "./modal.js";
 export function openDictionaryPicker() {
     const { dictionaries, activeDictionaryId } = getState();
     openModal({
-        title: t("home.select"),
+        title: t("hero.none"),
         build: (close) => dictionaries.length
             ? dictionaries.map((dict) => h("button", {
                 class: `row row-btn ${dict.id === activeDictionaryId ? "is-active" : ""}`, type: "button",

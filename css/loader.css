@@ -8,7 +8,7 @@
 .loader-card-b { --spread: translateY(-20px); animation-delay: .2s; background: linear-gradient(135deg, rgba(255, 77, 184, .2), rgba(123, 63, 242, .2)); }
 .loader-card-c { --spread: translate(104px, 10px) rotate(12deg); animation-delay: .3s; background: linear-gradient(135deg, rgba(58, 134, 255, .2), rgba(123, 63, 242, .2)); }
 .loader-text { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; animation: fade-up .8s var(--ease) .4s forwards; }
-.loader-brand { font-size: 2.8rem; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; }
+.loader-brand { font-family: var(--font-display); font-size: 2.8rem; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; }
 .loader-footer { position: absolute; bottom: calc(24px + var(--safe-bottom)); text-align: center; font-size: .7rem; line-height: 1.4; color: var(--muted); opacity: 0; animation: fade-up .8s var(--ease-out) 1.1s forwards; }
 @keyframes loader-spread { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: var(--spread); } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }

@@ -1,25 +1,48 @@
 import { createStarterDictionaries } from "../data/starter.js";
+import { dayKey, startOfDay } from "./dates.js";
+import { schedule, getQueue, getStatus, strength } from "./srs.js";
 
 const KEY = "mellow_state";
-const VERSION = 1;
+const VERSION = 2;
 const listeners = new Set();
 
 export const createId = () =>
     globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
+const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false });
+
 const createState = () => ({
     version: VERSION,
     username: "",
-    settings: { language: "en" },
+    settings: defaultSettings(),
     activeDictionaryId: null,
     totalTimeActive: 0, // seconds
+    log: {}, // "YYYY-MM-DD" -> { answers, correct, fresh, seconds }
     dictionaries: createStarterDictionaries(createId),
 });
 
+const migrations = {
+    // v1 had only a "learned" flag: such words come back for review in 4 days.
+    1: (old) => ({
+        ...old,
+        log: {},
+        dictionaries: old.dictionaries.map((dict) => ({
+            ...dict,
+            words: dict.words.map(({ learned, ...word }) => ({
+                ...word,
+                srs: learned ? { due: startOfDay(Date.now(), 4), interval: 4, ease: 2.5, step: 0, lapses: 0 } : null,
+            })),
+        })),
+    }),
+};
+
 function load() {
     try {
-        const saved = JSON.parse(localStorage.getItem(KEY));
-        if (saved?.version === VERSION && Array.isArray(saved.dictionaries)) return saved;
+        let saved = JSON.parse(localStorage.getItem(KEY));
+        if (Array.isArray(saved?.dictionaries)) {
+            for (let v = saved.version; v < VERSION; v++) saved = { ...migrations[v](saved), version: v + 1 };
+            if (saved.version === VERSION) return { ...saved, settings: { ...defaultSettings(), ...saved.settings } };
+        }
     } catch (error) {
         console.warn("Mellow: could not read saved data", error);
     }
@@ -50,19 +73,38 @@ function commit(type) {
 // Selectors
 export const getDictionary = (id) => state.dictionaries.find((d) => d.id === id);
 export const getActiveDictionary = () => getDictionary(state.activeDictionaryId);
-export const countLearned = (dict) => dict.words.filter((w) => w.learned).length;
 export const getProgress = (dict) =>
-    dict.words.length ? Math.round((countLearned(dict) / dict.words.length) * 100) : 0;
+    dict.words.length ? Math.round((dict.words.reduce((sum, w) => sum + strength(w.srs), 0) / dict.words.length) * 100) : 0;
+
+export function countStatuses(words) {
+    const counts = { new: 0, learning: 0, mastered: 0 };
+    words.forEach((w) => { counts[getStatus(w.srs)]++; });
+    return counts;
+}
+
+export const allWords = () => state.dictionaries.flatMap((d) => d.words);
 
 export function getTotals() {
-    const words = state.dictionaries.flatMap((d) => d.words);
+    const words = allWords();
     return {
         dictionaries: state.dictionaries.length,
         words: words.length,
         favourites: words.filter((w) => w.isFavourite).length,
-        learned: words.filter((w) => w.learned).length,
         seconds: state.totalTimeActive,
+        ...countStatuses(words),
     };
+}
+
+const emptyDay = () => ({ answers: 0, correct: 0, fresh: 0, seconds: 0 });
+export const getDay = (date) => state.log[dayKey(date)] ?? emptyDay();
+export const getNewLeft = () => Math.max(0, state.settings.newPerDay - getDay().fresh);
+export const getDictQueue = (dict) => getQueue(dict.words, getNewLeft());
+
+// Days in a row with at least one answer. Today may still be empty.
+export function getStreak(now = Date.now()) {
+    let streak = 0;
+    for (let i = getDay(now).answers ? 0 : -1; getDay(startOfDay(now, i)).answers; i--) streak++;
+    return streak;
 }
 
 // Actions
@@ -71,9 +113,45 @@ export function setUsername(name) {
     commit("user");
 }
 
-export function setLanguage(language) {
-    state.settings.language = language;
-    commit("language");
+export function updateSettings(changes) {
+    Object.assign(state.settings, changes);
+    commit("settings");
+}
+
+const today = () => (state.log[dayKey()] ??= emptyDay());
+
+function logAnswer(correct) {
+    const day = today();
+    day.answers++;
+    if (correct) day.correct++;
+    return day;
+}
+
+// Returns a function that takes the answer back.
+export function gradeWord(dictId, wordId, grade) {
+    const word = getDictionary(dictId)?.words.find((w) => w.id === wordId);
+    if (!word) return null;
+    const key = dayKey();
+    const before = { srs: word.srs, day: { ...getDay() } };
+    const day = logAnswer(grade !== "again");
+    if (!word.srs) day.fresh++;
+    word.srs = schedule(word.srs, grade);
+    commit("study");
+    return () => {
+        const current = getDictionary(dictId)?.words.find((w) => w.id === wordId);
+        if (!current) return;
+        current.srs = before.srs;
+        state.log[key] = { ...before.day, seconds: state.log[key]?.seconds ?? 0 };
+        commit("study");
+    };
+}
+
+// A wrong test answer makes a word that is already in study due now.
+export function recordTestAnswer(dictId, wordId, correct) {
+    logAnswer(correct);
+    const word = getDictionary(dictId)?.words.find((w) => w.id === wordId);
+    if (!correct && word?.srs) word.srs.due = Math.min(word.srs.due, Date.now());
+    commit("study");
 }
 
 export function setActiveDictionary(id) {
@@ -82,7 +160,7 @@ export function setActiveDictionary(id) {
 }
 
 const createWord = ({ word, translation }) => ({
-    id: createId(), word, translation, isFavourite: false, learned: false,
+    id: createId(), word, translation, isFavourite: false, srs: null,
 });
 
 export function addDictionary({ words = [], ...data }) {
@@ -128,6 +206,7 @@ export function removeWord(dictId, wordId) {
 
 export function addActiveTime(seconds) {
     state.totalTimeActive += seconds;
+    today().seconds += seconds;
     commit("time");
 }
 

@@ -10,6 +10,8 @@ python3 -m http.server 8000
 
 Open http://localhost:8000. ES modules do not work from `file://`.
 
+Unit tests: `node --test tests/*.mjs`.
+
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md): how the code is organised

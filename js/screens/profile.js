@@ -1,10 +1,13 @@
 import { h } from "../core/dom.js";
 import { t, languages, formatTime } from "../core/i18n.js";
-import { getState, getTotals, setLanguage, setUsername, resetAll } from "../core/store.js";
+import { lastDays } from "../core/dates.js";
+import { getState, getTotals, getDay, getStreak, allWords, updateSettings, setUsername, resetAll } from "../core/store.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
+import { icon } from "../ui/icons.js";
+import { section, segmented, statTile, statusBar, statusLegend, weekChart } from "../ui/parts.js";
 
-const line = (label, value) => h("div", { class: "row" }, h("span", { class: "row-main" }, label), value);
+const line = (label, control) => h("div", { class: "row" }, h("span", { class: "row-main" }, label), control);
 
 function editName() {
     const input = h("input", { class: "input", value: getState().username, maxlength: 30, autocomplete: "given-name" });
@@ -17,27 +20,42 @@ function editName() {
     });
 }
 
+const select = (label, key, options) => h("select", {
+    class: "input input-inline", "aria-label": label,
+    onChange: (event) => updateSettings({ [key]: options[event.target.selectedIndex].value }),
+}, options.map(({ value, name }) => h("option", { selected: value === getState().settings[key] }, name)));
+
+const numbers = (...values) => values.map((value) => ({ value, name: String(value) }));
+
 export function renderProfile() {
     const { username, settings } = getState();
     const totals = getTotals();
-    const language = h("select", { class: "input input-inline", "aria-label": t("profile.language"), onChange: (event) => setLanguage(event.target.value) },
-        languages.map(({ code, name }) => h("option", { value: code, selected: code === settings.language }, name)));
+    const week = lastDays(7).map(getDay);
+    const answers = week.reduce((sum, d) => sum + d.answers, 0);
+    const correct = week.reduce((sum, d) => sum + d.correct, 0);
 
     return [
-        screenHeader(t("profile.title"), t("profile.subtitle")),
-        h("div", { class: "card" },
-            h("h2", { class: "section-title" }, t("profile.stats")),
-            line(t("profile.learned"), h("strong", {}, `${totals.learned} / ${totals.words}`)),
-            line(t("home.favourites"), h("strong", {}, String(totals.favourites))),
-            line(t("home.time"), h("strong", {}, formatTime(totals.seconds)))),
-        h("div", { class: "card" },
-            h("h2", { class: "section-title" }, t("profile.settings")),
-            line(t("profile.name"), h("button", { class: "btn btn-soft", type: "button", onClick: editName }, username)),
-            line(t("profile.language"), language)),
-        h("div", { class: "card" },
-            h("h2", { class: "section-title" }, t("profile.data")),
+        screenHeader(t("profile.eyebrow"), username,
+            h("button", { class: "icon-btn icon-btn-soft", type: "button", "aria-label": t("profile.name"), onClick: editName }, icon("edit"))),
+        h("div", { class: "stats-grid stats-grid-3" },
+            statTile(`🔥 ${getStreak()}`, t("profile.streak"), "stat-card"),
+            statTile(answers ? `${Math.round((correct / answers) * 100)}%` : "—", t("profile.accuracy"), "stat-card"),
+            statTile(formatTime(totals.seconds), t("profile.time"), "stat-card")),
+        section(t("home.week"), weekChart()),
+        section(t("profile.words"), statusBar(allWords()), statusLegend(allWords())),
+        section(t("profile.learning"),
+            line(t("profile.goal"), select(t("profile.goal"), "dailyGoal", numbers(10, 20, 30, 50, 100))),
+            line(t("profile.newPerDay"), select(t("profile.newPerDay"), "newPerDay", numbers(5, 10, 15, 20, 30))),
+            line(t("profile.reverse"), h("input", {
+                class: "switch", type: "checkbox", role: "switch", "aria-label": t("profile.reverse"), checked: settings.reverse,
+                onChange: (event) => updateSettings({ reverse: event.target.checked }),
+            }))),
+        section(t("profile.appearance"),
+            segmented(t("profile.theme"), ["auto", "light", "dark"].map((value) => ({ value, label: t(`theme.${value}`) })), settings.theme, (theme) => updateSettings({ theme })),
+            line(t("profile.language"), select(t("profile.language"), "language", languages.map(({ code, name }) => ({ value: code, name }))))),
+        section(t("profile.data"),
             h("button", {
-                class: "btn btn-danger btn-wide", type: "button",
+                class: "btn btn-danger-soft btn-wide", type: "button",
                 onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),
             }, t("profile.reset"))),
     ];

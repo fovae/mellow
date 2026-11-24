@@ -34,9 +34,11 @@ export function refresh() {
 }
 
 export function navigate(name) {
+    if (current === name) views.get(name).content.scrollTo({ top: 0, behavior: "smooth" });
     current = name;
     views.forEach(({ section, tab }, key) => {
         section.classList.toggle("is-active", key === name);
+        section.classList.toggle("is-entering", key === name);
         tab.classList.toggle("is-active", key === name);
         if (key === name) tab.setAttribute("aria-current", "page");
         else tab.removeAttribute("aria-current");
@@ -46,7 +48,7 @@ export function navigate(name) {
 
 export const getCurrentScreen = () => current;
 
-export const screenHeader = (title, subtitle, action) =>
+export const screenHeader = (eyebrow, title, action) =>
     h("header", { class: "screen-header" },
-        h("div", {}, h("h1", { class: "screen-title" }, ...[title].flat()), h("p", { class: "muted" }, subtitle)),
+        h("div", {}, h("p", { class: "eyebrow" }, eyebrow), h("h1", { class: "screen-title" }, ...[title].flat())),
         action);
