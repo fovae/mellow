@@ -1,5 +1,5 @@
 // Bump the version whenever the file list changes.
-const CACHE = "mellow-v12";
+const CACHE = "mellow-v13";
 const ASSETS = [
     "./",
     "./css/art.css",

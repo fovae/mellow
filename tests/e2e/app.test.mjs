@@ -327,3 +327,21 @@ test("a module that failed once does not leave an empty page", async () => {
     assert.ok(failed);
     await fresh.close();
 });
+
+test("the first screen: languages never match, pace and interface language are kept", async () => {
+    await page.fill("dialog input", "Alex");
+    await page.click('dialog .cell:has-text("I learn")');
+    await page.locator("dialog").last().locator('[data-value="English"]').click();
+    await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
+    await page.click('dialog [data-value="calm"]');
+    await page.click('dialog .cell:has-text("App language")');
+    await page.locator("dialog").last().locator('[data-value="ru"]').click();
+    await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
+    assert.equal(await page.inputValue("dialog input"), "Alex");
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await page.click("dialog .btn-primary");
+    await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries.length === 2);
+    const { username, settings } = await state();
+    assert.deepEqual([username, settings.native, settings.target, settings.newPerDay, settings.dailyGoal, settings.language], ["Alex", "Spanish", "English", 5, 10, "ru"]);
+});

@@ -29,7 +29,7 @@ const defaultRewards = () => ({
 const createState = () => ({
     version: VERSION,
     username: "",
-    settings: defaultSettings(),
+    settings: { ...defaultSettings(), language: uiLanguages.find((code) => globalThis.navigator?.language?.startsWith(code)) ?? "en" },
     profiles: [], // { from, to }; the current one is settings.native -> settings.target
     removedTopics: [], // library keys that must not come back by themselves
     totalTimeActive: 0, // seconds

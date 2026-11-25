@@ -7,15 +7,9 @@ import { LIBRARY_LANGUAGES, loadLibrary, libraryKey, topicWords, toDictionary } 
 import { languageFlag, languageName } from "../data/languages.js";
 import { openModal } from "./modal.js";
 import { group } from "./cells.js";
-import { dropdown } from "./dropdown.js";
 import { icon } from "./icons.js";
 import { speakButton } from "./parts.js";
 import { openDictionary } from "./dictionary-modals.js";
-
-export const languageSelect = (label, value, onChange) => dropdown({
-    label, value, onChange,
-    options: LIBRARY_LANGUAGES.map((name) => ({ value: name, name: languageName(name, getLocale()), emoji: languageFlag(name) })),
-});
 
 export const topicTitle = (topic) => topic.title[getLocale()] ?? topic.title.en;
 
