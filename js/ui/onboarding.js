@@ -102,8 +102,8 @@ export function showOnboarding() {
             ], { foot: t("onboarding.private") }));
         screen.draw(page, h("div", { class: "session-footer" }, h("button", { class: "btn btn-primary", type: "submit", form: "setup" }, t("common.start"))));
         page.scrollTop = scrollTop;
-        // Not the name field: the keyboard must not open by itself.
-        if (!scrollTop) title.focus({ preventScroll: true, focusVisible: false });
+        // Not the name field: the keyboard must not open by itself. Focus stays on the screen after a redraw.
+        if (!scrollTop || !screen.body.contains(document.activeElement)) title.focus({ preventScroll: true, focusVisible: false });
     }
 
     draw();

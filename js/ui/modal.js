@@ -99,9 +99,21 @@ export function requireValue(input) {
 export function openFullscreen(label, onKey, onCancel) {
     const body = h("div", { class: "session" });
     const dialog = h("dialog", { class: "modal modal-full", "aria-label": label }, body);
-    if (onKey) dialog.addEventListener("keydown", onKey);
+    // Focus falls to <body> when the focused element is redrawn away. Keys must still reach this screen,
+    // or a second Escape closes it even though "cancel" is prevented.
+    const onDocumentKey = (event) => {
+        if (dialog.contains(event.target) || [...document.querySelectorAll("dialog[open]")].at(-1) !== dialog) return;
+        onKey(event);
+    };
+    if (onKey) {
+        dialog.addEventListener("keydown", onKey);
+        document.addEventListener("keydown", onDocumentKey);
+    }
     if (onCancel) dialog.addEventListener("cancel", (event) => { event.preventDefault(); onCancel(); });
-    dialog.addEventListener("close", () => dialog.remove());
+    dialog.addEventListener("close", () => {
+        document.removeEventListener("keydown", onDocumentKey);
+        dialog.remove();
+    });
     document.body.append(dialog);
     dialog.showModal();
     return { body, draw: (...nodes) => body.replaceChildren(...nodes.filter(Boolean)), close: () => dialog.close(), isOpen: () => dialog.open };

@@ -340,6 +340,8 @@ test("the first screen: languages never match, pace and interface language are k
     await page.locator("dialog").last().locator('[data-value="ru"]').click();
     await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
     assert.equal(await page.inputValue("dialog input"), "Alex");
+    // Escape must not close the first screen, even when focus has fallen to <body>.
+    await page.evaluate(() => document.activeElement.blur());
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
     await page.click("dialog .btn-primary");
