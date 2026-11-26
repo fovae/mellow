@@ -91,7 +91,3 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; w
 .confetti .confetti-3 { background: #ff8fb8; }
 @keyframes fall { to { transform: translateY(105vh) rotate(540deg); opacity: 0; } }
 @media (max-width: 359px) { .chip-stat { padding: 8px 10px; } .path-text { max-width: 124px; } }
-.moved-address { margin: 8px 0 0; padding: 10px 16px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); font-weight: 700; overflow-wrap: anywhere; }
-.moved-actions { flex-direction: column; }
-.moved-actions .btn { flex: none; align-self: stretch; }
-.moved-actions a.btn { text-decoration: none; }

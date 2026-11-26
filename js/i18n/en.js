@@ -389,9 +389,4 @@ export default {
     "backup.textCloud": "You can also save a copy to a file and keep it anywhere.",
     "onboarding.signInNote": "Load your copy from the cloud",
     "exercise.into": "Translate into {language}",
-    "moved.title": "Mellow has moved",
-    "moved.text": "Mellow now lives at a new address, with accounts and a cloud copy.",
-    "moved.textWords": "Mellow now lives at a new address, with accounts and a cloud copy. Words stay at the old address: save them to a file, open the new address and choose \"Load from a file\" on the first screen.",
-    "moved.save": "Save to a file",
-    "moved.open": "Open the new address",
 };

@@ -12,7 +12,6 @@ import { openLibrary } from "./ui/library-modal.js";
 import { continueCourse } from "./ui/profiles.js";
 import { showOnboarding } from "./ui/onboarding.js";
 import { autoSave, checkAccount } from "./ui/account.js";
-import { isOldHome, showMoved } from "./ui/moved.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
 import { renderCards } from "./screens/cards.js";
@@ -85,7 +84,6 @@ playLoader().then(async () => {
         refresh();
     });
     protectStreak();
-    if (isOldHome()) return showMoved();
     if (getState().username) return runShortcut();
     await Promise.race([accountChecked, new Promise((resolve) => setTimeout(resolve, 1500))]);
     if (!getState().username) showOnboarding();
