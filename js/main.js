@@ -11,6 +11,7 @@ import { countAll, studyAll } from "./ui/actions.js";
 import { openLibrary } from "./ui/library-modal.js";
 import { continueCourse } from "./ui/profiles.js";
 import { showOnboarding } from "./ui/onboarding.js";
+import { autoSave, checkAccount } from "./ui/account.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
 import { renderCards } from "./screens/cards.js";
@@ -54,6 +55,7 @@ subscribe((type) => {
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) return;
     protectStreak();
+    autoSave();
     if (!document.activeElement?.matches("input, textarea")) refresh();
 });
 
@@ -68,7 +70,10 @@ subscribe(updateBadge);
 // Ask the browser not to clear the data when space is low.
 navigator.storage?.persist?.().catch(() => {});
 
-playLoader().then(() => {
+// The account is checked while Mello wakes up: the first screen offers to sign in when there is a server.
+const accountChecked = checkAccount();
+
+playLoader().then(async () => {
     document.body.classList.add("is-ready");
     startActivityTracker();
     // Loaded when idle: suggestions and the next topic need it.
@@ -79,8 +84,9 @@ playLoader().then(() => {
         refresh();
     });
     protectStreak();
+    if (getState().username) return runShortcut();
+    await Promise.race([accountChecked, new Promise((resolve) => setTimeout(resolve, 1500))]);
     if (!getState().username) showOnboarding();
-    else runShortcut();
 });
 
 // A session ends with its dialog; "close" does not bubble.

@@ -1,5 +1,5 @@
 // Bump the version whenever the file list changes.
-const CACHE = "mellow-v13";
+const CACHE = "mellow-v14";
 const ASSETS = [
     "./",
     "./css/art.css",
@@ -26,6 +26,7 @@ const ASSETS = [
     "./index.html",
     "./js/boot.js",
     "./js/core/accents.js",
+    "./js/core/account.js",
     "./js/core/achievements.js",
     "./js/core/activity.js",
     "./js/core/advice.js",
@@ -56,6 +57,7 @@ const ASSETS = [
     "./js/screens/home.js",
     "./js/screens/profile.js",
     "./js/screens/tests.js",
+    "./js/ui/account.js",
     "./js/ui/actions.js",
     "./js/ui/art.js",
     "./js/ui/cells.js",
@@ -106,7 +108,9 @@ self.addEventListener("activate", (event) => {
 // Network first, cache as the offline fallback. Other origins are left to the browser.
 self.addEventListener("fetch", (event) => {
     const { request } = event;
-    if (request.method !== "GET" || new URL(request.url).origin !== location.origin) return;
+    const url = new URL(request.url);
+    // The account API is never cached: it is private and must be fresh.
+    if (request.method !== "GET" || url.origin !== location.origin || url.pathname.startsWith("/api/")) return;
 
     event.respondWith((async () => {
         try {

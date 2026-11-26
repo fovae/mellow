@@ -1,0 +1,15 @@
+# Files Cloudflare must not serve as part of the site.
+.git
+.github
+.wrangler
+.dev.vars*
+.env*
+.DS_Store
+node_modules
+server
+tests
+docs
+*.md
+wrangler.jsonc
+.assetsignore
+.gitignore

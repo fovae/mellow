@@ -10,6 +10,7 @@ import { canSpeak, speak } from "../core/speech.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
 import { saveBackup, restoreBackup } from "../ui/transfer-modals.js";
+import { accountRows, isSignedIn } from "../ui/account.js";
 import { cell, choiceCell, group } from "../ui/cells.js";
 import { dropsChip, openAccents, openShop } from "../ui/rewards.js";
 import { icon } from "../ui/icons.js";
@@ -121,13 +122,14 @@ export function renderProfile() {
             toggle("motion", { icon: "spark", tint: 4, label: t("settings.motion") }),
         ]),
         group(t("profile.data"), [
+            ...accountRows(),
             cell({
                 icon: "share", tint: 1, label: t("settings.backup"), onClick: saveBackup,
                 sub: lastBackup ? new Date(lastBackup).toLocaleDateString(getLocale(), { day: "numeric", month: "long", year: "numeric" }) : t("backup.never"),
             }),
             cell({ icon: "download", tint: 2, label: t("settings.restore"), onClick: restoreBackup }),
             toggle("backupReminder", { icon: "bell", tint: 3, label: t("settings.backupReminder") }),
-        ], { foot: t("backup.text") }),
+        ], { foot: t(isSignedIn() ? "backup.textCloud" : "backup.text") }),
         group(null, [cell({
             icon: "trash", danger: true, label: t("profile.reset"),
             onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),

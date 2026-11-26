@@ -2,6 +2,7 @@ import { t, getLocale } from "../core/i18n.js";
 import { h } from "../core/dom.js";
 import { getState, getAnswers } from "../core/store.js";
 import { needsBackup } from "../core/advice.js";
+import { getLocal } from "../core/account.js";
 import { saveBackup } from "../ui/transfer-modals.js";
 import { dropsChip } from "../ui/rewards.js";
 import { cell, group } from "../ui/cells.js";
@@ -15,7 +16,7 @@ export function renderHome() {
         screenHeader(date, [`${greeting()}, `, h("span", { class: "gradient-text" }, username)], dropsChip()),
         todayHero(),
         widgetGrid(),
-        settings.backupReminder && needsBackup({ answers: getAnswers(), lastBackup })
+        settings.backupReminder && needsBackup({ answers: getAnswers(), lastBackup: Math.max(lastBackup ?? 0, getLocal()?.cloudAt ?? 0) || null })
             && group(null, [cell({ icon: "share", tint: 3, label: t("advice.backup"), sub: t("advice.backupText"), onClick: saveBackup })]),
     ].filter(Boolean);
 }

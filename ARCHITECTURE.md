@@ -5,14 +5,16 @@ index.html      shell: loader, <main>, tab bar
 sw.js           offline cache (network first)
 css/            base (tokens, fonts), themes (colour styles), loader, layout, components, play, cells, widgets, art, legal
 js/main.js      boot
-js/core/        store, srs, quiz, games, lessons, rewards, accents, sound, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
+js/core/        store, account (API calls, password key, gzip), srs, quiz, games, lessons, rewards, accents, sound, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
 js/ui/          navigation, modal, cells (grouped lists), art (pictures), widgets (home), stats, dictionary modals, icons, scrollbar, loader, onboarding,
                 hero, parts (shared blocks), study, exercises, test-session, games, lesson, path,
                 rewards (quests, level, shop), mascot, toast, dropdown, library-modal, transfer-modals,
-                files, actions (shortcuts)
+                files, actions (shortcuts), account (settings rows and sheets)
 js/screens/     one render function per tab
 js/data/        library (33 topics, 6 languages, lazy), study languages
 js/i18n/        interface translations
+server/         Cloudflare Worker: account API (api.js), D1 schema; see docs/SERVER.md
+_headers        security headers of the static files; .assetsignore keeps non-site files private
 tests/          node --test tests/*.mjs
 ```
 
@@ -70,6 +72,7 @@ A wrong test answer makes a word that is already in study due now; right test an
 - Build DOM with `h()`. Do not use `innerHTML`: user text must stay text.
 - All interface text goes through `t()`, in every file of `js/i18n/`.
 - Every modal uses `openModal()`.
+- A cloud copy is the same JSON as the backup file and goes through `readBackup()` too. `localStorage.mellow_account` (nick, linked, cloudAt) is kept apart from the state so a restore does not touch it.
 - Data from files goes through `core/transfer.js` (`parseWords`, `cleanState`) before it reaches the store. A new state field must be added to `cleanState` too.
 - Files are saved and picked through `ui/files.js`.
 - When adding, removing or renaming a file, update `ASSETS` and the version in `sw.js`.

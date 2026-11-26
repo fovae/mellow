@@ -17,6 +17,7 @@ Browser tests: `cd tests/e2e && npm ci && npx playwright install chromium webkit
 
 - [ARCHITECTURE.md](ARCHITECTURE.md): how the code is organised
 - [docs/STATUS.md](docs/STATUS.md): what works, what was removed, what is next
+- [docs/SERVER.md](docs/SERVER.md): accounts, the cloud copy, deploying to Cloudflare
 
 ## License
 

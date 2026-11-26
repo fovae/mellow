@@ -9,6 +9,7 @@ import { mascot } from "./mascot.js";
 import { openFullscreen } from "./modal.js";
 import { addFirstTopics } from "./profiles.js";
 import { restoreBackup } from "./transfer-modals.js";
+import { hasServer, isSignedIn, openAuth } from "./account.js";
 
 const guests = ["Mystic Leaf", "Happy Pebble", "Silver Fox", "Cloud Jumper", "Little Fern",
     "Blue Owl", "Calm River", "Sunny Ray", "Night Owl", "Forest Friend"];
@@ -96,6 +97,7 @@ export function showOnboarding() {
                     options: languages.map((l) => ({ value: l.code, name: l.name })),
                     onPick: (language) => updateSettings({ language }),
                 }),
+                hasServer() && !isSignedIn() && cell({ icon: "cloud", tint: 6, label: t("account.signIn"), sub: t("onboarding.signInNote"), attrs: { "aria-haspopup": "dialog" }, onClick: () => openAuth() }),
                 cell({ icon: "download", tint: 5, label: t("settings.restore"), sub: t("onboarding.restoreNote"), onClick: restoreBackup }),
             ], { foot: t("onboarding.private") }));
         screen.draw(page, h("div", { class: "session-footer" }, h("button", { class: "btn btn-primary", type: "submit", form: "setup" }, t("common.start"))));

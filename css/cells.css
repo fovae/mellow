@@ -70,3 +70,4 @@ label.cell { cursor: pointer; }
 .topic-main { flex: 1; min-width: 0; min-height: 52px; display: flex; align-items: center; gap: 14px; padding-left: 16px; }
 .topic-main:active { opacity: .6; }
 .topic-added { flex: none; width: 44px; height: 44px; margin-right: -4px; display: grid; place-items: center; color: var(--success); }
+.sheet-groups { display: flex; flex-direction: column; gap: 26px; }

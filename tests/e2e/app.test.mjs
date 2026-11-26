@@ -13,6 +13,8 @@ let server, browser, context, page, url, problems;
 before(async () => {
     server = createServer(async (request, response) => {
         const path = new URL(request.url, "http://x").pathname;
+        // The account API answers as for someone signed out (account.test.mjs runs the real one).
+        if (path === "/api/me") return response.writeHead(200, { "Content-Type": "application/json" }).end('{"nick":null,"backup":null}');
         const file = path === "/" ? "/index.html" : path;
         try {
             const body = await readFile(new URL(`.${file}`, ROOT));
