@@ -1,5 +1,7 @@
-// Bump the version whenever the file list changes.
-const CACHE = "mellow-v18";
+// The same as APP_VERSION (js/core/version.js; a test checks it). A new number makes this file new,
+// so browsers see the update and the app offers to reload (js/ui/update.js).
+const VERSION = "0.19.0";
+const CACHE = `mellow-${VERSION}`;
 const ASSETS = [
     "./",
     "./css/art.css",
@@ -85,6 +87,7 @@ const ASSETS = [
     "./js/ui/test-session.js",
     "./js/ui/toast.js",
     "./js/ui/tour.js",
+    "./js/ui/update.js",
     "./js/ui/transfer-modals.js",
     "./js/ui/widgets.js",
     "./manifest.json",
@@ -94,7 +97,11 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
     event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
-    self.skipWaiting();
+});
+
+// A new version waits until the person taps "Update" (js/ui/update.js); the very first one starts at once.
+self.addEventListener("message", (event) => {
+    if (event.data === "skip-waiting") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {

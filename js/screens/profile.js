@@ -11,6 +11,7 @@ import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
 import { accountRows } from "../ui/account.js";
 import { showTour } from "../ui/tour.js";
+import { checkForUpdate } from "../ui/update.js";
 import { AUTO_DAYS } from "../core/account.js";
 import { cell, choiceCell, group } from "../ui/cells.js";
 import { dropsChip, openAccents, openShop } from "../ui/rewards.js";
@@ -132,7 +133,7 @@ export function renderProfile() {
             cell({ icon: "bulb", tint: 4, label: t("tour.open"), attrs: { "aria-haspopup": "dialog" }, onClick: showTour }),
             cell({ icon: "shield", tint: 1, label: t("profile.privacy"), href: "privacy.html" }),
             cell({ icon: "layers", tint: 2, label: t("profile.terms"), href: "terms.html" }),
-            cell({ icon: "info", tint: 3, label: t("profile.version"), value: APP_VERSION }),
+            cell({ icon: "info", tint: 3, label: t("profile.version"), value: APP_VERSION, sub: t("update.check"), onClick: checkForUpdate }),
         ]),
         h("p", { class: "credits" }, `${t("loader.created")} `, h("strong", { class: "gradient-text" }, "fovae")),
     ];

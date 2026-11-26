@@ -396,4 +396,10 @@ export default {
     "word.addAction": "Добавить",
     "word.targetHint": "слово",
     "word.nativeHint": "перевод",
+    "update.title": "Доступно обновление",
+    "update.text": "Вышла новая версия Mellow. Обновление займёт пару секунд, слова и прогресс останутся на месте.",
+    "update.now": "Обновить",
+    "update.later": "Позже",
+    "update.check": "Нажми, чтобы проверить обновления",
+    "update.latest": "У тебя последняя версия",
 };

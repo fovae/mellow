@@ -11,6 +11,7 @@ import { countAll, studyAll } from "./ui/actions.js";
 import { openLibrary } from "./ui/library-modal.js";
 import { continueCourse } from "./ui/profiles.js";
 import { showOnboarding } from "./ui/onboarding.js";
+import { initUpdates } from "./ui/update.js";
 import { autoSave, checkAccount, hasServer, isSignedIn, showAuthScreen } from "./ui/account.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
@@ -108,6 +109,4 @@ function runShortcut() {
     if (go === "review" && countAll()) studyAll();
 }
 
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch((error) => console.warn("Mellow: service worker failed", error));
-}
+initUpdates();

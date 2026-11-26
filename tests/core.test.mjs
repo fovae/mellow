@@ -239,3 +239,10 @@ test("every emoji in the data has a picture", async () => {
     const names = [...(await loadLibrary()).map((x) => x.emoji), ...dictionaryIcons, ...getAchievements({ log: {}, mastered: 0, words: 0, dailyGoal: 1 }).map((b) => b.emoji)];
     assert.deepEqual(names.filter((name) => !hasArt(name)), []);
 });
+
+test("sw.js carries the app version, so every release is offered as an update", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { APP_VERSION } = await import("../js/core/version.js");
+    const sw = await readFile(new URL("../sw.js", import.meta.url), "utf8");
+    assert.equal(sw.match(/const VERSION = "([^"]+)"/)?.[1], APP_VERSION);
+});

@@ -76,4 +76,4 @@ A wrong test answer makes a word that is already in study due now; right test an
 - A cloud copy is the backup JSON and goes through `readBackup()` too. `localStorage.mellow_account` (nick, linked, cloudAt) is kept apart from the state so a restore does not touch it.
 - Data from files goes through `core/transfer.js` (`parseWords`, `cleanState`) before it reaches the store. A new state field must be added to `cleanState` too.
 - Topics: library topics and one "My words" per course (`mine: true`, `store.ensureMyWords`); no user-made dictionaries, no files.
-- When adding, removing or renaming a file, update `ASSETS` and the version in `sw.js`.
+- When adding, removing or renaming a file, update `ASSETS` in `sw.js`. Every release: the same number in `APP_VERSION` and in `VERSION` of `sw.js` (a test checks it), so the app offers the update (`ui/update.js`).

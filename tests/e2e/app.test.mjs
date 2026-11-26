@@ -9,6 +9,7 @@ import playwright from "playwright";
 const ROOT = new URL("../../", import.meta.url);
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".woff2": "font/woff2" };
 let server, browser, context, page, url, problems;
+let nextVersion = null; // set by the update test: sw.js is served as a newer release
 
 before(async () => {
     server = createServer(async (request, response) => {
@@ -19,7 +20,8 @@ before(async () => {
         if (path === "/api/backup" && request.method === "PUT") return request.resume().on("end", () => json({ savedAt: Date.now(), size: 1 }));
         const file = path === "/" ? "/index.html" : path;
         try {
-            const body = await readFile(new URL(`.${file}`, ROOT));
+            let body = await readFile(new URL(`.${file}`, ROOT));
+            if (file === "/sw.js" && nextVersion) body = String(body).replace(/const VERSION = "[^"]+"/, `const VERSION = "${nextVersion}"`);
             response.writeHead(200, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream" }).end(body);
         } catch {
             response.writeHead(404).end();
@@ -362,4 +364,18 @@ test("the first screen: languages never match, pace and interface language are k
     await page.locator("dialog .tour-title", { hasText: "облаке" }).waitFor();
     await page.click("dialog .tour .session-footer .btn-primary");
     await page.waitForFunction(() => !document.querySelector("dialog"));
+});
+
+test("a new release is offered, and \"Update\" switches to it", async () => {
+    await start();
+    await page.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 15000 });
+    nextVersion = "99.0.0";
+    try {
+        await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+        await page.locator("dialog", { hasText: "Update available" }).waitFor({ timeout: 15000 });
+        await Promise.all([page.waitForEvent("load"), page.click('dialog .btn-primary:has-text("Update")')]);
+        await page.waitForFunction(() => caches.keys().then((keys) => keys.includes("mellow-99.0.0") && keys.length === 1), null, { timeout: 15000 });
+    } finally {
+        nextVersion = null;
+    }
 });

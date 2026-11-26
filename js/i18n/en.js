@@ -396,4 +396,10 @@ export default {
     "word.addAction": "Add",
     "word.targetHint": "word",
     "word.nativeHint": "translation",
+    "update.title": "Update available",
+    "update.text": "A new version of Mellow is out. Updating takes a couple of seconds; your words and progress stay.",
+    "update.now": "Update",
+    "update.later": "Later",
+    "update.check": "Tap to check for updates",
+    "update.latest": "You have the latest version",
 };
