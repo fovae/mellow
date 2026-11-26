@@ -27,7 +27,15 @@ jobs:
         working-directory: tests/e2e
       - run: npx playwright install --with-deps ${{ matrix.browser }}
         working-directory: tests/e2e
-      - run: npm test
+      - run: npm test 2>&1 | tee e2e.log; exit ${PIPESTATUS[0]}
+        shell: bash
         working-directory: tests/e2e
         env:
           BROWSER: ${{ matrix.browser }}
+      # Failures as one annotation: annotations are readable without signing in, logs are not.
+      - if: failure()
+        shell: bash
+        working-directory: tests/e2e
+        run: |
+          summary=$(grep -vE '^\s+at ' e2e.log | grep -E -A14 '^✖|^ *not ok' | head -150 | sed 's/%/%25/g' | awk 'BEGIN { ORS = "%0A" } 1')
+          echo "::error title=Browser tests (${{ matrix.browser }})::${summary}"
