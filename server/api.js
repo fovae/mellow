@@ -342,6 +342,8 @@ export async function handleApi(request, env, now = Date.now()) {
     let response;
     try {
         if (!route) stop(404, "not_found");
+        // The key made from the password must not travel in clear text.
+        if (url.protocol !== "https:" && !devCookie(env)) stop(403, "https");
         if (request.method !== "GET" && !sameOrigin(request, url)) stop(403, "origin");
         if (typeof env.PEPPER !== "string" || env.PEPPER.length < 32) stop(500, "config");
         response = await route(request, env, now, url);

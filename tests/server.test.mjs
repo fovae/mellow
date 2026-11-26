@@ -196,6 +196,12 @@ test("rate limits and the daily cap of the whole service", async () => {
     assert.equal((await busy.call("POST", "/api/signup", { body: { nick: "anna", key: await key("x") } })).status, 503);
 });
 
+test("plain http is refused", async () => {
+    const { env } = setup();
+    const response = await handleApi(new Request("http://mellow.example/api/me"), env);
+    assert.equal(response.status, 403);
+});
+
 test("no secret, no service; unknown routes are 404", async () => {
     const { call, env } = setup();
     assert.equal((await call("GET", "/api/nothing")).status, 404);

@@ -6,6 +6,7 @@ export default {
     fetch(request, env) {
         const { pathname } = new URL(request.url);
         if (pathname.startsWith("/api/")) return handleApi(request, env);
+        if (pathname === "/") return env.ASSETS.fetch(new Request(new URL("/index.html", request.url), request));
         return env.ASSETS.fetch(request);
     },
 };

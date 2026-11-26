@@ -21,6 +21,8 @@ API: `POST /api/signup | login | logout | recover | password | recovery-code`, `
 
 ## First deploy (once)
 
+Live: https://mellow.fovae.workers.dev (D1 "mellow", region WEUR). Steps below were done on 2026-11-26.
+
 1. Create a free Cloudflare account; install Node 22+.
 2. `npx wrangler login`
 3. `npx wrangler d1 create mellow` and put the printed `database_id` into `wrangler.jsonc`.
