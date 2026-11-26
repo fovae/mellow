@@ -95,10 +95,14 @@ test("library: search and add", async () => {
 test("add a word with a suggestion", async () => {
     await start();
     await active(".widget").filter({ hasText: "Add word" }).click();
-    await page.locator("dialog .input").first().fill("dog");
+    // It opens "My words" with the field in focus, ready to type.
+    assert.ok(await page.evaluate(() => document.activeElement.closest(".add-word") !== null));
+    await page.locator("dialog .add-word input").nth(1).fill("dog");
     await page.click("dialog .tag-btn");
-    await page.click("dialog .btn-primary");
-    assert.equal((await state()).dictionaries[0].words.at(-1).translation, "el perro");
+    await page.click('dialog .add-word [type="submit"]');
+    const mine = (await state()).dictionaries.find((d) => d.mine);
+    assert.equal(mine.words.at(-1).translation, "el perro");
+    assert.equal(await page.locator("dialog .word-list .row").count(), 1);
 });
 
 test("home: the word of the day opens, Mello gives a tip, the lesson starts", async () => {
@@ -193,12 +197,13 @@ test("user text is never parsed as HTML", async () => {
     await start();
     await tab(2);
     await active(".dict-card").first().click();
-    await page.click('dialog .cell:has-text("Import")');
-    await page.locator("dialog").last().locator("textarea").fill("<img src=x onerror=window.hacked=1>;<b>x</b>");
-    await page.locator("dialog").last().locator(".btn-primary").click();
+    await page.locator("dialog .add-word input").nth(0).fill("<b>x</b>");
+    await page.locator("dialog .add-word input").nth(1).fill("<img src=x onerror=window.hacked=1>");
+    await page.click('dialog .add-word [type="submit"]');
     await page.waitForTimeout(300);
     assert.equal(await page.evaluate(() => window.hacked), undefined);
     assert.equal((await state()).dictionaries[0].words.at(-1).translation, "<b>x</b>");
+    assert.equal(await page.locator("dialog .word-list strong").first().textContent(), "<b>x</b>");
 });
 
 test("a lesson: every exercise, rewards, the path moves", async () => {

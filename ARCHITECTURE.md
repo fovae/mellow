@@ -8,7 +8,7 @@ js/main.js      boot
 js/core/        store, account (API calls, password key, gzip), srs, quiz, games, lessons, rewards, accents, sound, library, transfer, advice, achievements, dates, i18n, theme, speech, dom, activity, viewport
 js/ui/          navigation, modal, cells (grouped lists), art (pictures), widgets (home), stats, dictionary modals, icons, scrollbar, loader, onboarding,
                 hero, parts (shared blocks), study, exercises, test-session, games, lesson, path,
-                rewards (quests, level, shop), mascot, toast, dropdown, library-modal, transfer-modals (word import/export), tour (the guide),
+                rewards (quests, level, shop), mascot, toast, dropdown, library-modal, transfer-modals (a message sheet), tour (the guide),
                 files, actions (shortcuts), account (settings rows and sheets)
 js/screens/     one render function per tab
 js/data/        library (33 topics, 6 languages, lazy), study languages
@@ -75,5 +75,5 @@ A wrong test answer makes a word that is already in study due now; right test an
 - The keyboard: `core/viewport.js` sets `--kb-h`, `--vvh` and `html[data-kb]` (the same mechanism as Training); screens never follow the visual viewport.
 - A cloud copy is the backup JSON and goes through `readBackup()` too. `localStorage.mellow_account` (nick, linked, cloudAt) is kept apart from the state so a restore does not touch it.
 - Data from files goes through `core/transfer.js` (`parseWords`, `cleanState`) before it reaches the store. A new state field must be added to `cleanState` too.
-- Files are saved and picked through `ui/files.js`.
+- Topics: library topics and one "My words" per course (`mine: true`, `store.ensureMyWords`); no user-made dictionaries, no files.
 - When adding, removing or renaming a file, update `ASSETS` and the version in `sw.js`.

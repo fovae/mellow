@@ -1,4 +1,5 @@
-import { art } from "./art.js";
+// A topic in one sheet: progress, adding a word right there, search and the words.
+// Library topics and "My words" (the person's own words of the course) open the same way.
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
 import * as store from "../core/store.js";
@@ -6,147 +7,122 @@ import { getStatus } from "../core/srs.js";
 import { normalize } from "../core/quiz.js";
 import { MAX_EXAMPLE, MAX_TEXT, wordKey } from "../core/transfer.js";
 import { loadLibrary, suggest } from "../core/library.js";
-import { dictionaryIcons, languageFlag, languageName } from "../data/languages.js";
+import { languageName } from "../data/languages.js";
 import { openModal, confirmModal, form, field, requireValue } from "./modal.js";
-import { exportWords, openWordImport } from "./transfer-modals.js";
 import { cell, group } from "./cells.js";
 import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
-import { segmented, speakButton, statusBar, statusLegend } from "./parts.js";
+import { speakButton, statusBar, statusLegend, topicName } from "./parts.js";
 
-const textInput = (value = "", placeholder = "", maxlength = 80) =>
-    h("input", { class: "input", value, placeholder, maxlength, autocomplete: "off" });
+const SEARCH_FROM = 8; // words; fewer fit on the screen anyway
 
-function iconPicker(initial) {
-    let selected = initial;
-    const el = h("div", { class: "icon-grid" });
-    const draw = () => el.replaceChildren(...dictionaryIcons.map((emoji) => h("button", {
-        class: `icon-choice ${emoji === selected ? "is-active" : ""}`, type: "button", "aria-label": emoji, "aria-pressed": String(emoji === selected),
-        onClick: () => { selected = emoji; draw(); },
-    }, art(emoji))));
-    draw();
-    return { el, get: () => selected, set: (emoji) => { selected = emoji; draw(); } };
-}
+const input = (value = "", maxlength = MAX_TEXT, attrs = {}) =>
+    h("input", { class: "input", value, maxlength, autocomplete: "off", autocorrect: "off", spellcheck: "false", ...attrs });
 
-// Create (no dict) and edit (dict) share one form.
-export function openDictionaryForm(dict) {
-    const name = textInput(dict?.name, t("dict.namePlaceholder"));
-    const description = textInput(dict?.description, t("dict.descriptionPlaceholder"), 140);
-    const { from, to } = dict ?? store.getProfile();
-    const picker = iconPicker(dict?.emoji ?? languageFlag(to));
-
-    openModal({
-        title: dict ? t("dict.settings") : t("dict.new"),
-        build: (close) => [form({
-            onCancel: close,
-            onSubmit: () => {
-                const data = {
-                    name: name.value.trim() || t("dict.new"),
-                    description: description.value.trim(),
-                    emoji: picker.get(), from, to,
-                };
-                close();
-                if (dict) store.updateDictionary(dict.id, data);
-                else openDictionary(store.addDictionary(data).id);
-            },
-        },
-            field(t("dict.name"), name),
-            field(t("dict.description"), description),
-            h("div", { class: "field" }, h("span", { class: "field-label" }, t("dict.icon")), picker.el)),
-        ...(dict ? [h("button", {
-            class: "btn btn-danger-soft btn-wide form-extra", type: "button",
-            onClick: () => confirmModal({
-                title: t("dict.deleteTitle"), text: t("dict.deleteText", { name: dict.name }), action: t("common.delete"),
-                onConfirm: () => { close(); store.removeDictionary(dict.id); },
-            }),
-        }, t("dict.delete"))] : [])],
-    });
-}
-
-export function openWordForm(dictId, word) {
-    const dict = store.getDictionary(dictId);
-    const original = textInput(word?.word, "", MAX_TEXT);
-    const translation = textInput(word?.translation, "", MAX_TEXT);
-    const example = textInput(word?.example, "", MAX_EXAMPLE);
-    const error = h("p", { class: "feedback is-wrong", role: "status" });
+// Library translations under the fields: works offline, nothing is sent anywhere.
+function suggestions(dict, target, native, example) {
     const tips = h("div", { class: "tags" });
-    // Translations from the built-in library: works offline, nothing is sent anywhere.
-    const drawTips = (input, side) => {
-        const list = input.value.trim() ? suggest(input.value, side, dict.from, dict.to) : [];
+    const draw = (from, side) => {
+        const list = from.value.trim() ? suggest(from.value, side, dict.from, dict.to) : [];
         tips.replaceChildren(...list.map((pair) => h("button", {
-            class: "tag tag-btn", type: "button",
+            class: "tag tag-btn", type: "button", onPointerdown: (event) => event.preventDefault(),
             onClick: () => {
-                original.value = pair.word;
-                translation.value = pair.translation;
-                if (pair.example) example.value = pair.example;
+                native.value = pair.word;
+                target.value = pair.translation;
+                if (example && pair.example) example.value = pair.example;
                 tips.replaceChildren();
             },
-        }, h("strong", {}, pair.word), ` ${pair.translation}`)));
+        }, h("strong", {}, pair.translation), ` ${pair.word}`)));
     };
-    original.addEventListener("input", () => drawTips(original, "word"));
-    translation.addEventListener("input", () => drawTips(translation, "translation"));
+    target.addEventListener("input", () => draw(target, "translation"));
+    native.addEventListener("input", () => draw(native, "word"));
     loadLibrary();
+    return { tips, clear: () => tips.replaceChildren() };
+}
+
+// Editing one word (a tap on it): the only sheet that opens over a topic.
+export function openWordForm(dictId, word) {
+    const dict = store.getDictionary(dictId);
+    const target = input(word.translation);
+    const native = input(word.word);
+    const example = input(word.example, MAX_EXAMPLE);
+    const error = h("p", { class: "feedback is-wrong", role: "status" });
+    const { tips } = suggestions(dict, target, native, example);
     openModal({
-        title: word ? t("word.edit") : t("word.add"),
+        title: t("word.edit"),
         build: (close) => [form({
             onCancel: close,
             onSubmit: () => {
-                if (!requireValue(original) || !requireValue(translation)) return;
-                const data = { word: original.value.trim(), translation: translation.value.trim(), example: example.value.trim() };
-                const same = (w) => w.id !== word?.id && wordKey(w) === wordKey(data);
+                if (!requireValue(target) || !requireValue(native)) return;
+                const data = { word: native.value.trim(), translation: target.value.trim(), example: example.value.trim() };
+                const same = (w) => w.id !== word.id && wordKey(w) === wordKey(data);
                 error.textContent = store.getDictionary(dictId).words.some(same) ? t("word.duplicate") : "";
                 if (error.textContent) return;
-                if (word) {
-                    store.updateWord(dictId, word.id, data);
-                    close();
-                } else {
-                    // Stay open so several words can be added in a row.
-                    store.addWord(dictId, data);
-                    original.value = translation.value = example.value = "";
-                    tips.replaceChildren();
-                    original.focus();
-                }
+                store.updateWord(dictId, word.id, data);
+                close();
             },
-        }, field(languageName(dict.from, getLocale()), original), field(languageName(dict.to, getLocale()), translation), tips, field(t("word.example"), example), error),
-        ...(word ? [h("button", {
+        }, field(languageName(dict.to, getLocale()), target), field(languageName(dict.from, getLocale()), native), tips, field(t("word.example"), example), error),
+        h("button", {
             class: "btn btn-danger-soft btn-wide form-extra", type: "button",
             onClick: () => confirmModal({
-                title: t("word.deleteTitle"), text: `${word.word} — ${word.translation}`, action: t("common.delete"),
+                title: t("word.deleteTitle"), text: `${word.translation} — ${word.word}`, action: t("common.delete"),
                 onConfirm: () => { close(); store.removeWord(dictId, word.id); },
             }),
-        }, t("word.delete"))] : [])],
+        }, t("word.delete"))],
     });
 }
 
-// Page of one dictionary; redraws the changing parts while open.
-export function openDictionary(dictId) {
-    let close;
-    let filter = "all";
+// Adding a word inside the topic sheet: two fields and a button, the keyboard stays open for the next one.
+function addForm(dictId) {
+    const dict = store.getDictionary(dictId);
+    const target = input("", MAX_TEXT, { class: "input cell-input", placeholder: t("word.targetHint"), autocapitalize: "off" });
+    const native = input("", MAX_TEXT, { class: "input cell-input", placeholder: t("word.nativeHint") });
+    const error = h("p", { class: "feedback is-wrong", role: "status" });
+    const { tips, clear } = suggestions(dict, target, native);
+    const row = (label, field) => h("label", { class: "cell auth-field" }, h("span", { class: "auth-label" }, label), field);
+    return h("form", {
+        class: "add-word", novalidate: true,
+        onSubmit: (event) => {
+            event.preventDefault();
+            if (!requireValue(target) || !requireValue(native)) return;
+            const data = { word: native.value.trim(), translation: target.value.trim(), example: "" };
+            error.textContent = store.getDictionary(dictId).words.some((w) => wordKey(w) === wordKey(data)) ? t("word.duplicate") : "";
+            if (error.textContent) return;
+            store.addWord(dictId, data);
+            target.value = native.value = "";
+            clear();
+            target.focus({ preventScroll: true });
+        },
+    },
+        group(t("word.add"), [row(languageName(dict.to, getLocale()), target), row(languageName(dict.from, getLocale()), native)]),
+        tips, error,
+        // The button does not take the focus: the keyboard stays open and the screen does not jump.
+        h("button", { class: "btn btn-soft btn-wide", type: "submit", onPointerdown: (event) => event.preventDefault() }, icon("plus"), t("word.addAction")));
+}
+
+// The page of one topic; the changing parts redraw while it is open.
+export function openDictionary(dictId, { add = false } = {}) {
     const top = h("div", { class: "stack" });
-    const filters = h("div");
     const list = h("div", { class: "card word-list" });
     const search = h("input", { class: "input", type: "search", placeholder: t("dict.search"), "aria-label": t("dict.search"), onInput: () => drawList() });
+    const searchBox = h("div", {}, search);
+    let close;
 
     const wordRow = (dict, word) => h("div", { class: "row" },
         h("i", { class: `dot is-${getStatus(word.srs)}`, title: t(`status.${getStatus(word.srs)}`) }),
-        h("button", { class: "row-main row-edit", type: "button", "aria-label": `${t("common.edit")}: ${word.word}`, onClick: () => openWordForm(dictId, word) },
-            h("strong", {}, word.word), h("small", { class: "muted" }, word.translation), word.example && h("small", { class: "example" }, word.example)),
-        speakButton(word.translation, dict.to),
-        h("button", {
-            class: `icon-btn ${word.isFavourite ? "is-favourite" : ""}`, type: "button",
-            "aria-label": `${t("word.favourite")}: ${word.word}`, "aria-pressed": String(word.isFavourite),
-            onClick: () => store.updateWord(dictId, word.id, { isFavourite: !word.isFavourite }),
-        }, icon("bookmark")));
+        h("button", { class: "row-main row-edit", type: "button", "aria-label": `${t("common.edit")}: ${word.translation}`, onClick: () => openWordForm(dictId, word) },
+            h("strong", {}, word.translation), h("small", { class: "muted" }, word.word), word.example && h("small", { class: "example" }, word.example)),
+        speakButton(word.translation, dict.to));
 
     function drawList() {
         const dict = store.getDictionary(dictId);
         const query = normalize(search.value);
-        const words = dict.words.filter((w) =>
-            (filter === "all" || getStatus(w.srs) === filter) &&
-            (!query || normalize(w.word).includes(query) || normalize(w.translation).includes(query)));
+        const words = dict.words.filter((w) => !query || normalize(w.word).includes(query) || normalize(w.translation).includes(query));
+        searchBox.hidden = dict.words.length < SEARCH_FROM;
+        list.hidden = !dict.words.length;
         list.replaceChildren(...(words.length
-            ? words.map((word) => wordRow(dict, word))
-            : [h("div", { class: "empty" }, mascot(dict.words.length ? "sad" : "sleepy"), h("p", { class: "muted" }, dict.words.length ? t("dict.notFound") : t("dict.noWords")))]));
+            ? [...words].reverse().map((word) => wordRow(dict, word))
+            : [h("div", { class: "empty" }, mascot("sad"), h("p", { class: "muted" }, t("dict.notFound")))]));
     }
 
     function draw() {
@@ -154,32 +130,34 @@ export function openDictionary(dictId) {
         if (!dict) return close?.();
         const isCurrent = store.getCurrentTopic()?.id === dictId || dict.words.every((w) => w.srs);
         top.replaceChildren(...[
-            dict.description && h("p", { class: "muted" }, dict.description),
-            h("div", { class: "card" }, statusBar(dict.words), statusLegend(dict.words)),
-            h("button", { class: "btn btn-primary btn-wide", type: "button", onClick: () => openWordForm(dictId) }, icon("plus"), t("word.add")),
-            group(null, [
-                !isCurrent && cell({ icon: "play", tint: 1, label: t("dict.use"), chevron: false, onClick: () => store.learnFirst(dictId) }),
-                cell({ icon: "download", tint: 2, label: t("import.title"), onClick: () => openWordImport(dictId) }),
-                dict.words.length > 0 && cell({ icon: "share", tint: 3, label: t("export.title"), onClick: () => exportWords(dict) }),
-            ]),
+            dict.words.length > 0 && h("div", { class: "card" }, statusBar(dict.words), statusLegend(dict.words)),
+            !dict.words.length && dict.mine && h("p", { class: "muted" }, t("dict.mineText")),
+            !isCurrent && dict.words.length > 0 && group(null, [cell({ icon: "play", tint: 1, label: t("dict.use"), sub: t("dict.useText"), chevron: false, onClick: () => store.learnFirst(dictId) })]),
         ].filter(Boolean));
-        filters.replaceChildren(segmented(t("profile.words"),
-            ["all", "new", "learning", "mastered"].map((value) => ({ value, label: t(value === "all" ? "dict.all" : `status.${value}`) })),
-            filter, (value) => { filter = value; draw(); }));
         drawList();
-        const title = top.closest("dialog")?.querySelector(".modal-title");
-        if (title) title.replaceChildren(art(dict.emoji), dict.name);
     }
 
-    draw();
     const dict = store.getDictionary(dictId);
+    const remove = !dict.mine && group(null, [cell({
+        icon: "trash", danger: true, label: t("dict.remove"),
+        onClick: () => confirmModal({
+            title: t("dict.removeTitle"), text: t("dict.removeText", { name: topicName(dict) }), action: t("dict.removeAction"),
+            onConfirm: () => store.removeDictionary(dictId),
+        }),
+    })]);
+    draw();
     const unsubscribe = store.subscribe((type) => type !== "time" && draw());
     close = openModal({
-        title: dict.name,
+        title: topicName(dict),
         emoji: dict.emoji,
         className: "modal-page",
-        actions: [h("button", { class: "icon-btn", type: "button", "aria-label": t("dict.settings"), onClick: () => openDictionaryForm(store.getDictionary(dictId)) }, icon("settings"))],
-        build: () => h("div", { class: "stack" }, top, search, filters, list),
+        build: () => h("div", { class: "stack" }, top, addForm(dictId), searchBox, list, remove),
     });
-    top.closest("dialog").addEventListener("close", unsubscribe);
+    const dialog = top.closest("dialog");
+    dialog.addEventListener("close", unsubscribe);
+    // Synchronously, inside the tap: iOS opens the keyboard only then.
+    if (add) dialog.querySelector(".add-word input").focus();
 }
+
+// "My words" is created the first time it is opened.
+export const openMyWords = (options) => openDictionary(store.ensureMyWords(t("dict.mine")).id, options);

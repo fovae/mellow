@@ -10,7 +10,7 @@ import { openFullscreen } from "./modal.js";
 import { languageName } from "../data/languages.js";
 import { mascot } from "./mascot.js";
 import { icon } from "./icons.js";
-import { speakButton, statTile } from "./parts.js";
+import { speakButton, statTile, topicName } from "./parts.js";
 
 const SWIPE = 90; // px
 
@@ -147,7 +147,7 @@ export function openStudy(scope) {
             onClick: () => { letters++; hint.textContent = hintMask(sides[1].text, letters); },
         }, icon("bulb"), t("study.help"));
         if (word.example) back.append(h("p", { class: "example" }, word.example));
-        if (!scope) front.prepend(h("span", { class: "badge" }, art(dict.emoji), dict.name));
+        if (!scope) front.prepend(h("span", { class: "badge" }, art(dict.emoji), topicName(dict)));
         attachSwipe(card, () => flipped, answer);
         screen.draw(header(), card, hint, help, h("p", { class: "muted session-hint" }, t("study.hint")), h("div", { class: "session-footer" }, show, grades));
         show.focus({ preventScroll: true, focusVisible: false });

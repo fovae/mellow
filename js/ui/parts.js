@@ -6,6 +6,9 @@ import { lastDays } from "../core/dates.js";
 import { canSpeak, speak } from "../core/speech.js";
 import { icon } from "./icons.js";
 
+// "My words" is named in the interface language, library topics keep their own name.
+export const topicName = (dict) => (dict.mine ? t("dict.mine") : dict.name);
+
 export const sessionHeader = (onClose, fill, count = "") => h("header", { class: "session-header" },
     h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), onClick: onClose }, icon("close")),
     h("div", { class: "bar" }, h("div", { class: "bar-fill", style: { width: `${fill * 100}%` } })),

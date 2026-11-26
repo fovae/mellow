@@ -29,7 +29,7 @@ const mocks = {
         h("div", { class: "tm-grades" }, ["again", "hard", "good", "easy"].map((grade) => h("span", { class: `tm-grade tm-grade-${grade} ${grade === "good" ? "is-lit" : ""}` })))),
     topics: () => phone(["dictionaries"],
         h("strong", { class: "tm-title" }, t("tab.dictionaries")),
-        ["👋", "🍎", "✈️"].map((emoji, i) => h("div", { class: "tm-card tm-row", style: { "--i": i } }, h("span", { class: "tm-emoji" }, art(emoji)), h("span", { class: "tm-lines" }, line(`${70 - i * 10}%`), line("35%")))),
+        ["👋", "🍎", "✏️"].map((emoji, i) => h("div", { class: "tm-card tm-row", style: { "--i": i } }, h("span", { class: "tm-emoji" }, art(emoji)), h("span", { class: "tm-lines" }, line(`${70 - i * 10}%`), line("35%")))),
         h("span", { class: "tm-add is-lit" }, icon("plus"))),
     path: () => phone(["cards", "tests"],
         h("div", { class: "tm-path" }, [0, 1, 2, 3].map((i) => h("span", { class: `tm-node ${i === 0 ? "is-done" : i === 1 ? "is-lit" : ""}`, style: { "--i": i } }, i === 0 ? icon("check") : i === 1 ? icon("play") : null)))),

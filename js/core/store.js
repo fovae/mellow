@@ -351,6 +351,14 @@ const createWord = ({ word, translation, example = "" }) => ({
     id: createId(), word, translation, example, misses: 0, isFavourite: false, srs: null,
 });
 
+// "My words": the one topic of a course for the person's own words (mine: true).
+export const getMyWords = (profile = getProfile()) => getDictionaries(profile).find((d) => d.mine);
+
+export function ensureMyWords(name) {
+    const { from, to } = getProfile();
+    return getMyWords() ?? addDictionary({ name, emoji: "✏️", from, to, mine: true });
+}
+
 export function addDictionary({ words = [], ...data }) {
     const dict = { id: createId(), ...data, words: words.map(createWord) };
     state.dictionaries.push(dict);

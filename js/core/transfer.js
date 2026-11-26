@@ -96,6 +96,7 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages 
         from: oneOf(d.from, studyLanguages, "English"),
         to: oneOf(d.to, studyLanguages, "Spanish"),
         ...(typeof d.libraryKey === "string" ? { libraryKey: d.libraryKey.slice(0, 80) } : {}),
+        ...(d.mine === true ? { mine: true } : {}),
         words: d.words.filter((w) => isObject(w) && text(w.word, MAX_TEXT).trim() && text(w.translation, MAX_TEXT).trim()).map((w) => ({
             id: id(w.id),
             word: text(w.word, MAX_TEXT),

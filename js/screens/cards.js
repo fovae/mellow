@@ -10,7 +10,7 @@ import { pathSection } from "../ui/path.js";
 import { emptyHero } from "../ui/hero.js";
 import { openMessage } from "../ui/transfer-modals.js";
 import { openModal } from "../ui/modal.js";
-import { statusBar } from "../ui/parts.js";
+import { statusBar, topicName } from "../ui/parts.js";
 
 function openDifficult() {
     const list = getDifficult();
@@ -23,10 +23,10 @@ function openDifficult() {
 }
 
 // The lessons of any other topic open in a sheet.
-const openTopicPath = (dict) => openModal({ title: dict.name, emoji: dict.emoji, className: "modal-page", build: () => pathSection(dict) });
+const openTopicPath = (dict) => openModal({ title: topicName(dict), emoji: dict.emoji, className: "modal-page", build: () => pathSection(dict) });
 
 const topicRow = (dict) => cell({
-    emoji: dict.emoji, label: dict.name, attrs: { "aria-haspopup": "dialog" }, onClick: () => openTopicPath(dict),
+    emoji: dict.emoji, label: topicName(dict), attrs: { "aria-haspopup": "dialog" }, onClick: () => openTopicPath(dict),
     sub: h("span", { class: "cell-progress" }, statusBar(dict.words), h("small", {}, `${getProgress(dict)}%`)),
 });
 

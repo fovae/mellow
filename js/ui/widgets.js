@@ -13,7 +13,7 @@ import { openLesson } from "./lesson.js";
 import { openLibrary } from "./library-modal.js";
 import { mascot } from "./mascot.js";
 import { navigate } from "./navigation.js";
-import { ring, speakButton } from "./parts.js";
+import { ring, speakButton, topicName } from "./parts.js";
 import { openTest } from "./test-session.js";
 import { openStats } from "./stats.js";
 import { toast } from "./toast.js";
@@ -83,7 +83,7 @@ function lessonWidget(dict) {
         const started = node.words.filter((w) => w.srs).length;
         return widget("wide", { className: "widget-lesson", onClick: () => openLesson(dict.id, node.words.map((w) => w.id)) },
             h("span", { class: "lesson-ring" }, ring(started, node.words.length, icon("play"))),
-            h("span", { class: "widget-text" }, h("small", {}, art(dict.emoji), ` ${dict.name}`), h("strong", {}, t("path.number", { count: node.number })),
+            h("span", { class: "widget-text" }, h("small", {}, art(dict.emoji), ` ${topicName(dict)}`), h("strong", {}, t("path.number", { count: node.number })),
                 h("span", { class: "muted" }, node.words.slice(0, 3).map((w) => w.translation).join(", "))),
             icon("chevron"));
     }

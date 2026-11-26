@@ -10,6 +10,8 @@ const GAP = 12;
 
 const isField = (el) => Boolean(el) && (el.tagName === "TEXTAREA" || el.isContentEditable
     || (el.tagName === "INPUT" && !/^(checkbox|radio|button|submit|range|color|file)$/.test(el.type)));
+// iOS never shrinks the window for the keyboard; there a shorter window is Safari's own bar, not a keyboard.
+const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const calm = () => document.documentElement.dataset.motion === "off" || matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function scroller(el) {
@@ -55,7 +57,7 @@ export function initViewport() {
         // No field in focus: no keyboard; remember the full window height (rotation, browser bars).
         if (!focused) baseHeight = window.innerHeight;
         const keyboard = view ? Math.max(0, window.innerHeight - view.height - view.offsetTop) : 0;
-        const now = focused && (keyboard >= MIN_KB || baseHeight - window.innerHeight >= MIN_KB);
+        const now = focused && (keyboard >= MIN_KB || (!ios && baseHeight - window.innerHeight >= MIN_KB));
         root.style.setProperty("--kb-h", `${now ? Math.round(keyboard) : 0}px`);
         root.style.setProperty("--vvh", `${Math.round(view ? view.height : window.innerHeight)}px`);
         if (now !== open) {
@@ -83,5 +85,7 @@ export function initViewport() {
     });
     // Moving to the next field must not blink.
     document.addEventListener("focusout", () => setTimeout(update, 50));
+    // iOS "Done" hides the keyboard but may leave the field focused: the next resize clears it as well.
+    window.visualViewport?.addEventListener("resize", () => setTimeout(update, 350));
     update();
 }
