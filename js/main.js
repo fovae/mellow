@@ -11,7 +11,7 @@ import { countAll, studyAll } from "./ui/actions.js";
 import { openLibrary } from "./ui/library-modal.js";
 import { continueCourse } from "./ui/profiles.js";
 import { showOnboarding } from "./ui/onboarding.js";
-import { autoSave, checkAccount } from "./ui/account.js";
+import { autoSave, checkAccount, hasServer, isSignedIn, showAuthScreen } from "./ui/account.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
 import { renderCards } from "./screens/cards.js";
@@ -42,7 +42,7 @@ subscribe((type) => {
     if (type === "switch") return;
     if (type === "reset") {
         navigate("home");
-        showOnboarding();
+        startFlow();
     } else if (type === "restore") {
         navigate("home");
         if (!getState().username) showOnboarding();
@@ -84,10 +84,17 @@ playLoader().then(async () => {
         refresh();
     });
     protectStreak();
-    if (getState().username) return runShortcut();
-    await Promise.race([accountChecked, new Promise((resolve) => setTimeout(resolve, 1500))]);
-    if (!getState().username) showOnboarding();
+    // A slow network must not hold the app: without an answer it starts as without a server.
+    await Promise.race([accountChecked, new Promise((resolve) => setTimeout(resolve, 4000))]);
+    if (getState().username && (!hasServer() || isSignedIn())) return runShortcut();
+    startFlow();
 });
+
+// An account comes first (when the server answers), then the first screen when this device has no profile yet.
+async function startFlow() {
+    if (hasServer() && !isSignedIn()) await showAuthScreen();
+    if (!getState().username) showOnboarding();
+}
 
 // A session ends with its dialog; "close" does not bubble.
 document.addEventListener("close", () => setTimeout(continueCourse), true);

@@ -1,7 +1,8 @@
 # Server: accounts and the cloud copy
 
 The app and its API run as one Cloudflare Worker on one origin: static files from the repository root, `/api/*` from `server/`.
-No build step. The app still works without the server (plain static hosting): the account rows are then hidden.
+No build step. An account is required: the sign-in screen comes first whenever the server answers.
+Without an answer (offline at the first start, or plain static hosting) the app starts without it.
 
 ## How it works
 
@@ -12,7 +13,8 @@ No build step. The app still works without the server (plain static hosting): th
 - Session: random 256-bit token in a cookie `__Host-mellow; Secure; HttpOnly; SameSite=Strict`, 180 days; the database keeps only its SHA-256. Up to 10 sessions per user.
 - Changing requests must have `Origin` of the site itself (and `Sec-Fetch-Site: same-origin` when sent): no CSRF.
 - Backup: gzip of the same JSON as the backup file, up to 600 KB. The server keeps the last copy and the one before. Saving: the button, or by itself every 7 days when the app is opened, only on a device that has saved or loaded this account's copy (an empty new device never replaces the cloud copy by itself).
-- After signing in, a cloud copy newer than this device has seen is offered for loading.
+- After signing in, a cloud copy newer than this device has seen loads by itself on an empty device and is offered otherwise.
+- A new profile (after the first screen) is saved at once. Signing out saves first, then clears the device; deleting the account clears it too.
 - Limits: 10 sign-in attempts per minute per IP and per nickname, 3 saves per minute and 20 per day per user;
   for the whole service a day: 1000 sign-ups, 5000 sign-ins, 20,000 saves. Worst case about 53,000 written rows, under D1's free 100,000.
 - Static files get CSP, HSTS, `frame-ancestors 'none'`, `Permissions-Policy: microphone=()` and more from `_headers`. `.assetsignore` keeps `server/`, tests and configs off the site.

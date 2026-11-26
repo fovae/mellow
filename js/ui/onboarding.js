@@ -9,7 +9,7 @@ import { mascot } from "./mascot.js";
 import { openFullscreen } from "./modal.js";
 import { addFirstTopics } from "./profiles.js";
 import { restoreBackup } from "./transfer-modals.js";
-import { hasServer, isSignedIn, openAuth } from "./account.js";
+import { isSignedIn, saveToCloud } from "./account.js";
 
 const guests = ["Mystic Leaf", "Happy Pebble", "Silver Fox", "Cloud Jumper", "Little Fern",
     "Blue Owl", "Calm River", "Sunny Ray", "Night Owl", "Forest Friend"];
@@ -19,7 +19,11 @@ const paces = {
     fast: { newPerDay: 20, dailyGoal: 30 },
 };
 
+let shown = false;
+
 export function showOnboarding() {
+    if (shown) return;
+    shown = true;
     const isNew = !getState().dictionaries.length;
     const native = LIBRARY_LANGUAGES.find((name) => navigator.language?.startsWith(languageCode(name))) ?? "English";
     const draft = { name: "", from: native, to: native === "English" ? "Spanish" : "English", pace: "steady" };
@@ -31,6 +35,7 @@ export function showOnboarding() {
     });
 
     function finish() {
+        shown = false;
         unsubscribe();
         screen.close();
     }
@@ -43,7 +48,8 @@ export function showOnboarding() {
             switchProfile({ from, to });
         }
         setUsername(name.trim() || guests[Math.floor(Math.random() * guests.length)]);
-        if (isNew) addFirstTopics({ from, to });
+        // The new profile with its first topics goes to the cloud at once, not in a week.
+        (isNew ? addFirstTopics({ from, to }) : Promise.resolve()).then(() => isSignedIn() && saveToCloud({ quiet: true }));
     }
 
     // The two languages never match: picking the other one swaps them.
@@ -97,7 +103,6 @@ export function showOnboarding() {
                     options: languages.map((l) => ({ value: l.code, name: l.name })),
                     onPick: (language) => updateSettings({ language }),
                 }),
-                hasServer() && !isSignedIn() && cell({ icon: "cloud", tint: 6, label: t("account.signIn"), sub: t("onboarding.signInNote"), attrs: { "aria-haspopup": "dialog" }, onClick: () => openAuth() }),
                 cell({ icon: "download", tint: 5, label: t("settings.restore"), sub: t("onboarding.restoreNote"), onClick: restoreBackup }),
             ], { foot: t("onboarding.private") }));
         screen.draw(page, h("div", { class: "session-footer" }, h("button", { class: "btn btn-primary", type: "submit", form: "setup" }, t("common.start"))));

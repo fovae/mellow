@@ -1,4 +1,4 @@
-// Accounts end to end, against a running Worker (wrangler dev): see docs/SERVER.md.
+// Accounts end to end, against a running Worker (wrangler dev or the live site): see docs/SERVER.md.
 // MELLOW_URL=http://localhost:8787/ BROWSER=webkit node --test account.test.mjs
 import test, { before, after } from "node:test";
 import assert from "node:assert/strict";
@@ -21,53 +21,52 @@ async function device() {
     return { context, page, problems };
 }
 const me = (page) => page.evaluate(() => fetch("/api/me").then((r) => r.json()));
-const state = (page) => page.evaluate(() => JSON.parse(localStorage.mellow_state));
-const fill = async (page, label, value) => page.getByLabel(label, { exact: true }).fill(value);
+const state = (page) => page.evaluate(() => JSON.parse(localStorage.mellow_state ?? "{}"));
+const authScreen = (page) => page.locator("dialog #auth");
+const submit = (page) => page.locator('dialog button[form="auth"]').click();
 
-test("an account: sign up on one device, load the copy on another, weekly save, delete", { skip: !url && "MELLOW_URL is not set" }, async () => {
+test("accounts: the sign-in screen comes first, sign up, another device, sign out, delete", { skip: !url && "MELLOW_URL is not set" }, async () => {
     const nick = `t${Date.now() % 1e9}`;
     const password = "correct horse 1";
 
-    // First device: the first screen, then the account in settings.
+    // First device: the sign-in screen cannot be skipped.
     const one = await device();
-    await one.page.getByRole("button", { name: "Sign in" }).waitFor();
-    await one.page.fill("dialog .setup-name", "Alex");
-    await one.page.click("dialog .btn-primary");
-    await one.page.waitForFunction(() => JSON.parse(localStorage.mellow_state ?? "{}").dictionaries?.length === 2);
-    await one.page.waitForFunction(() => !document.querySelector("dialog"));
-    await one.page.click(".tab:nth-child(5)");
-    await one.page.locator(".screen.is-active .cell", { hasText: "Account" }).click();
-    await one.page.getByRole("button", { name: "Create an account" }).click();
-    await one.page.getByRole("dialog", { name: "New account" }).waitFor();
-    await fill(one.page, "Nickname (latin letters, digits, _)", nick);
-    await fill(one.page, "New password", "short");
-    await one.page.getByRole("button", { name: "Create account" }).click();
+    await authScreen(one.page).waitFor();
+    await one.page.keyboard.press("Escape");
+    await one.page.keyboard.press("Escape");
+    assert.equal(await authScreen(one.page).count(), 1);
+    await one.page.getByLabel("Nickname").fill(nick);
+    await one.page.getByLabel("Password").fill("short");
+    await submit(one.page);
     await one.page.getByText("Password: at least 8 characters").waitFor();
-    await fill(one.page, "New password", password);
-    await one.page.getByRole("button", { name: "Create account" }).click();
+    await one.page.getByLabel("Password").fill(password);
+    await submit(one.page);
     const code = await one.page.locator(".recovery-code").textContent();
     assert.match(code, /^[A-Z2-9]{4}(-[A-Z2-9]{4}){3}$/);
     await one.page.getByRole("button", { name: "I saved the code" }).click();
+
+    // Then the usual first screen; the new profile goes to the cloud at once.
+    await one.page.locator("dialog .setup-name").fill("Alex");
+    await one.page.click("dialog .session-footer .btn-primary");
+    await one.page.waitForFunction(() => JSON.parse(localStorage.mellow_state ?? "{}").dictionaries?.length === 2);
     await one.page.waitForFunction(() => JSON.parse(localStorage.mellow_account ?? "{}").cloudAt);
+    await one.page.waitForFunction(() => !document.querySelector("dialog"));
     const first = await me(one.page);
     assert.equal(first.nick, nick);
     assert.ok(first.backup.savedAt);
-    // The session cookie is not readable by scripts.
-    assert.equal(await one.page.evaluate(() => document.cookie), "");
+    assert.equal(await one.page.evaluate(() => document.cookie), "", "the session cookie is not readable by scripts");
 
-    // Second device: sign in from the first screen and load the copy.
+    // Second device: sign in; the copy loads by itself, no first screen.
     const two = await device();
-    await two.page.getByRole("button", { name: "Sign in" }).click();
-    await two.page.getByRole("dialog", { name: "Sign in" }).waitFor();
-    await fill(two.page, "Nickname (latin letters, digits, _)", nick);
-    await fill(two.page, "Password", "wrong password");
-    await two.page.getByRole("button", { name: "Sign in", exact: true }).last().click();
+    await authScreen(two.page).waitFor();
+    await two.page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await two.page.getByLabel("Nickname").fill(nick);
+    await two.page.getByLabel("Password").fill("wrong password");
+    await submit(two.page);
     await two.page.getByText("Wrong nickname or password").waitFor();
     two.problems.length = 0; // the browser logs that 401 by itself
-    await fill(two.page, "Password", password);
-    await two.page.getByRole("button", { name: "Sign in", exact: true }).last().click();
-    await two.page.getByText("Load the copy from the cloud?").waitFor();
-    await two.page.getByRole("button", { name: "Restore", exact: true }).click();
+    await two.page.getByLabel("Password").fill(password);
+    await submit(two.page);
     await two.page.waitForFunction(() => JSON.parse(localStorage.mellow_state ?? "{}").username === "Alex");
     await two.page.waitForFunction(() => !document.querySelector("dialog[open]"));
     const [a, b] = [await state(one.page), await state(two.page)];
@@ -84,18 +83,24 @@ test("an account: sign up on one device, load the copy on another, weekly save, 
     assert.ok(second.backup.savedAt > first.backup.savedAt);
     assert.equal(second.backup.previousAt, first.backup.savedAt);
 
-    // "Reset all data" unlinks the device: its empty state is not saved over the cloud copy by itself.
-    await two.page.evaluate(async () => (await import("/js/core/store.js")).resetAll());
-    assert.equal(await two.page.evaluate(() => JSON.parse(localStorage.mellow_account).linked), false);
+    // Signing out saves, clears this device and shows the sign-in screen again.
+    await two.page.click(".tab:nth-child(5)");
+    await two.page.locator(".screen.is-active .cell", { hasText: "Account" }).click();
+    await two.page.getByRole("button", { name: "Sign out" }).click();
+    await two.page.locator("dialog .btn-danger").click();
+    await authScreen(two.page).waitFor();
+    assert.ok(!(await state(two.page)).username, "words left the device");
+    assert.equal((await me(two.page)).nick, null);
 
-    // Delete from the first device: the second one is signed out too.
+    // Deleting the account on the first device: everything goes, the sign-in screen is back.
+    await one.page.click(".tab:nth-child(5)");
     await one.page.locator(".screen.is-active .cell", { hasText: "Account" }).click();
     await one.page.getByRole("button", { name: "Delete account" }).click();
-    await fill(one.page, "Password", password);
+    await one.page.locator("dialog").last().getByLabel("Password").fill(password);
     await one.page.locator("dialog .btn-danger").click();
-    await one.page.getByText("Account deleted").waitFor();
-    assert.equal((await me(two.page)).nick, null);
+    await authScreen(one.page).waitFor();
     assert.equal(await one.page.evaluate(() => localStorage.getItem("mellow_account")), null);
+    assert.ok(!(await state(one.page)).username, "words left the device");
 
     await one.context.close();
     await two.context.close();

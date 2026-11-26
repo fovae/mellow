@@ -7,7 +7,7 @@ mascot, sounds. Splash where Mello wakes up, one-page first screen (name, langua
 dictionaries and words (search, filters, speech, examples, translation suggestions), spaced repetition with undo, swipes,
 hints and keyboard, mixed review, difficult words, tests (choice, typing, listening, hints), games (pairs, phrase, sprint), advice, word and tip of the day,
 achievements, daily goal, streak, statistics, grouped settings (languages, sounds, speech speed, animations, backup reminder), light/dark/auto theme, EN/RU, offline, import/export, backup, icon badge.
-Optional account (nickname and password, recovery code) with a cloud copy: by the button or every 7 days, offered after signing in on another device; Cloudflare Worker + D1 (docs/SERVER.md). Live at https://mellow.fovae.workers.dev.
+Required account (sign-in screen first: nickname and password, recovery code) with a cloud copy: by the button, after the first screen, before signing out and every 7 days; loads by itself on another device; Cloudflare Worker + D1 (docs/SERVER.md). Live at https://mellow.fovae.workers.dev.
 
 ## Next candidates
 
