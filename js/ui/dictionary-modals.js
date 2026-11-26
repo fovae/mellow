@@ -61,7 +61,7 @@ export function openWordForm(dictId, word) {
                 store.updateWord(dictId, word.id, data);
                 close();
             },
-        }, field(languageName(dict.to, getLocale()), target), field(languageName(dict.from, getLocale()), native), tips, field(t("word.example"), example), error),
+        }, field(languageName(dict.from, getLocale()), native), field(languageName(dict.to, getLocale()), target), tips, field(t("word.example"), example), error),
         h("button", {
             class: "btn btn-danger-soft btn-wide form-extra", type: "button",
             onClick: () => confirmModal({
@@ -75,8 +75,8 @@ export function openWordForm(dictId, word) {
 // Adding a word inside the topic sheet: two fields and a button, the keyboard stays open for the next one.
 function addForm(dictId) {
     const dict = store.getDictionary(dictId);
-    const target = input("", MAX_TEXT, { class: "input cell-input", placeholder: t("word.targetHint"), autocapitalize: "off" });
     const native = input("", MAX_TEXT, { class: "input cell-input", placeholder: t("word.nativeHint") });
+    const target = input("", MAX_TEXT, { class: "input cell-input", placeholder: t("word.targetHint"), autocapitalize: "off" });
     const error = h("p", { class: "feedback is-wrong", role: "status" });
     const { tips, clear } = suggestions(dict, target, native);
     const row = (label, field) => h("label", { class: "cell auth-field" }, h("span", { class: "auth-label" }, label), field);
@@ -91,10 +91,10 @@ function addForm(dictId) {
             store.addWord(dictId, data);
             target.value = native.value = "";
             clear();
-            target.focus({ preventScroll: true });
+            native.focus({ preventScroll: true });
         },
     },
-        group(t("word.add"), [row(languageName(dict.to, getLocale()), target), row(languageName(dict.from, getLocale()), native)]),
+        group(t("word.add"), [row(languageName(dict.from, getLocale()), native), row(languageName(dict.to, getLocale()), target)]),
         tips, error,
         // The button does not take the focus: the keyboard stays open and the screen does not jump.
         h("button", { class: "btn btn-soft btn-wide", type: "submit", onPointerdown: (event) => event.preventDefault() }, icon("plus"), t("word.addAction")));

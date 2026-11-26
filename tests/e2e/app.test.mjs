@@ -99,7 +99,7 @@ test("add a word with a suggestion", async () => {
     await active(".widget").filter({ hasText: "Add word" }).click();
     // It opens "My words" with the field in focus, ready to type.
     assert.ok(await page.evaluate(() => document.activeElement.closest(".add-word") !== null));
-    await page.locator("dialog .add-word input").nth(1).fill("dog");
+    await page.locator("dialog .add-word input").nth(0).fill("dog");
     await page.click("dialog .tag-btn");
     await page.click('dialog .add-word [type="submit"]');
     const mine = (await state()).dictionaries.find((d) => d.mine);
@@ -199,8 +199,8 @@ test("user text is never parsed as HTML", async () => {
     await start();
     await tab(2);
     await active(".dict-card").first().click();
-    await page.locator("dialog .add-word input").nth(0).fill("<b>x</b>");
-    await page.locator("dialog .add-word input").nth(1).fill("<img src=x onerror=window.hacked=1>");
+    await page.locator("dialog .add-word input").nth(1).fill("<b>x</b>");
+    await page.locator("dialog .add-word input").nth(0).fill("<img src=x onerror=window.hacked=1>");
     await page.click('dialog .add-word [type="submit"]');
     await page.waitForTimeout(300);
     assert.equal(await page.evaluate(() => window.hacked), undefined);

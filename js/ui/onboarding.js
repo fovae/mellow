@@ -99,8 +99,8 @@ export function showOnboarding() {
                 }),
             ], { foot: t("onboarding.private") }),
             isNew && group(t("onboarding.languages"), [
-                languageRow("to", "from", t("library.target")),
                 languageRow("from", "to", t("library.native")),
+                languageRow("to", "from", t("library.target")),
                 paceControl(),
             ], { foot: t("onboarding.auto") }),
             hasCloudCopy() && group(null, [cell({ icon: "cloud", tint: 6, label: t("account.load"), sub: t("onboarding.cloudNote"), attrs: { "aria-haspopup": "dialog" }, onClick: loadFromCloud })]));
