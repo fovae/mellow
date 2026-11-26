@@ -23,8 +23,8 @@
 .setup > * { flex: none; }
 .setup-head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .setup-head .screen-title { outline: none; }
-.setup-name { min-height: 44px; padding: 0; border: 0; border-radius: 0; background: none; }
-.setup-name:focus { outline: none; }
+.input.setup-name { min-height: 44px; padding: 0; border: 0; border-radius: 0; background: none; }
+.input.setup-name:focus { border: 0; outline: none; }
 .cell:has(> .setup-name:focus) { box-shadow: inset 0 0 0 2px var(--accent); border-radius: var(--radius); }
 .empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 16px; text-align: center; }
 

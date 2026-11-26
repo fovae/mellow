@@ -388,4 +388,5 @@ export default {
     "account.error.server": "Что-то пошло не так. Попробуй позже.",
     "backup.textCloud": "Можно также сохранить копию в файл и хранить где угодно.",
     "onboarding.signInNote": "Загрузить копию из облака",
+    "exercise.into": "Переведи на {language}",
 };

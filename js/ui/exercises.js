@@ -7,6 +7,12 @@ import { play } from "../core/sound.js";
 import { speak } from "../core/speech.js";
 import { getState } from "../core/store.js";
 import { languageCode, languageName } from "../data/languages.js";
+
+// The label says which language the answer is in: the word shown is in the other one.
+const into = (language) => {
+    const name = languageName(language, getLocale());
+    return t("exercise.into", { language: getLocale() === "ru" ? name.toLowerCase() : name });
+};
 import { icon } from "./icons.js";
 
 export const autoSpeak = (text, dict) => getState().settings.autoSpeak && speak(text, dict.to);
@@ -82,7 +88,7 @@ export function questionExercise({ question, mode, reverse, dict, onAnswer, onNe
     if (listen) playPrompt();
     return [
         h("div", { class: "question" },
-            h("span", { class: "flashcard-label" }, languageName(reverse ? dict.from : dict.to, getLocale())),
+            h("span", { class: "flashcard-label" }, into(reverse ? dict.from : dict.to)),
             listen && h("button", { class: "listen-btn", type: "button", "aria-label": t("common.listen"), onClick: playPrompt }, icon("sound")), word),
         body, feedback, help, footer,
     ];
@@ -119,7 +125,7 @@ export function sentenceExercise({ sentence, dict, onAnswer, onNext }) {
     }
     draw();
     return [
-        h("div", { class: "question" }, h("span", { class: "flashcard-label" }, languageName(dict.to, getLocale())), h("h2", { class: "question-word sentence-prompt" }, sentence.prompt)),
+        h("div", { class: "question" }, h("span", { class: "flashcard-label" }, into(dict.to)), h("h2", { class: "question-word sentence-prompt" }, sentence.prompt)),
         line, bank, feedback, h("div", { class: "session-footer" }, action),
     ];
 }

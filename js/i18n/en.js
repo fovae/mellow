@@ -388,4 +388,5 @@ export default {
     "account.error.server": "Something went wrong. Try later.",
     "backup.textCloud": "You can also save a copy to a file and keep it anywhere.",
     "onboarding.signInNote": "Load your copy from the cloud",
+    "exercise.into": "Translate into {language}",
 };

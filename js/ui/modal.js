@@ -15,7 +15,8 @@ export function openModal({ title, emoji, build, dismissible = true, className =
         setTimeout(() => dialog.close(), calmMotion() ? 0 : 180);
     };
 
-    dialog.append(h("div", { class: "modal-panel" },
+    // tabindex: the sheet itself takes focus on opening, not its first button (no focus ring after a tap).
+    dialog.append(h("div", { class: "modal-panel", tabindex: "-1" },
         dismissible && h("span", { class: "modal-grip", "aria-hidden": "true" }),
         h("header", { class: "modal-header" },
             h("h2", { class: "modal-title" }, emoji && art(emoji), title),
@@ -41,6 +42,7 @@ export function openModal({ title, emoji, build, dismissible = true, className =
 
     document.body.append(dialog);
     dialog.showModal();
+    dialog.firstElementChild.focus({ preventScroll: true });
     return close;
 }
 

@@ -6,7 +6,8 @@
 :root {
     --app-height: 100svh;
     --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    /* --bottom-gap (js/core/viewport.js): space the system already keeps below the window, or the keyboard. */
+    --safe-bottom: max(0px, calc(env(safe-area-inset-bottom, 0px) - var(--bottom-gap, 0px)));
     --font: "Manrope", system-ui, -apple-system, "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", sans-serif;
     --ease: cubic-bezier(.4, 0, .2, 1);
     --ease-out: cubic-bezier(.25, .75, .3, 1);
@@ -27,6 +28,8 @@
     --danger-soft: #fdeceb;
     --success: #15763a;
     --success-soft: #e3f6ea;
+    --warning: #9a5b00;
+    --warning-soft: #fff1dc;
     --shadow: 0 8px 28px rgba(30, 34, 80, .07);
 }
 
@@ -44,6 +47,8 @@
     --danger-soft: #3a1f22;
     --success: #6ee09a;
     --success-soft: #16321f;
+    --warning: #f5b35a;
+    --warning-soft: #3a2a14;
     --shadow: none;
 }
 

@@ -79,7 +79,7 @@ export function showOnboarding() {
         const scrollTop = screen.body.querySelector(".setup")?.scrollTop ?? 0;
         const name = h("input", {
             class: "input setup-name", placeholder: t("onboarding.placeholder"), "aria-label": t("onboarding.text"),
-            autocomplete: "given-name", maxlength: 30, value: draft.name, onInput: () => { draft.name = name.value; },
+            autocomplete: "off", maxlength: 30, value: draft.name, onInput: () => { draft.name = name.value; },
         });
         const locale = getLocale();
         const title = h("h1", { class: "screen-title", tabindex: "-1" }, t("onboarding.title"));
