@@ -1,5 +1,5 @@
 // Bump the version whenever the file list changes.
-const CACHE = "mellow-v16";
+const CACHE = "mellow-v17";
 const ASSETS = [
     "./",
     "./css/art.css",
@@ -11,6 +11,7 @@ const ASSETS = [
     "./css/loader.css",
     "./css/play.css",
     "./css/themes.css",
+    "./css/tour.css",
     "./css/widgets.css",
     "./fonts/manrope-cyrillic-ext.woff2",
     "./fonts/manrope-cyrillic.woff2",
@@ -84,6 +85,7 @@ const ASSETS = [
     "./js/ui/study.js",
     "./js/ui/test-session.js",
     "./js/ui/toast.js",
+    "./js/ui/tour.js",
     "./js/ui/transfer-modals.js",
     "./js/ui/widgets.js",
     "./manifest.json",

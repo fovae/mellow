@@ -46,11 +46,14 @@ test("accounts: the sign-in screen comes first, sign up, another device, sign ou
     await one.page.getByRole("button", { name: "I saved the code" }).click();
 
     // Then the usual first screen; the new profile goes to the cloud at once.
-    await one.page.locator("dialog .setup-name").fill("Alex");
+    // No name field: the name is the nickname. The guide follows.
+    assert.equal(await one.page.locator("dialog #setup input").count(), 0);
     await one.page.click("dialog .session-footer .btn-primary");
     await one.page.waitForFunction(() => JSON.parse(localStorage.mellow_state ?? "{}").dictionaries?.length === 2);
     await one.page.waitForFunction(() => JSON.parse(localStorage.mellow_account ?? "{}").cloudAt);
+    await one.page.click("dialog .tour-skip");
     await one.page.waitForFunction(() => !document.querySelector("dialog"));
+    assert.equal((await state(one.page)).username, nick);
     const first = await me(one.page);
     assert.equal(first.nick, nick);
     assert.ok(first.backup.savedAt);
@@ -67,7 +70,7 @@ test("accounts: the sign-in screen comes first, sign up, another device, sign ou
     two.problems.length = 0; // the browser logs that 401 by itself
     await two.page.getByLabel("Password").fill(password);
     await submit(two.page);
-    await two.page.waitForFunction(() => JSON.parse(localStorage.mellow_state ?? "{}").username === "Alex");
+    await two.page.waitForFunction((name) => JSON.parse(localStorage.mellow_state ?? "{}").username === name, nick);
     await two.page.waitForFunction(() => !document.querySelector("dialog[open]"));
     const [a, b] = [await state(one.page), await state(two.page)];
     assert.deepEqual(b.dictionaries.map((d) => d.words.length), a.dictionaries.map((d) => d.words.length));

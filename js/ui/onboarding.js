@@ -1,4 +1,5 @@
-// The first screen: name, languages and pace on one page.
+// The first screen after signing in: the app language first, then what to learn and the pace.
+// The name comes from the nickname; it can be changed in the profile.
 import { h } from "../core/dom.js";
 import { t, getLocale, languages } from "../core/i18n.js";
 import { LIBRARY_LANGUAGES } from "../core/library.js";
@@ -8,8 +9,8 @@ import { cell, choiceCell, group } from "./cells.js";
 import { mascot } from "./mascot.js";
 import { openFullscreen } from "./modal.js";
 import { addFirstTopics } from "./profiles.js";
-import { restoreBackup } from "./transfer-modals.js";
-import { isSignedIn, saveToCloud } from "./account.js";
+import { hasCloudCopy, isSignedIn, loadFromCloud, nickname, saveToCloud } from "./account.js";
+import { showTour } from "./tour.js";
 
 const guests = ["Mystic Leaf", "Happy Pebble", "Silver Fox", "Cloud Jumper", "Little Fern",
     "Blue Owl", "Calm River", "Sunny Ray", "Night Owl", "Forest Friend"];
@@ -26,7 +27,7 @@ export function showOnboarding() {
     shown = true;
     const isNew = !getState().dictionaries.length;
     const native = LIBRARY_LANGUAGES.find((name) => navigator.language?.startsWith(languageCode(name))) ?? "English";
-    const draft = { name: "", from: native, to: native === "English" ? "Spanish" : "English", pace: "steady" };
+    const draft = { from: native, to: native === "English" ? "Spanish" : "English", pace: "steady" };
     // There is nothing behind this screen yet, so Escape does not close it.
     const screen = openFullscreen(t("onboarding.title"), (event) => event.key === "Escape" && event.preventDefault(), () => {});
     const unsubscribe = subscribe((type) => {
@@ -41,15 +42,17 @@ export function showOnboarding() {
     }
 
     function save() {
-        const { name, from, to, pace } = draft;
+        const { from, to, pace } = draft;
         finish();
         if (isNew) {
             updateSettings(paces[pace], "switch");
             switchProfile({ from, to });
         }
-        setUsername(name.trim() || guests[Math.floor(Math.random() * guests.length)]);
+        setUsername(nickname() || guests[Math.floor(Math.random() * guests.length)]);
         // The new profile with its first topics goes to the cloud at once, not in a week.
         (isNew ? addFirstTopics({ from, to }) : Promise.resolve()).then(() => isSignedIn() && saveToCloud({ quiet: true }));
+        // Then the guide: where things are in Mellow.
+        setTimeout(showTour, 400);
     }
 
     // The two languages never match: picking the other one swaps them.
@@ -83,31 +86,26 @@ export function showOnboarding() {
 
     function draw() {
         const scrollTop = screen.body.querySelector(".setup")?.scrollTop ?? 0;
-        const name = h("input", {
-            class: "input setup-name", placeholder: t("onboarding.placeholder"), "aria-label": t("onboarding.text"),
-            autocomplete: "off", maxlength: 30, value: draft.name, onInput: () => { draft.name = name.value; },
-        });
         const locale = getLocale();
-        const title = h("h1", { class: "screen-title", tabindex: "-1" }, t("onboarding.title"));
+        const name = nickname();
+        const title = h("h1", { class: "screen-title", tabindex: "-1" }, name ? t("onboarding.hello", { name }) : t("onboarding.title"));
         const page = h("form", { class: "setup", id: "setup", onSubmit: (event) => { event.preventDefault(); save(); } },
             h("header", { class: "setup-head" }, mascot("happy", "mascot-large"), title, h("p", { class: "muted" }, t("onboarding.intro"))),
-            group(t("onboarding.text"), [h("div", { class: "cell" }, name)], { foot: t("onboarding.nameNote") }),
-            isNew && group(t("onboarding.languages"), [
-                languageRow("to", "from", t("library.target")),
-                languageRow("from", "to", t("library.native")),
-                paceControl(),
-            ], { foot: t("onboarding.auto") }),
             group(t("onboarding.app"), [
                 choiceCell({
                     icon: "text", tint: 4, label: t("profile.language"), value: locale,
                     options: languages.map((l) => ({ value: l.code, name: l.name })),
                     onPick: (language) => updateSettings({ language }),
                 }),
-                cell({ icon: "download", tint: 5, label: t("settings.restore"), sub: t("onboarding.restoreNote"), onClick: restoreBackup }),
-            ], { foot: t("onboarding.private") }));
+            ], { foot: t("onboarding.private") }),
+            isNew && group(t("onboarding.languages"), [
+                languageRow("to", "from", t("library.target")),
+                languageRow("from", "to", t("library.native")),
+                paceControl(),
+            ], { foot: t("onboarding.auto") }),
+            hasCloudCopy() && group(null, [cell({ icon: "cloud", tint: 6, label: t("account.load"), sub: t("onboarding.cloudNote"), attrs: { "aria-haspopup": "dialog" }, onClick: loadFromCloud })]));
         screen.draw(page, h("div", { class: "session-footer" }, h("button", { class: "btn btn-primary", type: "submit", form: "setup" }, t("common.start"))));
         page.scrollTop = scrollTop;
-        // Not the name field: the keyboard must not open by itself. Focus stays on the screen after a redraw.
         if (!scrollTop || !screen.body.contains(document.activeElement)) title.focus({ preventScroll: true, focusVisible: false });
     }
 

@@ -52,10 +52,11 @@ afterEach(async () => {
 const state = () => page.evaluate(() => JSON.parse(localStorage.mellow_state));
 const tab = (index) => page.click(`.tab:nth-child(${index})`);
 const active = (selector) => page.locator(`.screen.is-active ${selector}`);
+// The first screen, then the guide that follows it (skipped).
 async function start() {
-    await page.fill("dialog input", "Alex");
-    await page.click("dialog .btn-primary");
+    await page.click("dialog .session-footer .btn-primary");
     await page.waitForFunction(() => JSON.parse(localStorage.mellow_state ?? "{}").dictionaries?.length === 2);
+    await page.click("dialog .tour-skip");
     await page.waitForFunction(() => !document.querySelector("dialog"));
 }
 
@@ -333,7 +334,8 @@ test("a module that failed once does not leave an empty page", async () => {
 });
 
 test("the first screen: languages never match, pace and interface language are kept", async () => {
-    await page.fill("dialog input", "Alex");
+    assert.equal(await page.locator("dialog input").count(), 0, "no name field: the name is the nickname");
+    await page.locator("dialog .screen-title", { hasText: "Hi, tester!" }).waitFor();
     await page.click('dialog .cell:has-text("I learn")');
     await page.locator("dialog").last().locator('[data-value="English"]').click();
     await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
@@ -341,13 +343,18 @@ test("the first screen: languages never match, pace and interface language are k
     await page.click('dialog .cell:has-text("App language")');
     await page.locator("dialog").last().locator('[data-value="ru"]').click();
     await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
-    assert.equal(await page.inputValue("dialog input"), "Alex");
     // Escape must not close the first screen, even when focus has fallen to <body>.
     await page.evaluate(() => document.activeElement.blur());
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
-    await page.click("dialog .btn-primary");
+    await page.click("dialog .session-footer .btn-primary");
     await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries.length === 2);
     const { username, settings } = await state();
-    assert.deepEqual([username, settings.native, settings.target, settings.newPerDay, settings.dailyGoal, settings.language], ["Alex", "Spanish", "English", 5, 10, "ru"]);
+    assert.deepEqual([username, settings.native, settings.target, settings.newPerDay, settings.dailyGoal, settings.language], ["tester", "Spanish", "English", 5, 10, "ru"]);
+    // The guide follows the first screen: forward, back, then "Start learning" on the last story.
+    await page.locator("dialog .tour").waitFor();
+    for (let i = 0; i < 4; i++) await page.click("dialog .tour .session-footer .btn-primary");
+    await page.locator("dialog .tour-title", { hasText: "облаке" }).waitFor();
+    await page.click("dialog .tour .session-footer .btn-primary");
+    await page.waitForFunction(() => !document.querySelector("dialog"));
 });

@@ -1,4 +1,4 @@
-.main { position: relative; width: 100%; max-width: 600px; height: var(--app-height); margin: 0 auto; opacity: 0; transition: opacity .6s var(--ease); }
+.main { position: relative; width: 100%; max-width: 600px; height: 100%; margin: 0 auto; opacity: 0; transition: opacity .6s var(--ease); }
 .is-ready .main { opacity: 1; }
 
 .screen { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
@@ -20,6 +20,7 @@
 .screen-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
 .screen-header > div:first-child { min-width: 0; }
 .eyebrow { font-size: .78rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.screen-title .gradient-text { hyphens: manual; }
 .screen-title { margin-top: 6px; font-size: 1.9rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.2; hyphens: auto; overflow-wrap: anywhere; }
 
 /* Glass capsule */

@@ -1,9 +1,8 @@
 import { h } from "../core/dom.js";
 import { t } from "../core/i18n.js";
-import { dayKey } from "../core/dates.js";
 import * as store from "../core/store.js";
 import { MAX_WORDS, parseWords, toCSV } from "../core/transfer.js";
-import { openModal, confirmModal, requireValue } from "./modal.js";
+import { openModal, requireValue } from "./modal.js";
 import { pickFile, safeName, saveFile } from "./files.js";
 import { icon } from "./icons.js";
 
@@ -60,23 +59,3 @@ export function openWordImport(dictId) {
 
 export const exportWords = (dict) => saveFile(`${safeName(dict.name)}.csv`, "text/csv", toCSV(dict.words));
 
-export async function saveBackup() {
-    if (await saveFile(`mellow-${dayKey()}.json`, "application/json", store.getBackup())) store.markBackup();
-}
-
-export function restoreBackup() {
-    pickFile(".json,application/json", (text) => {
-        const next = text === null ? null : store.readBackup(text);
-        if (!next) return openMessage(t("backup.restore"), t("backup.invalid"));
-        confirmModal({
-            title: t("backup.restoreTitle"),
-            text: t("backup.restoreText", {
-                name: next.username || "—",
-                dictionaries: next.dictionaries.length,
-                words: next.dictionaries.reduce((sum, d) => sum + d.words.length, 0),
-            }),
-            action: t("backup.restore"),
-            onConfirm: () => store.restore(next),
-        });
-    });
-}

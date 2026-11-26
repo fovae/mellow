@@ -70,10 +70,14 @@ export function accountRows() {
     return [
         cell({ icon: "cloud", tint: 6, label: t("account.title"), sub: me.nick, attrs: { "aria-haspopup": "dialog" }, onClick: openAccount }),
         cell({ icon: "share", tint: 4, label: t("account.save"), sub: me.backup ? date(me.backup.savedAt) : t("backup.never"), onClick: () => saveToCloud() }),
-    ];
+        me.backup && cell({ icon: "download", tint: 5, label: t("account.load"), sub: date(me.backup.savedAt), attrs: { "aria-haspopup": "dialog" }, onClick: () => offerRestore() }),
+    ].filter(Boolean);
 }
 
 export const isSignedIn = () => Boolean(me);
+export const nickname = () => me?.nick ?? api.getLocal()?.nick ?? "";
+export const hasCloudCopy = () => Boolean(me?.backup);
+export const loadFromCloud = () => offerRestore();
 export const hasServer = () => available === true;
 
 // A form in a sheet: fields, a line for errors and one button. submit() may throw an ApiError.
@@ -156,7 +160,7 @@ export function showAuthScreen(mode = "signup") {
                     }
                 },
             },
-                h("header", { class: "setup-head" }, mascot("happy", "mascot-large"),
+                h("header", { class: "setup-head" }, mascot("happy", "mascot-large mascot-auth"),
                     h("h1", { class: "screen-title", tabindex: "-1" }, t("auth.title")), h("p", { class: "muted" }, t(`auth.intro.${mode}`))),
                 tabs,
                 group(null, [
@@ -164,9 +168,9 @@ export function showAuthScreen(mode = "signup") {
                     mode === "recover" && row(t("auth.code"), code),
                     row(t(mode === "login" ? "auth.password" : "auth.newPassword"), password),
                 ], { foot: { signup: t("account.signupNote"), login: "", recover: t("account.recoverNote") }[mode] }),
-                error,
-                h("button", { class: "link-btn", type: "button", onClick: go(mode === "recover" ? "login" : "recover") }, t(mode === "recover" ? "auth.back" : "account.to.recover")));
-            screen.draw(page, h("div", { class: "session-footer" }, button));
+                error);
+            screen.draw(page, h("div", { class: "session-footer auth-footer" }, button,
+                h("button", { class: "link-btn", type: "button", onClick: go(mode === "recover" ? "login" : "recover") }, t(mode === "recover" ? "auth.back" : "account.to.recover"))));
             page.querySelector(".screen-title").focus({ preventScroll: true, focusVisible: false });
         }
 

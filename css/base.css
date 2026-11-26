@@ -4,10 +4,10 @@
 @font-face { font-family: "Manrope"; font-weight: 200 800; font-display: swap; src: url("../fonts/manrope-cyrillic.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 
 :root {
-    --app-height: 100svh;
+    --kb-h: 0px; /* js/core/viewport.js: the keyboard, while it is open */
+    --vvh: 100dvh; /* the visible height */
     --safe-top: env(safe-area-inset-top, 0px);
-    /* --bottom-gap (js/core/viewport.js): space the system already keeps below the window, or the keyboard. */
-    --safe-bottom: max(0px, calc(env(safe-area-inset-bottom, 0px) - var(--bottom-gap, 0px)));
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
     --font: "Manrope", system-ui, -apple-system, "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", sans-serif;
     --ease: cubic-bezier(.4, 0, .2, 1);
     --ease-out: cubic-bezier(.25, .75, .3, 1);
@@ -55,6 +55,19 @@
 * { box-sizing: border-box; }
 
 html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+/* iOS 26+ home-screen app: while the page is shorter than the screen, iOS gives a window shorter than the
+   screen by the status bar and draws nothing below it (WebKit 301108): the tab bar stood too high with an
+   empty strip under it. A page as tall as the screen gets the whole window from the first frame.
+   100lvh is the only unit equal to the full height then; min() keeps 100% when the window is already full.
+   html[data-standalone] comes from js/boot.js in case display-mode does not match on iOS. Same as Training. */
+@supports (height: 100lvh) {
+    html[data-standalone], html[data-standalone] body { min-height: min(100lvh, calc(100% + var(--safe-top))); }
+    @media (display-mode: standalone) {
+        html, body { min-height: min(100lvh, calc(100% + var(--safe-top))); }
+    }
+}
+/* While the keyboard is open the field must not slide under a sheet's bottom padding. */
+html[data-kb] { --safe-bottom: 0px; }
 
 body {
     background: var(--page);

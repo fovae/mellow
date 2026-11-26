@@ -9,8 +9,9 @@ import { play } from "../core/sound.js";
 import { canSpeak, speak } from "../core/speech.js";
 import { screenHeader } from "../ui/navigation.js";
 import { openModal, confirmModal, form, field, requireValue } from "../ui/modal.js";
-import { saveBackup, restoreBackup } from "../ui/transfer-modals.js";
-import { accountRows, isSignedIn } from "../ui/account.js";
+import { accountRows } from "../ui/account.js";
+import { showTour } from "../ui/tour.js";
+import { AUTO_DAYS } from "../core/account.js";
 import { cell, choiceCell, group } from "../ui/cells.js";
 import { dropsChip, openAccents, openShop } from "../ui/rewards.js";
 import { icon } from "../ui/icons.js";
@@ -84,7 +85,7 @@ const toggle = (key, rest, onChange) => cell({
 const choose = (key, rest, options) => choiceCell({ ...rest, options, value: getState().settings[key], onPick: set(key) });
 
 export function renderProfile() {
-    const { settings, lastBackup, drops } = getState();
+    const { settings, drops } = getState();
     const list = badges();
     const sample = () => speak(t("settings.speechSample"), getLocale() === "ru" ? "Russian" : "English");
 
@@ -121,21 +122,14 @@ export function renderProfile() {
             choose("language", { icon: "text", tint: 3, label: t("profile.language") }, languages.map(({ code, name }) => ({ value: code, name }))),
             toggle("motion", { icon: "spark", tint: 4, label: t("settings.motion") }),
         ]),
-        group(t("profile.data"), [
-            ...accountRows(),
-            cell({
-                icon: "share", tint: 1, label: t("settings.backup"), onClick: saveBackup,
-                sub: lastBackup ? new Date(lastBackup).toLocaleDateString(getLocale(), { day: "numeric", month: "long", year: "numeric" }) : t("backup.never"),
-            }),
-            cell({ icon: "download", tint: 2, label: t("settings.restore"), onClick: restoreBackup }),
-            toggle("backupReminder", { icon: "bell", tint: 3, label: t("settings.backupReminder") }),
-        ], { foot: t(isSignedIn() ? "backup.textCloud" : "backup.text") }),
+        accountRows().length && group(t("profile.data"), accountRows(), { foot: t("account.autoNote", { count: AUTO_DAYS }) }),
         group(null, [cell({
             icon: "trash", danger: true, label: t("profile.reset"),
             onClick: () => confirmModal({ title: t("profile.resetTitle"), text: t("profile.resetText"), action: t("common.delete"), onConfirm: resetAll }),
         })]),
         group(t("settings.contacts"), CONTACTS.map(({ id, name, handle, href }, i) => cell({ icon: id, tint: i + 1, label: name, value: handle, href })), { foot: t("settings.contactsNote") }),
         group(t("profile.about"), [
+            cell({ icon: "bulb", tint: 4, label: t("tour.open"), attrs: { "aria-haspopup": "dialog" }, onClick: showTour }),
             cell({ icon: "shield", tint: 1, label: t("profile.privacy"), href: "privacy.html" }),
             cell({ icon: "layers", tint: 2, label: t("profile.terms"), href: "terms.html" }),
             cell({ icon: "info", tint: 3, label: t("profile.version"), value: APP_VERSION }),

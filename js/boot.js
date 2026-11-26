@@ -11,6 +11,8 @@
     document.documentElement.dataset.theme = theme;
     document.documentElement.dataset.accent = accent || "mellow";
     document.documentElement.dataset.motion = motion === false ? "off" : "on";
+    // Home-screen app on iOS: a mark for css/base.css (the height of the page).
+    if (navigator.standalone === true) document.documentElement.dataset.standalone = "";
 
     // A module that failed to load leaves an empty page: try again once.
     addEventListener("error", function (event) {

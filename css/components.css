@@ -110,14 +110,14 @@ button.card:active { transform: scale(.98); transition-duration: .11s; }
 .form .feedback:empty { display: none; }
 
 /* Modal: bottom sheet on phones, centred on wide screens */
-/* Dialogs follow the visible area: above the keyboard, and with it when iOS moves the page. */
-.modal { inset: var(--app-top, 0px) 0 var(--keyboard, 0px); width: 100%; max-width: 600px; max-height: none; margin: auto auto 0; padding: 0; border: 0; background: none; color: inherit; overflow: hidden; }
+/* Sheets stand on the keyboard (--kb-h); they never move with the page. */
+.modal { inset: 0 0 var(--kb-h); width: 100%; max-width: 600px; max-height: none; margin: auto auto 0; padding: 0; border: 0; background: none; color: inherit; overflow: hidden; }
 .modal::backdrop { background: rgba(10, 10, 20, .5); animation: fade .25s; }
 .modal[open] { animation: sheet-in .35s var(--ease-soft); }
 .modal.is-closing { animation: sheet-out .2s var(--ease) forwards; }
 .modal.is-closing::backdrop { opacity: 0; transition: opacity .18s; }
-.modal-panel { max-height: calc(var(--app-height) - var(--safe-top) - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gutter) calc(28px + var(--safe-bottom)); border-radius: 28px 28px 0 0; background: var(--page); }
-.modal-page .modal-panel { height: calc(var(--app-height) - var(--safe-top) - 24px); }
+.modal-panel { max-height: calc(var(--vvh) - var(--safe-top) - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gutter) calc(28px + var(--safe-bottom)); border-radius: 28px 28px 0 0; background: var(--page); }
+.modal-page .modal-panel { height: calc(var(--vvh) - var(--safe-top) - 24px); }
 .modal-grip { display: block; width: 40px; height: 5px; margin: 8px auto -4px; border-radius: 999px; background: color-mix(in srgb, var(--muted) 35%, transparent); }
 .modal-header { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 4px; min-height: 64px; background: var(--page); }
 .modal-title { flex: 1; min-width: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; overflow-wrap: anywhere; }
@@ -131,7 +131,9 @@ button.card:active { transform: scale(.98); transition-duration: .11s; }
 }
 
 /* Full-screen study and test */
-.modal-full { max-width: none; height: var(--app-height); margin: 0; background: var(--page); }
+/* Full screens keep the whole screen; with the keyboard only their bottom makes room (the footer stays above it). */
+.modal-full { inset: 0; max-width: none; height: 100%; margin: 0; background: var(--page); }
+html[data-kb] .modal-full .session { padding-bottom: calc(var(--kb-h) + 12px); }
 .modal-full[open] { animation: rise .35s var(--ease-soft); }
 .session { display: flex; flex-direction: column; gap: 14px; max-width: 600px; height: 100%; margin: 0 auto; padding: calc(8px + var(--safe-top)) 16px calc(16px + var(--safe-bottom)); overflow: hidden auto; }
 .session-header { display: flex; align-items: center; gap: 10px; min-height: 48px; }
