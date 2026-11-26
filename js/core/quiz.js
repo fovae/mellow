@@ -8,10 +8,11 @@ export const shuffle = (list) => {
     return copy;
 };
 
-// Case, punctuation and Latin accents do not matter.
-export const normalize = (text) => text.toLowerCase().normalize("NFD")
+// Case, punctuation (dashes count as spaces), Latin accents and ё/е do not matter: an answer is never wrong for a mark.
+export const normalize = (text) => text.toLowerCase().replaceAll("ё", "е").normalize("NFD")
     .replace(/([a-z])[̀-ͯ]+/g, "$1").normalize("NFC")
-    .replace(/[.!?¡¿'’"«»()。！？]/g, "").replace(/\s+/g, " ").trim();
+    .replace(/[-‐–—]/g, " ")
+    .replace(/[.,;:…!?¡¿'’‘"“”„«»()。、，！？]/g, "").replace(/\s+/g, " ").trim();
 
 // "der Hund" -> "Hund". Works for the languages that use articles; "to go" -> "go".
 export const stripArticle = (text) => text.replace(/^\s*(?:(?:the|an?|to|el|la|los|las|le|les|un|une|una|der|die|das|ein|eine|il|lo|i|gli)\s+|l['’])(?=\S)/i, "");

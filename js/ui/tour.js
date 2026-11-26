@@ -26,7 +26,7 @@ const mocks = {
         h("div", { class: "tm-card tm-row" }, h("span", { class: "tm-ring" }), h("span", { class: "tm-lines" }, line("70%"), line("45%")))),
     cards: () => phone([],
         h("div", { class: "tm-card tm-flash" }, h("b", {}, "hello"), line("40%")),
-        h("div", { class: "tm-grades" }, ["again", "hard", "good", "easy"].map((grade) => h("span", { class: `tm-grade tm-grade-${grade} ${grade === "good" ? "is-lit" : ""}` })))),
+        h("div", { class: "tm-grades" }, ["again", "good"].map((grade) => h("span", { class: `tm-grade tm-grade-${grade} ${grade === "good" ? "is-lit" : ""}` })))),
     topics: () => phone(["dictionaries"],
         h("strong", { class: "tm-title" }, t("tab.dictionaries")),
         ["👋", "🍎", "✏️"].map((emoji, i) => h("div", { class: "tm-card tm-row", style: { "--i": i } }, h("span", { class: "tm-emoji" }, art(emoji)), h("span", { class: "tm-lines" }, line(`${70 - i * 10}%`), line("35%")))),

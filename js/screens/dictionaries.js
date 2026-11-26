@@ -7,6 +7,7 @@ import { languageName } from "../data/languages.js";
 import { screenHeader } from "../ui/navigation.js";
 import { cell, group } from "../ui/cells.js";
 import { statusBar, topicName } from "../ui/parts.js";
+import { icon } from "../ui/icons.js";
 import { openLibrary } from "../ui/library-modal.js";
 import { openDictionary, openMyWords } from "../ui/dictionary-modals.js";
 
@@ -32,7 +33,9 @@ export function renderDictionaries() {
         h("button", { class: "hero hero-link", type: "button", onClick: openLibrary },
             h("span", { class: "eyebrow" }, t("library.eyebrow")),
             h("strong", { class: "hero-title" }, t("library.title")),
-            h("span", { class: "hero-text" }, t("library.text"))),
+            h("span", { class: "hero-text" }, t("library.text")),
+            // Looks like a button, so the card reads as tappable.
+            h("span", { class: "btn hero-btn hero-cta", "aria-hidden": "true" }, icon("plus"), t("library.cta"))),
         current && !current.mine && group(t("hero.active"), [row(current)]),
         group(t("dict.mineGroup"), [mine
             ? row(mine)

@@ -1,7 +1,9 @@
 import { art } from "./art.js";
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
-import { GRADES, schedule, pickNext } from "../core/srs.js";
+import { schedule, pickNext } from "../core/srs.js";
+
+const ANSWERS = [["again", "study.forgot"], ["good", "study.remember"]];
 import { findWord, getScopeDictionaries, getScopeQueue, getScopeWords, getNewLeft, getState, gradeWord } from "../core/store.js";
 import { hintMask } from "../core/quiz.js";
 import { play } from "../core/sound.js";
@@ -64,7 +66,7 @@ export function openStudy(scope) {
 
     const screen = openFullscreen(t("cards.title"), (event) => {
         if (!word || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
-        const grade = GRADES[Number(event.key) - 1];
+        const grade = { 1: "again", 2: "good", ArrowLeft: "again", ArrowRight: "good" }[event.key];
         if (grade && flipped) answer(grade);
         else if (event.key === " " && !event.target.closest("button")) {
             event.preventDefault();
@@ -121,9 +123,10 @@ export function openStudy(scope) {
 
         const card = h("div", { class: "flashcard", onClick: () => card.dataset.swiped || flip() }, h("div", { class: "flashcard-inner" }, front, back));
         const show = h("button", { class: "btn btn-primary", type: "button", onClick: () => flip() }, t("study.show"));
-        const grades = h("div", { class: "grades", hidden: true }, GRADES.map((grade) => h("button", {
+        // Two answers, as the swipes: "Forgot" (left) and "Remember" (right). The schedule does the rest.
+        const grades = h("div", { class: "grades", hidden: true }, ANSWERS.map(([grade, label]) => h("button", {
             class: `grade grade-${grade}`, type: "button", onClick: () => answer(grade),
-        }, h("strong", {}, t(`grade.${grade}`)), h("small", {}, previewInterval(word.srs, grade)))));
+        }, h("strong", {}, t(label)), h("small", {}, previewInterval(word.srs, grade)))));
 
         flip = () => {
             flipped = !card.classList.contains("is-flipped");
@@ -137,7 +140,7 @@ export function openStudy(scope) {
             help.hidden = flipped;
             show.hidden = true;
             grades.hidden = false;
-            if (flipped) grades.children[2].focus({ preventScroll: true, focusVisible: false });
+            if (flipped) grades.children[1].focus({ preventScroll: true, focusVisible: false });
         };
         // Each tap opens one more letter; the last one is left to the learner.
         let letters = 0;

@@ -28,7 +28,7 @@ const CONTACTS = [
 ];
 
 function editName() {
-    const input = h("input", { class: "input", value: getState().username, maxlength: 30, autocomplete: "given-name" });
+    const input = h("input", { class: "input", value: getState().username, maxlength: 30, autocomplete: "off" });
     openModal({
         title: t("profile.name"),
         build: (close) => form({

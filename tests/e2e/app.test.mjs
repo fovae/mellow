@@ -74,13 +74,15 @@ test("study: grade, undo, finish", async () => {
     await start();
     await active(".hero-btn").click();
     await page.click(".session-footer .btn-primary");
-    await page.keyboard.press("4");
-    assert.equal((await state()).dictionaries[0].words[0].srs.interval, 4);
+    // Two answers only: "Forgot" and "Remember".
+    assert.deepEqual(await page.locator(".grades .grade strong").allTextContents(), ["Forgot", "Remember"]);
+    await page.keyboard.press("2");
+    assert.notEqual((await state()).dictionaries[0].words[0].srs, null);
     await page.click('[aria-label="Undo"]');
     assert.equal((await state()).dictionaries[0].words[0].srs, null);
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 60 && !(await page.locator(".session-summary").count()); i++) {
         await page.click(".session-footer .btn-primary");
-        await page.keyboard.press("4");
+        await page.keyboard.press("2");
     }
     await page.waitForSelector(".session-summary");
 });

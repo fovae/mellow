@@ -32,24 +32,24 @@ a little|немного|un poco|un peu|ein bisschen|un po'
 ` },
 { id: "phrases", emoji: "💬", level: "A1", title: { en: "Everyday phrases", ru: "Фразы на каждый день" }, data: `
 How are you?|Как дела?|¿Cómo estás?|Comment ça va ?|Wie geht's?|Come stai?
-I'm fine, thanks.|Всё хорошо, спасибо.|Estoy bien, gracias.|Je vais bien, merci.|Mir geht's gut, danke.|Sto bene, grazie.
+I'm fine, thanks|Всё хорошо, спасибо|Estoy bien, gracias|Je vais bien, merci|Mir geht's gut, danke|Sto bene, grazie
 What's your name?|Как тебя зовут?|¿Cómo te llamas?|Comment tu t'appelles ?|Wie heißt du?|Come ti chiami?
-My name is Anna.|Меня зовут Анна.|Me llamo Anna.|Je m'appelle Anna.|Ich heiße Anna.|Mi chiamo Anna.
-Nice to meet you.|Приятно познакомиться.|Mucho gusto.|Enchanté.|Freut mich.|Piacere.
+My name is Anna|Меня зовут Анна|Me llamo Anna|Je m'appelle Anna|Ich heiße Anna|Mi chiamo Anna
+Nice to meet you|Приятно познакомиться|Mucho gusto|Enchanté|Freut mich|Piacere
 Where are you from?|Откуда ты?|¿De dónde eres?|Tu viens d'où ?|Woher kommst du?|Di dove sei?
-I don't understand.|Я не понимаю.|No entiendo.|Je ne comprends pas.|Ich verstehe nicht.|Non capisco.
-I don't know.|Я не знаю.|No lo sé.|Je ne sais pas.|Ich weiß nicht.|Non lo so.
+I don't understand|Я не понимаю|No entiendo|Je ne comprends pas|Ich verstehe nicht|Non capisco
+I don't know|Я не знаю|No lo sé|Je ne sais pas|Ich weiß nicht|Non lo so
 Can you repeat that?|Можешь повторить?|¿Puedes repetirlo?|Tu peux répéter ?|Kannst du das wiederholen?|Puoi ripetere?
-Speak more slowly, please.|Говорите медленнее, пожалуйста.|Hable más despacio, por favor.|Parlez plus lentement, s'il vous plaît.|Sprechen Sie bitte langsamer.|Parli più lentamente, per favore.
+Speak more slowly, please|Говорите медленнее, пожалуйста|Hable más despacio, por favor|Parlez plus lentement, s'il vous plaît|Sprechen Sie bitte langsamer|Parli più lentamente, per favore
 What does this mean?|Что это значит?|¿Qué significa esto?|Qu'est-ce que ça veut dire ?|Was bedeutet das?|Cosa significa?
-I need help.|Мне нужна помощь.|Necesito ayuda.|J'ai besoin d'aide.|Ich brauche Hilfe.|Ho bisogno di aiuto.
-No problem.|Без проблем.|No hay problema.|Pas de problème.|Kein Problem.|Nessun problema.
-I like it.|Мне это нравится.|Me gusta.|Ça me plaît.|Das gefällt mir.|Mi piace.
-I agree.|Я согласен.|Estoy de acuerdo.|Je suis d'accord.|Ich bin einverstanden.|Sono d'accordo.
+I need help|Мне нужна помощь|Necesito ayuda|J'ai besoin d'aide|Ich brauche Hilfe|Ho bisogno di aiuto
+No problem|Без проблем|No hay problema|Pas de problème|Kein Problem|Nessun problema
+I like it|Мне это нравится|Me gusta|Ça me plaît|Das gefällt mir|Mi piace
+I agree|Я согласен|Estoy de acuerdo|Je suis d'accord|Ich bin einverstanden|Sono d'accordo
 Let's go!|Пойдём!|¡Vamos!|On y va !|Gehen wir!|Andiamo!
-Wait a minute.|Подожди минуту.|Espera un minuto.|Attends une minute.|Warte eine Minute.|Aspetta un minuto.
-I'm hungry.|Я хочу есть.|Tengo hambre.|J'ai faim.|Ich habe Hunger.|Ho fame.
-I'm thirsty.|Я хочу пить.|Tengo sed.|J'ai soif.|Ich habe Durst.|Ho sete.
+Wait a minute|Подожди минуту|Espera un minuto|Attends une minute|Warte eine Minute|Aspetta un minuto
+I'm hungry|Я хочу есть|Tengo hambre|J'ai faim|Ich habe Hunger|Ho fame
+I'm thirsty|Я хочу пить|Tengo sed|J'ai soif|Ich habe Durst|Ho sete
 Good luck!|Удачи!|¡Buena suerte!|Bonne chance !|Viel Glück!|Buona fortuna!
 Happy birthday!|С днём рождения!|¡Feliz cumpleaños!|Joyeux anniversaire !|Alles Gute zum Geburtstag!|Buon compleanno!
 Enjoy your meal!|Приятного аппетита!|¡Buen provecho!|Bon appétit !|Guten Appetit!|Buon appetito!
@@ -209,10 +209,10 @@ the cup|чашка|la taza|la tasse|die Tasse|la tazza
 the fork|вилка|el tenedor|la fourchette|die Gabel|la forchetta
 the knife|нож|el cuchillo|le couteau|das Messer|il coltello
 the spoon|ложка|la cuchara|la cuillère|der Löffel|il cucchiaio
-A table for two, please.|Столик на двоих, пожалуйста.|Una mesa para dos, por favor.|Une table pour deux, s'il vous plaît.|Einen Tisch für zwei, bitte.|Un tavolo per due, per favore.
-I would like a coffee.|Я бы хотел кофе.|Quisiera un café.|Je voudrais un café.|Ich hätte gern einen Kaffee.|Vorrei un caffè.
-The bill, please.|Счёт, пожалуйста.|La cuenta, por favor.|L'addition, s'il vous plaît.|Die Rechnung, bitte.|Il conto, per favore.
-It's delicious.|Это вкусно.|Está delicioso.|C'est délicieux.|Es ist lecker.|È delizioso.
+A table for two, please|Столик на двоих, пожалуйста|Una mesa para dos, por favor|Une table pour deux, s'il vous plaît|Einen Tisch für zwei, bitte|Un tavolo per due, per favore
+I would like a coffee|Я бы хотел кофе|Quisiera un café|Je voudrais un café|Ich hätte gern einen Kaffee|Vorrei un caffè
+The bill, please|Счёт, пожалуйста|La cuenta, por favor|L'addition, s'il vous plaît|Die Rechnung, bitte|Il conto, per favore
+It's delicious|Это вкусно|Está delicioso|C'est délicieux|Es ist lecker|È delizioso
 ` },
 { id: "home", emoji: "🏠", level: "A1", title: { en: "Home", ru: "Дом" }, data: `
 the house|дом|la casa|la maison|das Haus|la casa
@@ -364,8 +364,8 @@ the border|граница|la frontera|la frontière|die Grenze|il confine
 the holiday|отпуск|las vacaciones|les vacances|der Urlaub|le vacanze
 the tourist|турист|el turista|le touriste|der Tourist|il turista
 Where is the station?|Где вокзал?|¿Dónde está la estación?|Où est la gare ?|Wo ist der Bahnhof?|Dov'è la stazione?
-I'm lost.|Я заблудился.|Estoy perdido.|Je suis perdu.|Ich habe mich verlaufen.|Mi sono perso.
-I have a reservation.|У меня есть бронь.|Tengo una reserva.|J'ai une réservation.|Ich habe eine Reservierung.|Ho una prenotazione.
+I'm lost|Я заблудился|Estoy perdido|Je suis perdu|Ich habe mich verlaufen|Mi sono perso
+I have a reservation|У меня есть бронь|Tengo una reserva|J'ai une réservation|Ich habe eine Reservierung|Ho una prenotazione
 What time does the train leave?|Во сколько отходит поезд?|¿A qué hora sale el tren?|À quelle heure part le train ?|Wann fährt der Zug ab?|A che ora parte il treno?
 ` },
 { id: "shopping", emoji: "🛍️", level: "A2", title: { en: "Shopping and money", ru: "Покупки и деньги" }, data: `
@@ -386,9 +386,9 @@ expensive|дорогой|caro|cher|teuer|caro
 open|открытый|abierto|ouvert|geöffnet|aperto
 closed|закрытый|cerrado|fermé|geschlossen|chiuso
 How much does it cost?|Сколько это стоит?|¿Cuánto cuesta?|Combien ça coûte ?|Wie viel kostet das?|Quanto costa?
-I'm just looking.|Я просто смотрю.|Solo estoy mirando.|Je regarde seulement.|Ich schaue mich nur um.|Sto solo guardando.
+I'm just looking|Я просто смотрю|Solo estoy mirando|Je regarde seulement|Ich schaue mich nur um|Sto solo guardando
 Can I try it on?|Можно примерить?|¿Puedo probármelo?|Je peux l'essayer ?|Kann ich das anprobieren?|Posso provarlo?
-It's too expensive.|Это слишком дорого.|Es demasiado caro.|C'est trop cher.|Das ist zu teuer.|È troppo caro.
+It's too expensive|Это слишком дорого|Es demasiado caro|C'est trop cher|Das ist zu teuer|È troppo caro
 Can I pay by card?|Можно оплатить картой?|¿Puedo pagar con tarjeta?|Je peux payer par carte ?|Kann ich mit Karte zahlen?|Posso pagare con la carta?
 ` },
 { id: "nature", emoji: "🌿", level: "A2", title: { en: "Nature", ru: "Природа" }, data: `
@@ -433,9 +433,9 @@ warm|тёплый|cálido|chaud|warm|tiepido
 cool|прохладный|fresco|frais|kühl|fresco
 wet|мокрый|mojado|mouillé|nass|bagnato
 dry|сухой|seco|sec|trocken|asciutto
-It's raining.|Идёт дождь.|Está lloviendo.|Il pleut.|Es regnet.|Piove.
-It's snowing.|Идёт снег.|Está nevando.|Il neige.|Es schneit.|Nevica.
-It's hot today.|Сегодня жарко.|Hoy hace calor.|Il fait chaud aujourd'hui.|Heute ist es heiß.|Oggi fa caldo.
+It's raining|Идёт дождь|Está lloviendo|Il pleut|Es regnet|Piove
+It's snowing|Идёт снег|Está nevando|Il neige|Es schneit|Nevica
+It's hot today|Сегодня жарко|Hoy hace calor|Il fait chaud aujourd'hui|Heute ist es heiß|Oggi fa caldo
 ` },
 { id: "animals", emoji: "🐾", level: "A1", title: { en: "Animals", ru: "Животные" }, data: `
 the dog|собака|el perro|le chien|der Hund|il cane
@@ -583,189 +583,189 @@ patient|терпеливый|paciente|patient|geduldig|paziente
 ` },
 { id: "adjectives", emoji: "📏", level: "A2", title: { en: "Opposites", ru: "Противоположности" }, data: `
 big|большой|grande|grand|groß|grande
->The house is big.|Дом большой.|La casa es grande.|La maison est grande.|Das Haus ist groß.|La casa è grande.
+>The house is big|Дом большой|La casa es grande|La maison est grande|Das Haus ist groß|La casa è grande
 small|маленький|pequeño|petit|klein|piccolo
->The room is small.|Комната маленькая.|La habitación es pequeña.|La pièce est petite.|Das Zimmer ist klein.|La stanza è piccola.
+>The room is small|Комната маленькая|La habitación es pequeña|La pièce est petite|Das Zimmer ist klein|La stanza è piccola
 good|хороший|bueno|bon|gut|buono
->The wine is good.|Вино хорошее.|El vino es bueno.|Le vin est bon.|Der Wein ist gut.|Il vino è buono.
+>The wine is good|Вино хорошее|El vino es bueno|Le vin est bon|Der Wein ist gut|Il vino è buono
 bad|плохой|malo|mauvais|schlecht|cattivo
->The weather is bad.|Погода плохая.|El tiempo es malo.|Le temps est mauvais.|Das Wetter ist schlecht.|Il tempo è cattivo.
+>The weather is bad|Погода плохая|El tiempo es malo|Le temps est mauvais|Das Wetter ist schlecht|Il tempo è cattivo
 new|новый|nuevo|nouveau|neu|nuovo
->I have a new phone.|У меня новый телефон.|Tengo un teléfono nuevo.|J'ai un nouveau téléphone.|Ich habe ein neues Telefon.|Ho un telefono nuovo.
+>I have a new phone|У меня новый телефон|Tengo un teléfono nuevo|J'ai un nouveau téléphone|Ich habe ein neues Telefon|Ho un telefono nuovo
 old|старый|viejo|vieux|alt|vecchio
->This book is old.|Эта книга старая.|Este libro es viejo.|Ce livre est vieux.|Dieses Buch ist alt.|Questo libro è vecchio.
+>This book is old|Эта книга старая|Este libro es viejo|Ce livre est vieux|Dieses Buch ist alt|Questo libro è vecchio
 young|молодой|joven|jeune|jung|giovane
->My teacher is young.|Мой учитель молодой.|Mi profesor es joven.|Mon professeur est jeune.|Mein Lehrer ist jung.|Il mio insegnante è giovane.
+>My teacher is young|Мой учитель молодой|Mi profesor es joven|Mon professeur est jeune|Mein Lehrer ist jung|Il mio insegnante è giovane
 long|длинный|largo|long|lang|lungo
->The road is long.|Дорога длинная.|El camino es largo.|La route est longue.|Der Weg ist lang.|La strada è lunga.
+>The road is long|Дорога длинная|El camino es largo|La route est longue|Der Weg ist lang|La strada è lunga
 short|короткий|corto|court|kurz|corto
->The lesson is short.|Урок короткий.|La clase es corta.|Le cours est court.|Der Unterricht ist kurz.|La lezione è corta.
+>The lesson is short|Урок короткий|La clase es corta|Le cours est court|Der Unterricht ist kurz|La lezione è corta
 tall|высокий|alto|haut|hoch|alto
->The building is tall.|Здание высокое.|El edificio es alto.|Le bâtiment est haut.|Das Gebäude ist hoch.|L'edificio è alto.
+>The building is tall|Здание высокое|El edificio es alto|Le bâtiment est haut|Das Gebäude ist hoch|L'edificio è alto
 low|низкий|bajo|bas|niedrig|basso
->The price is low.|Цена низкая.|El precio es bajo.|Le prix est bas.|Der Preis ist niedrig.|Il prezzo è basso.
+>The price is low|Цена низкая|El precio es bajo|Le prix est bas|Der Preis ist niedrig|Il prezzo è basso
 fast|быстрый|rápido|rapide|schnell|veloce
->This car is fast.|Эта машина быстрая.|Este coche es rápido.|Cette voiture est rapide.|Dieses Auto ist schnell.|Questa macchina è veloce.
+>This car is fast|Эта машина быстрая|Este coche es rápido|Cette voiture est rapide|Dieses Auto ist schnell|Questa macchina è veloce
 slow|медленный|lento|lent|langsam|lento
->The bus is slow.|Автобус медленный.|El autobús es lento.|Le bus est lent.|Der Bus ist langsam.|L'autobus è lento.
+>The bus is slow|Автобус медленный|El autobús es lento|Le bus est lent|Der Bus ist langsam|L'autobus è lento
 easy|лёгкий|fácil|facile|einfach|facile
->The question is easy.|Вопрос лёгкий.|La pregunta es fácil.|La question est facile.|Die Frage ist einfach.|La domanda è facile.
+>The question is easy|Вопрос лёгкий|La pregunta es fácil|La question est facile|Die Frage ist einfach|La domanda è facile
 difficult|трудный|difícil|difficile|schwierig|difficile
->The exam is difficult.|Экзамен трудный.|El examen es difícil.|L'examen est difficile.|Die Prüfung ist schwierig.|L'esame è difficile.
+>The exam is difficult|Экзамен трудный|El examen es difícil|L'examen est difficile|Die Prüfung ist schwierig|L'esame è difficile
 strong|сильный|fuerte|fort|stark|forte
->The coffee is strong.|Кофе крепкий.|El café es fuerte.|Le café est fort.|Der Kaffee ist stark.|Il caffè è forte.
+>The coffee is strong|Кофе крепкий|El café es fuerte|Le café est fort|Der Kaffee ist stark|Il caffè è forte
 weak|слабый|débil|faible|schwach|debole
->I feel weak.|Я чувствую слабость.|Me siento débil.|Je me sens faible.|Ich fühle mich schwach.|Mi sento debole.
+>I feel weak|Я чувствую слабость|Me siento débil|Je me sens faible|Ich fühle mich schwach|Mi sento debole
 full|полный|lleno|plein|voll|pieno
->The glass is full.|Стакан полный.|El vaso está lleno.|Le verre est plein.|Das Glas ist voll.|Il bicchiere è pieno.
+>The glass is full|Стакан полный|El vaso está lleno|Le verre est plein|Das Glas ist voll|Il bicchiere è pieno
 empty|пустой|vacío|vide|leer|vuoto
->The bottle is empty.|Бутылка пустая.|La botella está vacía.|La bouteille est vide.|Die Flasche ist leer.|La bottiglia è vuota.
+>The bottle is empty|Бутылка пустая|La botella está vacía|La bouteille est vide|Die Flasche ist leer|La bottiglia è vuota
 clean|чистый|limpio|propre|sauber|pulito
->The kitchen is clean.|Кухня чистая.|La cocina está limpia.|La cuisine est propre.|Die Küche ist sauber.|La cucina è pulita.
+>The kitchen is clean|Кухня чистая|La cocina está limpia|La cuisine est propre|Die Küche ist sauber|La cucina è pulita
 dirty|грязный|sucio|sale|schmutzig|sporco
->My shoes are dirty.|Моя обувь грязная.|Mis zapatos están sucios.|Mes chaussures sont sales.|Meine Schuhe sind schmutzig.|Le mie scarpe sono sporche.
+>My shoes are dirty|Моя обувь грязная|Mis zapatos están sucios|Mes chaussures sont sales|Meine Schuhe sind schmutzig|Le mie scarpe sono sporche
 beautiful|красивый|hermoso|beau|schön|bello
->The city is beautiful.|Город красивый.|La ciudad es hermosa.|La ville est belle.|Die Stadt ist schön.|La città è bella.
+>The city is beautiful|Город красивый|La ciudad es hermosa|La ville est belle|Die Stadt ist schön|La città è bella
 ugly|уродливый|feo|laid|hässlich|brutto
->This hat is ugly.|Эта шляпа уродливая.|Este sombrero es feo.|Ce chapeau est laid.|Dieser Hut ist hässlich.|Questo cappello è brutto.
+>This hat is ugly|Эта шляпа уродливая|Este sombrero es feo|Ce chapeau est laid|Dieser Hut ist hässlich|Questo cappello è brutto
 important|важный|importante|important|wichtig|importante
->It's very important.|Это очень важно.|Es muy importante.|C'est très important.|Das ist sehr wichtig.|È molto importante.
+>It's very important|Это очень важно|Es muy importante|C'est très important|Das ist sehr wichtig|È molto importante
 interesting|интересный|interesante|intéressant|interessant|interessante
->The film is interesting.|Фильм интересный.|La película es interesante.|Le film est intéressant.|Der Film ist interessant.|Il film è interessante.
+>The film is interesting|Фильм интересный|La película es interesante|Le film est intéressant|Der Film ist interessant|Il film è interessante
 boring|скучный|aburrido|ennuyeux|langweilig|noioso
->The book is boring.|Книга скучная.|El libro es aburrido.|Le livre est ennuyeux.|Das Buch ist langweilig.|Il libro è noioso.
+>The book is boring|Книга скучная|El libro es aburrido|Le livre est ennuyeux|Das Buch ist langweilig|Il libro è noioso
 ` },
 { id: "verbs", emoji: "🏃", level: "A1", title: { en: "Key verbs with examples", ru: "Главные глаголы с примерами" }, data: `
 to have|иметь|tener|avoir|haben|avere
->I have a question.|У меня есть вопрос.|Tengo una pregunta.|J'ai une question.|Ich habe eine Frage.|Ho una domanda.
+>I have a question|У меня есть вопрос|Tengo una pregunta|J'ai une question|Ich habe eine Frage|Ho una domanda
 to do|делать|hacer|faire|machen|fare
 >What are you doing?|Что ты делаешь?|¿Qué haces?|Qu'est-ce que tu fais ?|Was machst du?|Che cosa fai?
 to go|идти|ir|aller|gehen|andare
->We are going home.|Мы идём домой.|Vamos a casa.|Nous allons à la maison.|Wir gehen nach Hause.|Andiamo a casa.
+>We are going home|Мы идём домой|Vamos a casa|Nous allons à la maison|Wir gehen nach Hause|Andiamo a casa
 to come|приходить|venir|venir|kommen|venire
->She comes every day.|Она приходит каждый день.|Viene todos los días.|Elle vient tous les jours.|Sie kommt jeden Tag.|Viene ogni giorno.
+>She comes every day|Она приходит каждый день|Viene todos los días|Elle vient tous les jours|Sie kommt jeden Tag|Viene ogni giorno
 to want|хотеть|querer|vouloir|wollen|volere
->I want to learn.|Я хочу учиться.|Quiero aprender.|Je veux apprendre.|Ich will lernen.|Voglio imparare.
+>I want to learn|Я хочу учиться|Quiero aprender|Je veux apprendre|Ich will lernen|Voglio imparare
 can|мочь|poder|pouvoir|können|potere
->I can help you.|Я могу тебе помочь.|Puedo ayudarte.|Je peux t'aider.|Ich kann dir helfen.|Posso aiutarti.
+>I can help you|Я могу тебе помочь|Puedo ayudarte|Je peux t'aider|Ich kann dir helfen|Posso aiutarti
 to know|знать|saber|savoir|wissen|sapere
->He knows the answer.|Он знает ответ.|Sabe la respuesta.|Il sait la réponse.|Er weiß die Antwort.|Sa la risposta.
+>He knows the answer|Он знает ответ|Sabe la respuesta|Il sait la réponse|Er weiß die Antwort|Sa la risposta
 to say|сказать|decir|dire|sagen|dire
 >What did you say?|Что ты сказал?|¿Qué has dicho?|Qu'est-ce que tu as dit ?|Was hast du gesagt?|Che cosa hai detto?
 to speak|говорить|hablar|parler|sprechen|parlare
 >Do you speak English?|Ты говоришь по-английски?|¿Hablas inglés?|Tu parles anglais ?|Sprichst du Englisch?|Parli inglese?
 to see|видеть|ver|voir|sehen|vedere
->I see the sea.|Я вижу море.|Veo el mar.|Je vois la mer.|Ich sehe das Meer.|Vedo il mare.
+>I see the sea|Я вижу море|Veo el mar|Je vois la mer|Ich sehe das Meer|Vedo il mare
 to hear|слышать|oír|entendre|hören|sentire
->I can't hear you.|Я тебя не слышу.|No te oigo.|Je ne t'entends pas.|Ich höre dich nicht.|Non ti sento.
+>I can't hear you|Я тебя не слышу|No te oigo|Je ne t'entends pas|Ich höre dich nicht|Non ti sento
 to eat|есть|comer|manger|essen|mangiare
->We eat at home.|Мы едим дома.|Comemos en casa.|Nous mangeons à la maison.|Wir essen zu Hause.|Mangiamo a casa.
+>We eat at home|Мы едим дома|Comemos en casa|Nous mangeons à la maison|Wir essen zu Hause|Mangiamo a casa
 to drink|пить|beber|boire|trinken|bere
->I drink water.|Я пью воду.|Bebo agua.|Je bois de l'eau.|Ich trinke Wasser.|Bevo acqua.
+>I drink water|Я пью воду|Bebo agua|Je bois de l'eau|Ich trinke Wasser|Bevo acqua
 to sleep|спать|dormir|dormir|schlafen|dormire
->The child is sleeping.|Ребёнок спит.|El niño duerme.|L'enfant dort.|Das Kind schläft.|Il bambino dorme.
+>The child is sleeping|Ребёнок спит|El niño duerme|L'enfant dort|Das Kind schläft|Il bambino dorme
 to live|жить|vivir|vivre|leben|vivere
->They live in Berlin.|Они живут в Берлине.|Viven en Berlín.|Ils vivent à Berlin.|Sie leben in Berlin.|Vivono a Berlino.
+>They live in Berlin|Они живут в Берлине|Viven en Berlín|Ils vivent à Berlin|Sie leben in Berlin|Vivono a Berlino
 to work|работать|trabajar|travailler|arbeiten|lavorare
->I work from home.|Я работаю из дома.|Trabajo desde casa.|Je travaille à la maison.|Ich arbeite von zu Hause.|Lavoro da casa.
+>I work from home|Я работаю из дома|Trabajo desde casa|Je travaille à la maison|Ich arbeite von zu Hause|Lavoro da casa
 to read|читать|leer|lire|lesen|leggere
->She is reading a book.|Она читает книгу.|Lee un libro.|Elle lit un livre.|Sie liest ein Buch.|Legge un libro.
+>She is reading a book|Она читает книгу|Lee un libro|Elle lit un livre|Sie liest ein Buch|Legge un libro
 to write|писать|escribir|écrire|schreiben|scrivere
->Write your name here.|Напиши своё имя здесь.|Escribe tu nombre aquí.|Écris ton nom ici.|Schreib deinen Namen hier.|Scrivi qui il tuo nome.
+>Write your name here|Напиши своё имя здесь|Escribe tu nombre aquí|Écris ton nom ici|Schreib deinen Namen hier|Scrivi qui il tuo nome
 to learn|учить|aprender|apprendre|lernen|imparare
->I learn ten words a day.|Я учу десять слов в день.|Aprendo diez palabras al día.|J'apprends dix mots par jour.|Ich lerne zehn Wörter am Tag.|Imparo dieci parole al giorno.
+>I learn ten words a day|Я учу десять слов в день|Aprendo diez palabras al día|J'apprends dix mots par jour|Ich lerne zehn Wörter am Tag|Imparo dieci parole al giorno
 to understand|понимать|entender|comprendre|verstehen|capire
 >Do you understand me?|Ты меня понимаешь?|¿Me entiendes?|Tu me comprends ?|Verstehst du mich?|Mi capisci?
 to think|думать|pensar|penser|denken|pensare
->I think about you.|Я думаю о тебе.|Pienso en ti.|Je pense à toi.|Ich denke an dich.|Penso a te.
+>I think about you|Я думаю о тебе|Pienso en ti|Je pense à toi|Ich denke an dich|Penso a te
 to find|находить|encontrar|trouver|finden|trovare
->I can't find my keys.|Я не могу найти ключи.|No encuentro mis llaves.|Je ne trouve pas mes clés.|Ich finde meine Schlüssel nicht.|Non trovo le mie chiavi.
+>I can't find my keys|Я не могу найти ключи|No encuentro mis llaves|Je ne trouve pas mes clés|Ich finde meine Schlüssel nicht|Non trovo le mie chiavi
 to buy|покупать|comprar|acheter|kaufen|comprare
->I am buying bread.|Я покупаю хлеб.|Compro pan.|J'achète du pain.|Ich kaufe Brot.|Compro il pane.
+>I am buying bread|Я покупаю хлеб|Compro pan|J'achète du pain|Ich kaufe Brot|Compro il pane
 to pay|платить|pagar|payer|bezahlen|pagare
 >Who is paying?|Кто платит?|¿Quién paga?|Qui paie ?|Wer bezahlt?|Chi paga?
 to give|давать|dar|donner|geben|dare
->Give me the book.|Дай мне книгу.|Dame el libro.|Donne-moi le livre.|Gib mir das Buch.|Dammi il libro.
+>Give me the book|Дай мне книгу|Dame el libro|Donne-moi le livre|Gib mir das Buch|Dammi il libro
 to take|брать|tomar|prendre|nehmen|prendere
->I take the bus.|Я еду на автобусе.|Tomo el autobús.|Je prends le bus.|Ich nehme den Bus.|Prendo l'autobus.
+>I take the bus|Я еду на автобусе|Tomo el autobús|Je prends le bus|Ich nehme den Bus|Prendo l'autobus
 to help|помогать|ayudar|aider|helfen|aiutare
 >Can you help me?|Ты можешь мне помочь?|¿Puedes ayudarme?|Tu peux m'aider ?|Kannst du mir helfen?|Puoi aiutarmi?
 to wait|ждать|esperar|attendre|warten|aspettare
->We are waiting for the train.|Мы ждём поезд.|Esperamos el tren.|Nous attendons le train.|Wir warten auf den Zug.|Aspettiamo il treno.
+>We are waiting for the train|Мы ждём поезд|Esperamos el tren|Nous attendons le train|Wir warten auf den Zug|Aspettiamo il treno
 to open|открывать|abrir|ouvrir|öffnen|aprire
->Open the window, please.|Открой окно, пожалуйста.|Abre la ventana, por favor.|Ouvre la fenêtre, s'il te plaît.|Öffne bitte das Fenster.|Apri la finestra, per favore.
+>Open the window, please|Открой окно, пожалуйста|Abre la ventana, por favor|Ouvre la fenêtre, s'il te plaît|Öffne bitte das Fenster|Apri la finestra, per favore
 to close|закрывать|cerrar|fermer|schließen|chiudere
->Close the door.|Закрой дверь.|Cierra la puerta.|Ferme la porte.|Schließ die Tür.|Chiudi la porta.
+>Close the door|Закрой дверь|Cierra la puerta|Ferme la porte|Schließ die Tür|Chiudi la porta
 ` },
 { id: "verbs2", emoji: "⚡", level: "A2", title: { en: "More verbs", ru: "Ещё глаголы" }, data: `
 to begin|начинать|empezar|commencer|anfangen|cominciare
->The film begins now.|Фильм начинается сейчас.|La película empieza ahora.|Le film commence maintenant.|Der Film fängt jetzt an.|Il film comincia adesso.
+>The film begins now|Фильм начинается сейчас|La película empieza ahora|Le film commence maintenant|Der Film fängt jetzt an|Il film comincia adesso
 to finish|заканчивать|terminar|finir|beenden|finire
->I finish at six.|Я заканчиваю в шесть.|Termino a las seis.|Je finis à six heures.|Ich höre um sechs auf.|Finisco alle sei.
+>I finish at six|Я заканчиваю в шесть|Termino a las seis|Je finis à six heures|Ich höre um sechs auf|Finisco alle sei
 to ask|спрашивать|preguntar|demander|fragen|chiedere
 >May I ask something?|Можно спросить?|¿Puedo preguntar algo?|Je peux demander quelque chose ?|Darf ich etwas fragen?|Posso chiedere una cosa?
 to answer|отвечать|responder|répondre|antworten|rispondere
->He doesn't answer.|Он не отвечает.|Él no responde.|Il ne répond pas.|Er antwortet nicht.|Lui non risponde.
+>He doesn't answer|Он не отвечает|Él no responde|Il ne répond pas|Er antwortet nicht|Lui non risponde
 to remember|помнить|recordar|se souvenir|sich erinnern|ricordare
->I remember your name.|Я помню твоё имя.|Recuerdo tu nombre.|Je me souviens de ton nom.|Ich erinnere mich an deinen Namen.|Ricordo il tuo nome.
+>I remember your name|Я помню твоё имя|Recuerdo tu nombre|Je me souviens de ton nom|Ich erinnere mich an deinen Namen|Ricordo il tuo nome
 to forget|забывать|olvidar|oublier|vergessen|dimenticare
->Don't forget the keys.|Не забудь ключи.|No olvides las llaves.|N'oublie pas les clés.|Vergiss die Schlüssel nicht.|Non dimenticare le chiavi.
+>Don't forget the keys|Не забудь ключи|No olvides las llaves|N'oublie pas les clés|Vergiss die Schlüssel nicht|Non dimenticare le chiavi
 to love|любить|amar|aimer|lieben|amare
->I love my family.|Я люблю свою семью.|Amo a mi familia.|J'aime ma famille.|Ich liebe meine Familie.|Amo la mia famiglia.
+>I love my family|Я люблю свою семью|Amo a mi familia|J'aime ma famille|Ich liebe meine Familie|Amo la mia famiglia
 to believe|верить|creer|croire|glauben|credere
->I believe you.|Я тебе верю.|Te creo.|Je te crois.|Ich glaube dir.|Ti credo.
+>I believe you|Я тебе верю|Te creo|Je te crois|Ich glaube dir|Ti credo
 to search|искать|buscar|chercher|suchen|cercare
->I'm looking for the station.|Я ищу вокзал.|Busco la estación.|Je cherche la gare.|Ich suche den Bahnhof.|Cerco la stazione.
+>I'm looking for the station|Я ищу вокзал|Busco la estación|Je cherche la gare|Ich suche den Bahnhof|Cerco la stazione
 to play|играть|jugar|jouer|spielen|giocare
->The children are playing in the garden.|Дети играют в саду.|Los niños juegan en el jardín.|Les enfants jouent dans le jardin.|Die Kinder spielen im Garten.|I bambini giocano in giardino.
+>The children are playing in the garden|Дети играют в саду|Los niños juegan en el jardín|Les enfants jouent dans le jardin|Die Kinder spielen im Garten|I bambini giocano in giardino
 to run|бежать|correr|courir|laufen|correre
->I run every morning.|Я бегаю каждое утро.|Corro todas las mañanas.|Je cours tous les matins.|Ich laufe jeden Morgen.|Corro ogni mattina.
+>I run every morning|Я бегаю каждое утро|Corro todas las mañanas|Je cours tous les matins|Ich laufe jeden Morgen|Corro ogni mattina
 to swim|плавать|nadar|nager|schwimmen|nuotare
->We swim in the sea.|Мы плаваем в море.|Nadamos en el mar.|Nous nageons dans la mer.|Wir schwimmen im Meer.|Nuotiamo nel mare.
+>We swim in the sea|Мы плаваем в море|Nadamos en el mar|Nous nageons dans la mer|Wir schwimmen im Meer|Nuotiamo nel mare
 to sing|петь|cantar|chanter|singen|cantare
->She sings very well.|Она очень хорошо поёт.|Ella canta muy bien.|Elle chante très bien.|Sie singt sehr gut.|Lei canta molto bene.
+>She sings very well|Она очень хорошо поёт|Ella canta muy bien|Elle chante très bien|Sie singt sehr gut|Lei canta molto bene
 to dance|танцевать|bailar|danser|tanzen|ballare
->They dance together.|Они танцуют вместе.|Bailan juntos.|Ils dansent ensemble.|Sie tanzen zusammen.|Ballano insieme.
+>They dance together|Они танцуют вместе|Bailan juntos|Ils dansent ensemble|Sie tanzen zusammen|Ballano insieme
 to cook|готовить|cocinar|cuisiner|kochen|cucinare
->My father cooks today.|Сегодня готовит мой отец.|Hoy cocina mi padre.|Mon père cuisine aujourd'hui.|Mein Vater kocht heute.|Oggi cucina mio padre.
+>My father cooks today|Сегодня готовит мой отец|Hoy cocina mi padre|Mon père cuisine aujourd'hui|Mein Vater kocht heute|Oggi cucina mio padre
 to clean|убирать|limpiar|nettoyer|putzen|pulire
->I clean the kitchen.|Я убираю кухню.|Limpio la cocina.|Je nettoie la cuisine.|Ich putze die Küche.|Pulisco la cucina.
+>I clean the kitchen|Я убираю кухню|Limpio la cocina|Je nettoie la cuisine|Ich putze die Küche|Pulisco la cucina
 to travel|путешествовать|viajar|voyager|reisen|viaggiare
->We travel a lot.|Мы много путешествуем.|Viajamos mucho.|Nous voyageons beaucoup.|Wir reisen viel.|Viaggiamo molto.
+>We travel a lot|Мы много путешествуем|Viajamos mucho|Nous voyageons beaucoup|Wir reisen viel|Viaggiamo molto
 to arrive|прибывать|llegar|arriver|ankommen|arrivare
->The train arrives at nine.|Поезд прибывает в девять.|El tren llega a las nueve.|Le train arrive à neuf heures.|Der Zug kommt um neun Uhr an.|Il treno arriva alle nove.
+>The train arrives at nine|Поезд прибывает в девять|El tren llega a las nueve|Le train arrive à neuf heures|Der Zug kommt um neun Uhr an|Il treno arriva alle nove
 to leave|уходить|salir|partir|weggehen|uscire
->I leave the house at eight.|Я выхожу из дома в восемь.|Salgo de casa a las ocho.|Je pars de la maison à huit heures.|Ich gehe um acht aus dem Haus.|Esco di casa alle otto.
+>I leave the house at eight|Я выхожу из дома в восемь|Salgo de casa a las ocho|Je pars de la maison à huit heures|Ich gehe um acht aus dem Haus|Esco di casa alle otto
 to return|возвращаться|volver|revenir|zurückkommen|tornare
->I'll come back tomorrow.|Я вернусь завтра.|Vuelvo mañana.|Je reviens demain.|Ich komme morgen zurück.|Torno domani.
+>I'll come back tomorrow|Я вернусь завтра|Vuelvo mañana|Je reviens demain|Ich komme morgen zurück|Torno domani
 to sell|продавать|vender|vendre|verkaufen|vendere
->They are selling the house.|Они продают дом.|Venden la casa.|Ils vendent la maison.|Sie verkaufen das Haus.|Vendono la casa.
+>They are selling the house|Они продают дом|Venden la casa|Ils vendent la maison|Sie verkaufen das Haus|Vendono la casa
 to send|отправлять|enviar|envoyer|schicken|inviare
->I'm sending you a message.|Я отправляю тебе сообщение.|Te envío un mensaje.|Je t'envoie un message.|Ich schicke dir eine Nachricht.|Ti invio un messaggio.
+>I'm sending you a message|Я отправляю тебе сообщение|Te envío un mensaje|Je t'envoie un message|Ich schicke dir eine Nachricht|Ti invio un messaggio
 to receive|получать|recibir|recevoir|bekommen|ricevere
->I receive many letters.|Я получаю много писем.|Recibo muchas cartas.|Je reçois beaucoup de lettres.|Ich bekomme viele Briefe.|Ricevo molte lettere.
+>I receive many letters|Я получаю много писем|Recibo muchas cartas|Je reçois beaucoup de lettres|Ich bekomme viele Briefe|Ricevo molte lettere
 to choose|выбирать|elegir|choisir|wählen|scegliere
->Choose a colour.|Выбери цвет.|Elige un color.|Choisis une couleur.|Wähl eine Farbe.|Scegli un colore.
+>Choose a colour|Выбери цвет|Elige un color|Choisis une couleur|Wähl eine Farbe|Scegli un colore
 to try|пробовать|intentar|essayer|versuchen|provare
->I try every day.|Я пытаюсь каждый день.|Lo intento todos los días.|J'essaie tous les jours.|Ich versuche es jeden Tag.|Ci provo ogni giorno.
+>I try every day|Я пытаюсь каждый день|Lo intento todos los días|J'essaie tous les jours|Ich versuche es jeden Tag|Ci provo ogni giorno
 to change|менять|cambiar|changer|ändern|cambiare
->I want to change the date.|Я хочу изменить дату.|Quiero cambiar la fecha.|Je veux changer la date.|Ich möchte das Datum ändern.|Voglio cambiare la data.
+>I want to change the date|Я хочу изменить дату|Quiero cambiar la fecha|Je veux changer la date|Ich möchte das Datum ändern|Voglio cambiare la data
 to lose|терять|perder|perdre|verlieren|perdere
->I don't want to lose time.|Я не хочу терять время.|No quiero perder tiempo.|Je ne veux pas perdre de temps.|Ich will keine Zeit verlieren.|Non voglio perdere tempo.
+>I don't want to lose time|Я не хочу терять время|No quiero perder tiempo|Je ne veux pas perdre de temps|Ich will keine Zeit verlieren|Non voglio perdere tempo
 to win|выигрывать|ganar|gagner|gewinnen|vincere
->Our team wins today.|Сегодня выигрывает наша команда.|Nuestro equipo gana hoy.|Notre équipe gagne aujourd'hui.|Unsere Mannschaft gewinnt heute.|La nostra squadra vince oggi.
+>Our team wins today|Сегодня выигрывает наша команда|Nuestro equipo gana hoy|Notre équipe gagne aujourd'hui|Unsere Mannschaft gewinnt heute|La nostra squadra vince oggi
 to laugh|смеяться|reír|rire|lachen|ridere
->We laugh a lot.|Мы много смеёмся.|Nos reímos mucho.|Nous rions beaucoup.|Wir lachen viel.|Ridiamo molto.
+>We laugh a lot|Мы много смеёмся|Nos reímos mucho|Nous rions beaucoup|Wir lachen viel|Ridiamo molto
 to cry|плакать|llorar|pleurer|weinen|piangere
->The baby is crying.|Малыш плачет.|El bebé llora.|Le bébé pleure.|Das Baby weint.|Il neonato piange.
+>The baby is crying|Малыш плачет|El bebé llora|Le bébé pleure|Das Baby weint|Il neonato piange
 ` },
 { id: "doctor", emoji: "🩺", level: "A2", title: { en: "At the doctor", ru: "У врача" }, data: `
-I don't feel well.|Мне нехорошо.|No me encuentro bien.|Je ne me sens pas bien.|Mir geht es nicht gut.|Non mi sento bene.
-My head hurts.|У меня болит голова.|Me duele la cabeza.|J'ai mal à la tête.|Ich habe Kopfschmerzen.|Ho mal di testa.
-My stomach hurts.|У меня болит живот.|Me duele el estómago.|J'ai mal au ventre.|Ich habe Bauchschmerzen.|Ho mal di pancia.
-I have a fever.|У меня температура.|Tengo fiebre.|J'ai de la fièvre.|Ich habe Fieber.|Ho la febbre.
-I am allergic to nuts.|У меня аллергия на орехи.|Soy alérgico a los frutos secos.|Je suis allergique aux noix.|Ich bin allergisch gegen Nüsse.|Sono allergico alle noci.
-I need a doctor.|Мне нужен врач.|Necesito un médico.|J'ai besoin d'un médecin.|Ich brauche einen Arzt.|Ho bisogno di un medico.
+I don't feel well|Мне нехорошо|No me encuentro bien|Je ne me sens pas bien|Mir geht es nicht gut|Non mi sento bene
+My head hurts|У меня болит голова|Me duele la cabeza|J'ai mal à la tête|Ich habe Kopfschmerzen|Ho mal di testa
+My stomach hurts|У меня болит живот|Me duele el estómago|J'ai mal au ventre|Ich habe Bauchschmerzen|Ho mal di pancia
+I have a fever|У меня температура|Tengo fiebre|J'ai de la fièvre|Ich habe Fieber|Ho la febbre
+I am allergic to nuts|У меня аллергия на орехи|Soy alérgico a los frutos secos|Je suis allergique aux noix|Ich bin allergisch gegen Nüsse|Sono allergico alle noci
+I need a doctor|Мне нужен врач|Necesito un médico|J'ai besoin d'un médecin|Ich brauche einen Arzt|Ho bisogno di un medico
 Call an ambulance!|Вызовите скорую!|¡Llame a una ambulancia!|Appelez une ambulance !|Rufen Sie einen Krankenwagen!|Chiami un'ambulanza!
 Where is the pharmacy?|Где аптека?|¿Dónde está la farmacia?|Où est la pharmacie ?|Wo ist die Apotheke?|Dov'è la farmacia?
 How often should I take it?|Как часто это принимать?|¿Cada cuánto debo tomarlo?|Combien de fois dois-je le prendre ?|Wie oft soll ich es nehmen?|Quante volte devo prenderlo?
@@ -791,31 +791,31 @@ to have lunch|обедать|almorzar|déjeuner|zu Mittag essen|pranzare
 to go shopping|ходить за покупками|ir de compras|faire les courses|einkaufen gehen|fare la spesa
 to rest|отдыхать|descansar|se reposer|sich ausruhen|riposarsi
 to go to bed|ложиться спать|acostarse|se coucher|ins Bett gehen|andare a letto
-I get up at seven.|Я встаю в семь.|Me levanto a las siete.|Je me lève à sept heures.|Ich stehe um sieben Uhr auf.|Mi alzo alle sette.
-I go to work by bus.|Я езжу на работу на автобусе.|Voy al trabajo en autobús.|Je vais au travail en bus.|Ich fahre mit dem Bus zur Arbeit.|Vado al lavoro in autobus.
-I finish work at six.|Я заканчиваю работу в шесть.|Termino de trabajar a las seis.|Je finis le travail à six heures.|Ich bin um sechs mit der Arbeit fertig.|Finisco di lavorare alle sei.
-In the evening I read.|Вечером я читаю.|Por la noche leo.|Le soir, je lis.|Abends lese ich.|La sera leggo.
-I go to bed early.|Я рано ложусь спать.|Me acuesto temprano.|Je me couche tôt.|Ich gehe früh ins Bett.|Vado a letto presto.
+I get up at seven|Я встаю в семь|Me levanto a las siete|Je me lève à sept heures|Ich stehe um sieben Uhr auf|Mi alzo alle sette
+I go to work by bus|Я езжу на работу на автобусе|Voy al trabajo en autobús|Je vais au travail en bus|Ich fahre mit dem Bus zur Arbeit|Vado al lavoro in autobus
+I finish work at six|Я заканчиваю работу в шесть|Termino de trabajar a las seis|Je finis le travail à six heures|Ich bin um sechs mit der Arbeit fertig|Finisco di lavorare alle sei
+In the evening I read|Вечером я читаю|Por la noche leo|Le soir, je lis|Abends lese ich|La sera leggo
+I go to bed early|Я рано ложусь спать|Me acuesto temprano|Je me couche tôt|Ich gehe früh ins Bett|Vado a letto presto
 What do you do on Sundays?|Что ты делаешь по воскресеньям?|¿Qué haces los domingos?|Qu'est-ce que tu fais le dimanche ?|Was machst du sonntags?|Che cosa fai la domenica?
 early|рано|temprano|tôt|früh|presto
 late|поздно|tarde|tard|spät|tardi
 every day|каждый день|todos los días|tous les jours|jeden Tag|ogni giorno
 ` },
 { id: "opinions", emoji: "🗣️", level: "B1", title: { en: "Opinions and talk", ru: "Мнения и беседа" }, data: `
-I think you are right.|Я думаю, ты прав.|Creo que tienes razón.|Je pense que tu as raison.|Ich glaube, du hast recht.|Penso che tu abbia ragione.
+I think you are right|Я думаю, ты прав|Creo que tienes razón|Je pense que tu as raison|Ich glaube, du hast recht|Penso che tu abbia ragione
 In my opinion|По моему мнению|En mi opinión|À mon avis|Meiner Meinung nach|Secondo me
-I'm not sure.|Я не уверен.|No estoy seguro.|Je ne suis pas sûr.|Ich bin nicht sicher.|Non sono sicuro.
-It depends.|Смотря по ситуации.|Depende.|Ça dépend.|Es kommt darauf an.|Dipende.
-That's a good idea.|Это хорошая идея.|Es una buena idea.|C'est une bonne idée.|Das ist eine gute Idee.|È una buona idea.
-I don't agree with you.|Я с тобой не согласен.|No estoy de acuerdo contigo.|Je ne suis pas d'accord avec toi.|Ich bin nicht deiner Meinung.|Non sono d'accordo con te.
+I'm not sure|Я не уверен|No estoy seguro|Je ne suis pas sûr|Ich bin nicht sicher|Non sono sicuro
+It depends|Смотря по ситуации|Depende|Ça dépend|Es kommt darauf an|Dipende
+That's a good idea|Это хорошая идея|Es una buena idea|C'est une bonne idée|Das ist eine gute Idee|È una buona idea
+I don't agree with you|Я с тобой не согласен|No estoy de acuerdo contigo|Je ne suis pas d'accord avec toi|Ich bin nicht deiner Meinung|Non sono d'accordo con te
 What do you think?|Что ты думаешь?|¿Qué piensas?|Qu'est-ce que tu en penses ?|Was denkst du?|Che cosa ne pensi?
 On the one hand|С одной стороны|Por un lado|D'un côté|Einerseits|Da un lato
 On the other hand|С другой стороны|Por otro lado|D'un autre côté|Andererseits|D'altra parte
 For example|Например|Por ejemplo|Par exemple|Zum Beispiel|Per esempio
-I prefer tea to coffee.|Я предпочитаю чай кофе.|Prefiero el té al café.|Je préfère le thé au café.|Ich mag Tee lieber als Kaffee.|Preferisco il tè al caffè.
-It doesn't matter.|Это не важно.|No importa.|Ce n'est pas grave.|Das macht nichts.|Non importa.
+I prefer tea to coffee|Я предпочитаю чай кофе|Prefiero el té al café|Je préfère le thé au café|Ich mag Tee lieber als Kaffee|Preferisco il tè al caffè
+It doesn't matter|Это не важно|No importa|Ce n'est pas grave|Das macht nichts|Non importa
 Are you serious?|Ты серьёзно?|¿Hablas en serio?|Tu es sérieux ?|Meinst du das ernst?|Dici sul serio?
-You are welcome to join.|Можешь присоединиться.|Puedes unirte a nosotros.|Tu peux te joindre à nous.|Du kannst gern mitkommen.|Puoi unirti a noi.
+You are welcome to join|Можешь присоединиться|Puedes unirte a nosotros|Tu peux te joindre à nous|Du kannst gern mitkommen|Puoi unirti a noi
 the opinion|мнение|la opinión|l'opinion|die Meinung|l'opinione
 the reason|причина|la razón|la raison|der Grund|la ragione
 the truth|правда|la verdad|la vérité|die Wahrheit|la verità
@@ -839,10 +839,10 @@ the neighbourhood|район|el barrio|le quartier|das Viertel|il quartiere
 the moving|переезд|la mudanza|le déménagement|der Umzug|il trasloco
 quiet|тихий|tranquilo|calme|ruhig|tranquillo
 furnished|меблированный|amueblado|meublé|möbliert|arredato
-I'm looking for a flat.|Я ищу квартиру.|Busco un piso.|Je cherche un appartement.|Ich suche eine Wohnung.|Cerco un appartamento.
+I'm looking for a flat|Я ищу квартиру|Busco un piso|Je cherche un appartement|Ich suche eine Wohnung|Cerco un appartamento
 How much is the rent?|Сколько стоит аренда?|¿Cuánto es el alquiler?|Combien coûte le loyer ?|Wie hoch ist die Miete?|Quanto costa l'affitto?
 Can I see the flat?|Можно посмотреть квартиру?|¿Puedo ver el piso?|Je peux voir l'appartement ?|Kann ich die Wohnung sehen?|Posso vedere l'appartamento?
-The heating doesn't work.|Отопление не работает.|La calefacción no funciona.|Le chauffage ne marche pas.|Die Heizung funktioniert nicht.|Il riscaldamento non funziona.
+The heating doesn't work|Отопление не работает|La calefacción no funciona|Le chauffage ne marche pas|Die Heizung funktioniert nicht|Il riscaldamento non funziona
 ` },
 { id: "kitchen", emoji: "🍳", level: "A2", title: { en: "Cooking", ru: "Готовим" }, data: `
 to cut|резать|cortar|couper|schneiden|tagliare
@@ -891,21 +891,21 @@ to destroy|разрушать|destruir|détruire|zerstören|distruggere
 to grow|расти|crecer|grandir|wachsen|crescere
 clean (energy)|экологически чистый|limpio|propre|sauber|pulito
 dangerous|опасный|peligroso|dangereux|gefährlich|pericoloso
-We must protect nature.|Мы должны защищать природу.|Debemos proteger la naturaleza.|Nous devons protéger la nature.|Wir müssen die Natur schützen.|Dobbiamo proteggere la natura.
+We must protect nature|Мы должны защищать природу|Debemos proteger la naturaleza|Nous devons protéger la nature|Wir müssen die Natur schützen|Dobbiamo proteggere la natura
 ` },
 { id: "smalltalk", emoji: "☕", level: "A2", title: { en: "Making plans", ru: "Встречи и планы" }, data: `
 What are you doing tonight?|Что ты делаешь сегодня вечером?|¿Qué haces esta noche?|Qu'est-ce que tu fais ce soir ?|Was machst du heute Abend?|Che cosa fai stasera?
 Are you free tomorrow?|Ты свободен завтра?|¿Estás libre mañana?|Tu es libre demain ?|Hast du morgen Zeit?|Sei libero domani?
-Let's meet at eight.|Давай встретимся в восемь.|Quedamos a las ocho.|On se retrouve à huit heures.|Treffen wir uns um acht.|Ci vediamo alle otto.
+Let's meet at eight|Давай встретимся в восемь|Quedamos a las ocho|On se retrouve à huit heures|Treffen wir uns um acht|Ci vediamo alle otto
 Where shall we meet?|Где встретимся?|¿Dónde quedamos?|On se retrouve où ?|Wo treffen wir uns?|Dove ci vediamo?
-I will be a bit late.|Я немного опоздаю.|Llegaré un poco tarde.|Je serai un peu en retard.|Ich komme etwas später.|Arriverò un po' in ritardo.
-Sorry, I can't today.|Извини, сегодня не могу.|Lo siento, hoy no puedo.|Désolé, je ne peux pas aujourd'hui.|Tut mir leid, heute kann ich nicht.|Mi dispiace, oggi non posso.
+I will be a bit late|Я немного опоздаю|Llegaré un poco tarde|Je serai un peu en retard|Ich komme etwas später|Arriverò un po' in ritardo
+Sorry, I can't today|Извини, сегодня не могу|Lo siento, hoy no puedo|Désolé, je ne peux pas aujourd'hui|Tut mir leid, heute kann ich nicht|Mi dispiace, oggi non posso
 How was your day?|Как прошёл твой день?|¿Qué tal tu día?|Comment s'est passée ta journée ?|Wie war dein Tag?|Com'è andata la giornata?
 Have a nice weekend!|Хороших выходных!|¡Buen fin de semana!|Bon week-end !|Schönes Wochenende!|Buon fine settimana!
-See you on Monday.|Увидимся в понедельник.|Nos vemos el lunes.|On se voit lundi.|Wir sehen uns am Montag.|Ci vediamo lunedì.
+See you on Monday|Увидимся в понедельник|Nos vemos el lunes|On se voit lundi|Wir sehen uns am Montag|Ci vediamo lunedì
 Do you want to dance?|Хочешь потанцевать?|¿Quieres bailar?|Tu veux danser ?|Möchtest du tanzen?|Vuoi ballare?
-It was a lovely evening.|Это был чудесный вечер.|Ha sido una noche estupenda.|C'était une belle soirée.|Es war ein schöner Abend.|È stata una bella serata.
-Call me later.|Позвони мне позже.|Llámame más tarde.|Appelle-moi plus tard.|Ruf mich später an.|Chiamami più tardi.
+It was a lovely evening|Это был чудесный вечер|Ha sido una noche estupenda|C'était une belle soirée|Es war ein schöner Abend|È stata una bella serata
+Call me later|Позвони мне позже|Llámame más tarde|Appelle-moi plus tard|Ruf mich später an|Chiamami più tardi
 What's your phone number?|Какой у тебя номер телефона?|¿Cuál es tu número de teléfono?|Quel est ton numéro de téléphone ?|Wie ist deine Telefonnummer?|Qual è il tuo numero di telefono?
 the party|вечеринка|la fiesta|la fête|die Party|la festa
 the invitation|приглашение|la invitación|l'invitation|die Einladung|l'invito

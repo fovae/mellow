@@ -26,8 +26,13 @@ export function openModal({ title, emoji, build, dismissible = true, className =
 
     if (dismissible) swipeToClose(dialog, close);
     dialog.addEventListener("close", () => dialog.remove());
+    // A tap on the dimmed area closes the sheet only when it also started there: a sheet that moves up
+    // for the keyboard must not turn the tap on its field into a tap on the backdrop.
+    let downOnBackdrop = false;
+    dialog.addEventListener("pointerdown", (event) => { downOnBackdrop = event.target === dialog; });
     dialog.addEventListener("click", (event) => {
-        if (dismissible && event.target === dialog) close();
+        if (dismissible && event.target === dialog && downOnBackdrop) close();
+        downOnBackdrop = false;
     });
     if (dismissible) {
         dialog.addEventListener("cancel", (event) => {

@@ -246,3 +246,10 @@ test("sw.js carries the app version, so every release is offered as an update", 
     const sw = await readFile(new URL("../sw.js", import.meta.url), "utf8");
     assert.equal(sw.match(/const VERSION = "([^"]+)"/)?.[1], APP_VERSION);
 });
+
+test("answers: punctuation, dashes and ё never make an answer wrong", () => {
+    const q = { accepted: ["Всё хорошо, спасибо", "peut-être", "How are you?"] };
+    for (const text of ["все хорошо спасибо", "Всё хорошо, спасибо.", "всё хорошо — спасибо", "peut etre", "peut-être", "how are you", "How are you?!"]) assert.ok(isCorrect(q, text), text);
+    assert.ok(!isCorrect(q, "все плохо"));
+    assert.ok(!isCorrect(q, "..."));
+});

@@ -40,11 +40,11 @@
 .tm-ring { flex: none; width: 30px; height: 30px; border: 4px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; }
 .tm-flash { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
 .tm-flash b { font-size: 1.3rem; }
-.tm-grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tm-grades { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tm-grade { height: 26px; border-radius: 9px; }
 .tm-grade-again { background: var(--danger-soft); }
 .tm-grade-hard { background: var(--warning-soft); }
-.tm-grade-good { background: var(--accent-soft); }
+.tm-grade-good { background: var(--success-soft); }
 .tm-grade-easy { background: var(--success-soft); }
 .tm-emoji { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: var(--inner); }
 .tm-emoji .art { width: 20px; height: 20px; }

@@ -155,13 +155,13 @@ html[data-kb] .modal-full .session { padding-bottom: calc(var(--kb-h) + 12px); }
 .flashcard[data-swipe="again"] .flashcard-face { border-color: var(--danger); }
 .flashcard-label { font-size: .76rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .flashcard-word, .question-word { max-width: 100%; font-size: 2.1rem; font-weight: 700; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
-.grades { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.grades { flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .grade { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 64px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft); }
-.grade strong { font-size: .88rem; }
+.grade strong { font-size: 1rem; }
 .grade small { font-size: .76rem; color: var(--muted); }
 .grade-again { color: var(--danger); background: var(--danger-soft); }
 .grade-hard { color: var(--warning); background: var(--warning-soft); }
-.grade-good { color: var(--accent); background: var(--accent-soft); }
+.grade-good { color: var(--success); background: var(--success-soft); }
 .grade-easy { color: var(--success); background: var(--success-soft); }
 
 .question { flex: 1; min-height: 120px; max-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
@@ -211,3 +211,5 @@ html[data-kb] .modal-full .session { padding-bottom: calc(var(--kb-h) + 12px); }
 .modal-panel:focus { outline: none; }
 .add-word { display: flex; flex-direction: column; gap: 10px; }
 .add-word .tags:empty, .add-word .feedback:empty { display: none; }
+.hero-cta { margin-top: 18px; pointer-events: none; }
+.hero-link:active .hero-cta { transform: scale(.97); }
