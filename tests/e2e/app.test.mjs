@@ -77,18 +77,31 @@ test("the first start adds topics for the chosen pair", async () => {
 test("study: grade, undo, finish", async () => {
     await start();
     await active(".hero-btn").click();
-    await page.click(".session-footer .btn-primary");
-    // Two answers only: "Forgot" and "Remember".
+    // The first time a picture shows how cards are swiped; once only.
+    await page.click(".swipe-tutorial .btn");
+    await page.waitForFunction(() => !document.querySelector(".swipe-tutorial"));
+    // Two answers only, always there: "Forgot" and "Remember". Chosen before turning, the answer shows first.
     assert.deepEqual(await page.locator(".grades .grade strong").allTextContents(), ["Forgot", "Remember"]);
     await page.keyboard.press("2");
-    assert.notEqual((await state()).dictionaries[0].words[0].srs, null);
+    await page.locator(".flashcard.is-flipped").waitFor();
+    await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries[0].words[0].srs !== null);
     await page.click('[aria-label="Undo"]');
     assert.equal((await state()).dictionaries[0].words[0].srs, null);
+    // A swipe to the right is "Remember" too.
+    const box = await page.locator(".flashcard").boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2, { steps: 4 });
+    await page.mouse.move(box.x + box.width / 2 + 160, box.y + box.height / 2, { steps: 4 });
+    await page.mouse.up();
+    await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries[0].words[0].srs !== null);
     for (let i = 0; i < 60 && !(await page.locator(".session-summary").count()); i++) {
-        await page.click(".session-footer .btn-primary");
+        await page.click(".flashcard:not(.is-gone)");
         await page.keyboard.press("2");
+        await page.waitForFunction(() => !document.querySelector(".flashcard.is-gone"));
     }
     await page.waitForSelector(".session-summary");
+    assert.equal(await page.evaluate(() => localStorage.getItem("mellow_cards_tutorial")), "1", "the picture is shown once");
 });
 
 test("library: search and add", async () => {

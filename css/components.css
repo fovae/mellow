@@ -146,7 +146,9 @@ html[data-kb] .modal-full .session { padding-bottom: calc(var(--kb-h) + 12px); }
 .summary-list { text-align: left; }
 @keyframes pop { from { opacity: 0; transform: scale(.4); } }
 
-.flashcard { flex: 1; min-height: 200px; perspective: 1400px; cursor: pointer; touch-action: pan-y; animation: rise .3s var(--ease-soft); }
+.flashcard { position: relative; flex: 1; display: flex; min-height: 200px; cursor: pointer; touch-action: pan-y; animation: rise .3s var(--ease-soft); transition: transform .35s var(--ease-soft); }
+.flashcard.is-dragging { transition: none; }
+.flashcard-scene { position: relative; flex: 1; perspective: 1400px; }
 .flashcard-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .55s var(--ease-soft); }
 .flashcard.is-flipped .flashcard-inner { transform: rotateY(180deg); }
 .flashcard-face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; border: 2px solid transparent; border-radius: 32px; background: var(--surface); box-shadow: var(--shadow); backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: border-color .2s; }
@@ -155,8 +157,8 @@ html[data-kb] .modal-full .session { padding-bottom: calc(var(--kb-h) + 12px); }
 .flashcard[data-swipe="again"] .flashcard-face { border-color: var(--danger); }
 .flashcard-label { font-size: .76rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .flashcard-word, .question-word { max-width: 100%; font-size: 2.1rem; font-weight: 700; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
-.grades { flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.grade { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 64px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft); }
+.grades { flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grade { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 68px; padding: 8px 12px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft); }
 .grade strong { font-size: 1rem; }
 .grade small { font-size: .76rem; color: var(--muted); }
 .grade-again { color: var(--danger); background: var(--danger-soft); }
@@ -213,3 +215,55 @@ html[data-kb] .modal-full .session { padding-bottom: calc(var(--kb-h) + 12px); }
 .add-word .tags:empty, .add-word .feedback:empty { display: none; }
 .hero-cta { margin-top: 18px; pointer-events: none; }
 .hero-link:active .hero-cta { transform: scale(.97); }
+
+/* Flashcards: answers always there, the card flies off to the side of the answer (js/ui/study.js). */
+.card-zone { position: relative; flex: 1; display: flex; min-height: 200px; }
+.grade-icon { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, currentColor 14%, transparent); transition: transform .42s var(--ease-soft); }
+.grade-icon .icon { width: 20px; height: 20px; stroke-width: 2.6; }
+.grade-text { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; }
+/* Dragging past the line, or the chosen answer: its button lights up. */
+.session:has(.flashcard[data-swipe="good"]) .grade-good, .grades[data-chosen="good"] .grade-good,
+.session:has(.flashcard[data-swipe="again"]) .grade-again, .grades[data-chosen="again"] .grade-again { transform: scale(1.04); box-shadow: inset 0 0 0 2px currentColor; }
+.session:has(.flashcard[data-swipe="good"]) .grade-good .grade-icon, .grades[data-chosen="good"] .grade-good .grade-icon,
+.session:has(.flashcard[data-swipe="again"]) .grade-again .grade-icon, .grades[data-chosen="again"] .grade-again .grade-icon { transform: scale(1.12); }
+
+.flashcard.is-gone { pointer-events: none; transition: transform .3s cubic-bezier(.4, 0, .9, .6), opacity .3s cubic-bezier(.4, 0, 1, 1); opacity: 0; }
+.flashcard.is-gone-good { transform: translateX(115%) rotate(14deg); }
+.flashcard.is-gone-again { transform: translateX(-115%) rotate(-14deg); }
+.flashcard-tap { position: absolute; bottom: 20px; left: 0; right: 0; font-size: .78rem; font-weight: 600; color: var(--muted); text-align: center; }
+
+/* The stamp that shows through while dragging: "Remember" on the left side of the card, "Forgot" on the right. */
+.swipe-stamp { position: absolute; top: 24px; z-index: 2; padding: 6px 12px; border: 3px solid currentColor; border-radius: 12px; font-size: 1rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; pointer-events: none; background: var(--surface); }
+.swipe-stamp-good { left: 22px; color: var(--success); opacity: var(--good, 0); transform: rotate(-12deg); }
+.swipe-stamp-again { right: 22px; color: var(--danger); opacity: var(--again, 0); transform: rotate(12deg); }
+.flashcard.is-gone-good .swipe-stamp-good, .flashcard.is-gone-again .swipe-stamp-again { opacity: 1; }
+
+/* The first time: how cards are swiped. */
+.swipe-tutorial { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; border-radius: 32px; text-align: center; background: var(--surface); box-shadow: var(--shadow); animation: rise .35s var(--ease-soft); transition: opacity .2s; }
+.swipe-tutorial.is-leaving { opacity: 0; }
+.swipe-tutorial .btn { flex: none; align-self: stretch; margin-top: 8px; }
+.swipe-title { font-size: 1.3rem; font-weight: 800; }
+.swipe-picture { width: min(260px, 86%); overflow: visible; }
+.swipe-legend { display: flex; justify-content: space-between; width: min(260px, 86%); margin-top: -6px; font-size: .82rem; font-weight: 700; }
+.swipe-legend-again { color: var(--danger); }
+.swipe-legend-good { color: var(--success); }
+.swipe-card, .swipe-finger, .swipe-side { transform-box: fill-box; transform-origin: center; }
+.swipe-card-body { fill: var(--page); stroke: var(--accent); stroke-width: 2.5; }
+.swipe-card-line { fill: var(--accent); opacity: .55; }
+.swipe-card-line.is-light { opacity: .25; }
+.swipe-finger-ring { fill: var(--accent); opacity: .18; }
+.swipe-finger-dot { fill: var(--accent); }
+.swipe-side circle { stroke: none; }
+.swipe-side path { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.swipe-side-again circle { fill: var(--danger-soft); }
+.swipe-side-again path { stroke: var(--danger); }
+.swipe-side-good circle { fill: var(--success-soft); }
+.swipe-side-good path { stroke: var(--success); }
+.swipe-card { animation: swipe-card 3.4s var(--ease-soft) infinite; }
+.swipe-finger { animation: swipe-finger 3.4s var(--ease-soft) infinite; }
+.swipe-side-again { animation: swipe-again 3.4s ease infinite; }
+.swipe-side-good { animation: swipe-good 3.4s ease infinite; }
+@keyframes swipe-card { 0%, 8% { transform: none; } 28%, 34% { transform: translateX(-48px) rotate(-11deg); } 46%, 54% { transform: none; } 74%, 80% { transform: translateX(48px) rotate(11deg); } 92%, 100% { transform: none; } }
+@keyframes swipe-finger { 0%, 8% { transform: none; opacity: 1; } 28%, 34% { transform: translateX(-48px); } 46%, 54% { transform: none; } 74%, 80% { transform: translateX(48px); } 92%, 100% { transform: none; } }
+@keyframes swipe-again { 0%, 20%, 42%, 100% { transform: none; opacity: .55; } 30% { transform: scale(1.18); opacity: 1; } }
+@keyframes swipe-good { 0%, 66%, 88%, 100% { transform: none; opacity: .55; } 76% { transform: scale(1.18); opacity: 1; } }

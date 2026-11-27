@@ -53,8 +53,6 @@ export default {
     "cards.inWeek": "Back within 7 days",
     "cards.how": "How it works",
     "cards.howText": "Mellow shows a word right before you would forget it. Answer honestly: the better you know a word, the later it returns. After 21 days it counts as mastered.",
-    "study.show": "Show answer",
-    "study.hint": "Tap to flip · left: forgot, right: remember",
     "study.doneTitle": "Session complete",
     "study.doneText": "Words will come back when it is time.",
     "tests.eyebrow": "Check yourself",
@@ -430,5 +428,9 @@ export default {
     "update.latest": "You have the latest version",
     "study.forgot": "Forgot",
     "study.remember": "Remember",
+    "study.tapToFlip": "Tap to turn over",
+    "study.tutorialTitle": "Swipe the cards",
+    "study.tutorialText": "Right means you remember, left means you forgot. Or use the buttons below. Tap a card to see the translation.",
+    "study.tutorialOk": "Got it",
     "library.cta": "Choose topics",
 };
