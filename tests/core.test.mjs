@@ -82,7 +82,7 @@ test("export and import return the same words", () => {
     assert.deepEqual(parseWords(toCSV(words)).words, words);
 });
 test("a damaged backup is cleaned", () => {
-    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, haptics: true, speechRate: "normal", motion: true, backupReminder: true, accent: "mellow", native: "English", target: "Spanish" } };
+    const defaults = { version: 2, settings: { language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, paceUnit: "day", reverse: false, autoSpeak: false, sound: true, haptics: true, speechRate: "normal", motion: true, backupReminder: true, accent: "mellow", native: "English", target: "Spanish" } };
     let n = 0;
     const clean = cleanState({
         username: 5, profiles: [5, { from: "Elvish", to: "Spanish" }, { from: "Spanish", to: "English" }], removedTopics: [1, "a:b:c"], settings: { theme: "x", dailyGoal: "a" }, log: { bad: {}, "2026-11-24": { answers: "x", correct: 2 } },

@@ -1,0 +1,73 @@
+/* The first screen: big blocks of tiles instead of rows (js/ui/onboarding.js), the pace sheet (js/ui/pace.js)
+   and the app language switch of the sign-in screen. */
+
+.setup-blocks { display: flex; flex-direction: column; gap: 28px; }
+.setup-block { display: flex; flex-direction: column; gap: 12px; }
+.setup-block-title { margin: 0 4px; font-size: .84rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.setup-note { margin: 0 4px; font-size: .82rem; line-height: 1.45; text-align: center; color: var(--muted); }
+
+/* A tile: picture, a big line, a small one. Chosen = a ring and a tint of the colour style. */
+.setup-tile { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 14px 8px; border: 2px solid transparent; border-radius: 22px; text-align: center; background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft), border-color .2s, background .2s; }
+.setup-tile:active { transform: scale(.97); transition-duration: .11s; }
+.setup-tile.is-active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--surface)); }
+.setup-tile-art { display: grid; place-items: center; width: 40px; height: 40px; }
+.setup-tile-art .art { width: 100%; height: 100%; }
+.setup-tile-main { max-width: 100%; font-size: 1.05rem; font-weight: 800; letter-spacing: -.01em; overflow-wrap: break-word; }
+.setup-tile-sub { font-size: .78rem; font-weight: 600; color: var(--muted); }
+.setup-tile.is-active .setup-tile-sub { color: var(--accent); }
+
+.tile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile-row-3 { grid-template-columns: repeat(3, 1fr); }
+.tile-row-3 .setup-tile-main { font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+/* "Own pace": the whole width, the picture on the left. */
+.setup-tile-wide { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "art main" "art sub"; align-items: center; justify-items: start; column-gap: 14px; row-gap: 2px; padding: 12px 16px; text-align: left; }
+.setup-tile-wide .setup-tile-art { grid-area: art; width: 34px; height: 34px; }
+.setup-tile-wide .setup-tile-main { grid-area: main; }
+.setup-tile-wide .setup-tile-sub { grid-area: sub; }
+
+/* Languages: "I speak" (arrow) "I learn". */
+.lang-pair { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.lang-tile { padding: 16px 8px 14px; }
+.lang-tile .setup-tile-art { width: 48px; height: 48px; }
+.lang-swap { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--accent); background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft); }
+.lang-swap:active { transform: scale(.92); transition-duration: .11s; }
+.lang-swap .icon { width: 20px; height: 20px; }
+.lang-swap-arrow { display: grid; }
+.lang-swap-arrow.is-spinning { animation: half-turn .5s var(--ease-soft); }
+@keyframes half-turn { from { transform: rotate(-180deg); } }
+
+/* The language sheet: flags in a grid. */
+.lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.lang-option { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 14px 4px; border: 2px solid transparent; border-radius: 20px; font-size: .8rem; font-weight: 700; overflow-wrap: break-word; background: var(--surface); box-shadow: var(--shadow); transition: transform .42s var(--ease-soft); }
+.lang-option:active { transform: scale(.96); transition-duration: .11s; }
+.lang-option.is-active { border-color: var(--accent); color: var(--accent); }
+.lang-option-art { display: grid; width: 40px; height: 40px; }
+.lang-option-art .art { width: 100%; height: 100%; }
+
+/* The pace sheet: − number +, per day | per week. */
+.pace-sheet { display: flex; flex-direction: column; gap: 20px; padding-top: 4px; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 28px; }
+.stepper-btn { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); touch-action: manipulation; transition: transform .42s var(--ease-soft), opacity .2s; }
+.stepper-btn:active { transform: scale(.92); transition-duration: .11s; }
+.stepper-btn:disabled { opacity: .35; }
+.stepper-btn .icon { width: 24px; height: 24px; }
+.stepper-value { min-width: 3ch; font-size: 3rem; font-weight: 800; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+.pace-forecast { text-align: center; }
+
+/* Mello watches the first screen from the top, small enough to leave the blocks in view; a small hop at every choice. */
+.mascot-large.mascot-watch { width: 96px; }
+.mascot-large.mascot-happy.is-cheering { animation: hop .6s var(--ease-soft), float 4s ease-in-out .6s infinite; }
+
+/* The app language on the sign-in screen: small, in the corner. */
+.auth-top { display: flex; justify-content: flex-end; margin-bottom: -24px; }
+.lang-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 999px; font-size: .85rem; font-weight: 600; color: var(--muted); background: var(--surface); box-shadow: var(--shadow); }
+.lang-pill .icon { width: 16px; height: 16px; }
+
+@media (max-width: 359px) {
+    .tile-row-3 { gap: 8px; }
+    .lang-pair { gap: 6px; }
+    .lang-tile .setup-tile-art { width: 40px; height: 40px; }
+    .lang-tile .setup-tile-main, .tile-row:not(.tile-row-3) .setup-tile-main { font-size: .9rem; }
+    .lang-option { font-size: .74rem; }
+}

@@ -121,6 +121,7 @@ export function cleanState(raw, defaults, createId, { languages, studyLanguages 
             theme: oneOf(settings.theme, ["auto", "light", "dark"], defaults.settings.theme),
             dailyGoal: number(settings.dailyGoal, 1, 1000, defaults.settings.dailyGoal),
             newPerDay: number(settings.newPerDay, 0, 1000, defaults.settings.newPerDay),
+            paceUnit: oneOf(settings.paceUnit, ["day", "week"], "day"),
             reverse: settings.reverse === true,
             sound: settings.sound !== false,
             haptics: settings.haptics !== false,

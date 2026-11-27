@@ -13,7 +13,8 @@ import { accountRows } from "../ui/account.js";
 import { showTour } from "../ui/tour.js";
 import { checkForUpdate } from "../ui/update.js";
 import { AUTO_DAYS } from "../core/account.js";
-import { cell, choiceCell, group } from "../ui/cells.js";
+import { cell, choiceCell, group, openChoice } from "../ui/cells.js";
+import { isPreset, openPaceSheet, paceLabel, PRESETS } from "../ui/pace.js";
 import { dropsChip, openAccents, openShop } from "../ui/rewards.js";
 import { icon } from "../ui/icons.js";
 import { profilesGroup } from "../ui/profiles.js";
@@ -83,6 +84,22 @@ const toggle = (key, rest, onChange) => cell({
     }),
 });
 
+// The pace: ready ones and "Own pace" (per day or per week), as on the first screen.
+const paceRow = (settings) => {
+    const value = { count: settings.newPerDay, unit: settings.paceUnit ?? "day" };
+    const pick = (next) => updateSettings({ newPerDay: next.count, paceUnit: next.unit });
+    // An own pace is never marked as chosen in the list, so tapping it always opens its sheet.
+    return cell({
+        icon: "plus", tint: 4, label: t("profile.newPerDay"), value: paceLabel(value), attrs: { "aria-haspopup": "dialog" },
+        onClick: () => openChoice({
+            label: t("profile.newPerDay"), value: isPreset(value) ? value.count : null,
+            options: [...PRESETS.map(({ count, art: emoji }) => ({ value: count, name: paceLabel({ count, unit: "day" }), emoji })),
+                { value: "custom", name: isPreset(value) ? t("pace.custom") : paceLabel(value), emoji: "✏️" }],
+            onPick: (choice) => (choice === "custom" ? setTimeout(() => openPaceSheet(value, pick), 250) : pick({ count: Number(choice), unit: "day" })),
+        }),
+    });
+};
+
 const choose = (key, rest, options) => choiceCell({ ...rest, options, value: getState().settings[key], onPick: set(key) });
 
 export function renderProfile() {
@@ -101,7 +118,7 @@ export function renderProfile() {
         profilesGroup(),
         group(t("profile.learning"), [
             choose("dailyGoal", { icon: "target", tint: 3, label: t("profile.goal") }, numbers(10, 20, 30, 50, 100)),
-            choose("newPerDay", { icon: "plus", tint: 4, label: t("profile.newPerDay") }, numbers(5, 10, 15, 20, 30)),
+            paceRow(settings),
             toggle("reverse", { icon: "swap", tint: 5, label: t("profile.reverse") }),
         ], { foot: t("settings.reverseNote") }),
         group(t("settings.sound"), [

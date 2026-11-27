@@ -1,9 +1,10 @@
 // The account: the sign-in screen that comes first, the account rows in settings and their sheets.
 import * as api from "../core/account.js";
 import { h } from "../core/dom.js";
-import { t, getLocale } from "../core/i18n.js";
-import { getBackup, getState, readBackup, resetAll, restore, subscribe } from "../core/store.js";
-import { cell, group } from "./cells.js";
+import { t, getLocale, languages } from "../core/i18n.js";
+import { getBackup, getState, readBackup, resetAll, restore, subscribe, updateSettings } from "../core/store.js";
+import { cell, group, openChoice } from "./cells.js";
+import { icon } from "./icons.js";
 import { mascot } from "./mascot.js";
 import { confirmModal, field, openFullscreen, openModal } from "./modal.js";
 import { refresh } from "./navigation.js";
@@ -242,6 +243,14 @@ export function showAuthScreen(mode = "signup", message = "") {
             const withGoogle = google && (mode === "signup" || mode === "login") && h("div", { class: "auth-google" },
                 h("button", { class: "btn btn-google", type: "button", onClick: () => toGoogle() }, googleMark(), t("auth.google")),
                 h("span", { class: "auth-or" }, t("auth.or")));
+            // The app language: it follows the system at first; a small switch in the corner, the full choice is in settings.
+            const language = h("div", { class: "auth-top" }, h("button", {
+                class: "lang-pill", type: "button", "aria-haspopup": "dialog", "aria-label": t("profile.language"),
+                onClick: () => openChoice({
+                    label: t("profile.language"), value: getLocale(), options: languages.map((l) => ({ value: l.code, name: l.name })),
+                    onPick: (code) => updateSettings({ language: code }),
+                }),
+            }, icon("globe"), languages.find((l) => l.code === getLocale())?.name ?? getLocale()));
             const page = h("form", {
                 class: "setup", id: "auth", novalidate: true,
                 onSubmit: async (event) => {
@@ -261,6 +270,7 @@ export function showAuthScreen(mode = "signup", message = "") {
                     }
                 },
             },
+                language,
                 h("header", { class: "setup-head" }, mascot("happy", "mascot-large mascot-auth"),
                     h("h1", { class: "screen-title", tabindex: "-1" }, t("auth.title")), h("p", { class: "muted" }, t(`auth.intro.${mode}`))),
                 withGoogle,
@@ -304,6 +314,10 @@ export function showAuthScreen(mode = "signup", message = "") {
             refresh();
         }
 
+        // A new app language redraws the screen in it; what was typed stays.
+        const unsubscribe = subscribe((type) => { if (type === "settings" && screen.isOpen()) draw(); });
+        const done = resolve;
+        resolve = () => { unsubscribe(); done(); };
         draw();
     });
 }

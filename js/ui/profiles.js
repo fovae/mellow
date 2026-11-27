@@ -1,7 +1,7 @@
 // Learning profiles: one language pair at a time.
 import { h } from "../core/dom.js";
 import { t, getLocale } from "../core/i18n.js";
-import { loadLibrary, LIBRARY_LANGUAGES, nextTopic } from "../core/library.js";
+import { libraryKey, loadLibrary, LIBRARY_LANGUAGES, nextTopic } from "../core/library.js";
 import { samePair } from "../core/profiles.js";
 import * as store from "../core/store.js";
 import { languageFlag, languageName, studyLanguages } from "../data/languages.js";
@@ -16,9 +16,13 @@ const FIRST_TOPICS = 2;
 const name = (language) => languageName(language, getLocale());
 const pairName = ({ from, to }) => `${name(from)} → ${name(to)}`;
 
-export async function addFirstTopics({ from, to }) {
+// knowsBasics: the A1 topics are skipped. The course will not add them by itself, but they stay in Topics.
+export async function addFirstTopics({ from, to }, { knowsBasics = false } = {}) {
     const topics = await loadLibrary();
-    if (topics && LIBRARY_LANGUAGES.includes(from) && LIBRARY_LANGUAGES.includes(to)) addTopics(topics.slice(0, FIRST_TOPICS), from, to);
+    if (!topics || !LIBRARY_LANGUAGES.includes(from) || !LIBRARY_LANGUAGES.includes(to)) return;
+    const skipped = knowsBasics ? topics.filter((topic) => topic.level === "A1") : [];
+    if (skipped.length) store.skipTopics(skipped.map((topic) => libraryKey(topic.id, from, to)));
+    addTopics(topics.filter((topic) => !skipped.includes(topic)).slice(0, FIRST_TOPICS), from, to);
 }
 
 // The course goes on by itself: when every word is started, the next topic of the library is added.

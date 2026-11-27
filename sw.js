@@ -1,6 +1,6 @@
 // The same as APP_VERSION (js/core/version.js; a test checks it). A new number makes this file new,
 // so browsers see the update and the app offers to reload (js/ui/update.js).
-const VERSION = "0.21.1";
+const VERSION = "0.22.0";
 const CACHE = `mellow-${VERSION}`;
 const ASSETS = [
     "./",
@@ -12,6 +12,7 @@ const ASSETS = [
     "./css/legal.css",
     "./css/loader.css",
     "./css/play.css",
+    "./css/setup.css",
     "./css/themes.css",
     "./css/tour.css",
     "./css/widgets.css",
@@ -77,6 +78,7 @@ const ASSETS = [
     "./js/ui/modal.js",
     "./js/ui/navigation.js",
     "./js/ui/onboarding.js",
+    "./js/ui/pace.js",
     "./js/ui/parts.js",
     "./js/ui/path.js",
     "./js/ui/profiles.js",

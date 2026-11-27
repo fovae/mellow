@@ -346,16 +346,25 @@ test("a module that failed once does not leave an empty page", async () => {
     await fresh.close();
 });
 
-test("the first screen: languages never match, pace and interface language are kept", async () => {
+test("the first screen: languages never match, an own weekly pace, the basics skipped", async () => {
     assert.equal(await page.locator("dialog input").count(), 0, "no name field: the name is the nickname");
     await page.locator("dialog .screen-title", { hasText: "Hi, tester!" }).waitFor();
-    await page.click('dialog .cell:has-text("I learn")');
+    await page.click('dialog .lang-tile:has-text("I learn")');
     await page.locator("dialog").last().locator('[data-value="English"]').click();
     await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
-    await page.click('dialog [data-value="calm"]');
-    await page.click('dialog .cell:has-text("App language")');
-    await page.locator("dialog").last().locator('[data-value="ru"]').click();
+    assert.match(await page.locator("dialog .lang-tile").first().textContent(), /Spanish/, "picking the other language swaps them");
+    // A ready pace, then an own one: per week, one more.
+    await page.click("dialog .tile-row-3 .setup-tile >> nth=0");
+    assert.equal(await page.locator("dialog .setup-note[role=status]").textContent(), "≈ 150 words a month · 1,825 a year");
+    await page.click("dialog .setup-tile-wide");
+    const sheet = page.locator("dialog").last();
+    await sheet.locator('[data-value="week"]').click();
+    await sheet.locator(".stepper-btn").last().click();
+    assert.equal(await sheet.locator(".stepper-value").textContent(), "6");
+    await sheet.locator(".btn-primary").click();
     await page.waitForFunction(() => document.querySelectorAll("dialog").length === 1);
+    assert.match(await page.locator("dialog .setup-tile-wide").textContent(), /6 a week/);
+    await page.click('dialog .setup-tile:has-text("I know the basics")');
     // Escape must not close the first screen, even when focus has fallen to <body>.
     await page.evaluate(() => document.activeElement.blur());
     await page.keyboard.press("Escape");
@@ -363,11 +372,15 @@ test("the first screen: languages never match, pace and interface language are k
     await page.click("dialog .session-footer .btn-primary");
     await page.waitForFunction(() => JSON.parse(localStorage.mellow_state).dictionaries.length === 2);
     const { username, settings } = await state();
-    assert.deepEqual([username, settings.native, settings.target, settings.newPerDay, settings.dailyGoal, settings.language], ["tester", "Spanish", "English", 5, 10, "ru"]);
+    assert.deepEqual([username, settings.native, settings.target, settings.newPerDay, settings.paceUnit, settings.dailyGoal], ["tester", "Spanish", "English", 6, "week", 10]);
+    // The basics are skipped: the course starts past them and will not add them by itself.
+    const first = (await state()).dictionaries.find((d) => d.libraryKey);
+    assert.ok(!first.libraryKey.startsWith("basics:"), first.libraryKey);
+    assert.ok((await state()).removedTopics.includes("basics:Spanish:English"));
     // The guide follows the first screen: forward, back, then "Start learning" on the last story.
     await page.locator("dialog .tour").waitFor();
     for (let i = 0; i < 4; i++) await page.click("dialog .tour .session-footer .btn-primary");
-    await page.locator("dialog .tour-title", { hasText: "облаке" }).waitFor();
+    await page.locator("dialog .tour-title", { hasText: "cloud" }).waitFor();
     await page.click("dialog .tour .session-footer .btn-primary");
     await page.waitForFunction(() => !document.querySelector("dialog"));
 });

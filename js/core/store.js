@@ -15,7 +15,7 @@ const listeners = new Set();
 export const createId = () =>
     globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
-const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, reverse: false, autoSpeak: false, sound: true, haptics: true, speechRate: "normal", motion: true, backupReminder: true, accent: "mellow", native: "English", target: "Spanish" });
+const defaultSettings = () => ({ language: "en", theme: "auto", dailyGoal: 20, newPerDay: 10, paceUnit: "day", reverse: false, autoSpeak: false, sound: true, haptics: true, speechRate: "normal", motion: true, backupReminder: true, accent: "mellow", native: "English", target: "Spanish" });
 
 const defaultRewards = () => ({
     drops: 20,
@@ -168,7 +168,14 @@ export function getTotals() {
 }
 
 export const getDay = (date) => state.log[dayKey(date)] ?? emptyDay();
-export const getNewLeft = () => Math.max(0, state.settings.newPerDay - getDay().fresh);
+// New words still allowed: per day, or per week (the last 7 days, today included). settings.newPerDay is the number of either.
+export function getNewLeft() {
+    const { newPerDay, paceUnit } = state.settings;
+    if (paceUnit !== "week") return Math.max(0, newPerDay - getDay().fresh);
+    let fresh = 0;
+    for (let back = 0; back < 7; back++) fresh += getDay(new Date(Date.now() - back * 86400000)).fresh;
+    return Math.max(0, newPerDay - fresh);
+}
 
 // A scope is a dictionary id, or null for everything.
 export const getScopeDictionaries = (scope) => (scope ? state.dictionaries.filter((d) => d.id === scope) : getDictionaries());
@@ -201,6 +208,12 @@ export const getAnswers = () => Object.values(state.log).reduce((sum, d) => sum 
 export const getStreak = (now = Date.now()) => streakOf(state.log, state.frozen, now);
 
 // Actions
+// Library topics the course must not add by itself (the person already knows them); they stay in Topics.
+export function skipTopics(keys) {
+    state.removedTopics = [...new Set([...state.removedTopics, ...keys])];
+    commit("dictionaries");
+}
+
 export function setUsername(name) {
     state.username = name;
     commit("user");
