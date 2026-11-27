@@ -2,7 +2,7 @@
 (function () {
     var theme, accent, motion;
     // A new epoch clears what earlier test versions left on the device: it goes with a reset of the cloud database.
-    var EPOCH = "3";
+    var EPOCH = "4";
     try {
         if (localStorage.getItem("mellow_epoch") !== EPOCH) {
             ["mellow_state", "mellow_state_unreadable", "mellow_account"].forEach(function (key) { localStorage.removeItem(key); });
