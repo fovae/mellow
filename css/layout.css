@@ -4,17 +4,21 @@
 /* Hidden screens stay laid out (not content-visibility: hidden): they are drawn only when something changed,
    so showing one again costs only a change of classes. */
 .screen { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
-.screen.is-active { visibility: visible; opacity: 1; }
+.screen.is-active { z-index: 1; visibility: visible; opacity: 1; }
 .screen-scroll { height: 100%; display: flex; flex-direction: column; gap: 30px; overflow: hidden auto; overscroll-behavior: none; scrollbar-width: none; padding: calc(24px + var(--safe-top)) var(--gutter) calc(124px + var(--safe-bottom)); }
 .screen-scroll::-webkit-scrollbar { display: none; }
 .screen-scroll > * { flex-shrink: 0; }
-/* A new screen: visible from the first frame and settles softly. The whole screen moves as one layer
-   (it scrolls by itself, so it is a layer anyway); moving its blocks one by one made a layer with a shadow
-   for each of them in the first frame, and that frame came late. */
-.screen.is-entering { animation: settle .28s var(--ease-soft) backwards; }
+/* Changing screens is a soft crossfade: the old screen melts away quickly underneath, the new one comes up
+   just after it (no doubled text in the middle) with a small lift; the fade is a little longer than the move, so it is still settling when already in place.
+   The whole screen moves as one layer (it scrolls by itself, so it is a layer anyway); moving its blocks one
+   by one made a layer with a shadow for each of them in the first frame, and that frame came late. */
+.screen.is-entering { animation: screen-fade .44s cubic-bezier(.33, 0, .2, 1) 100ms backwards, screen-lift .56s var(--ease-soft) 100ms backwards; }
+.screen.is-leaving { visibility: visible; animation: screen-out .14s cubic-bezier(.25, .1, .25, 1) both; }
+@keyframes screen-fade { from { opacity: 0; } }
+@keyframes screen-lift { from { transform: translateY(10px); } }
+@keyframes screen-out { from { opacity: 1; } to { opacity: 0; } }
 .screen.is-entering .bar-fill, .screen.is-entering .status-bar > span { animation: grow .6s var(--ease-soft) .1s backwards; }
 @keyframes grow { from { transform: scaleX(0); } }
-@keyframes settle { from { opacity: .35; transform: translateY(6px); } }
 @keyframes rise { from { opacity: .2; transform: translateY(18px); } }
 .scroll-thumb { position: absolute; top: 0; right: 4px; width: 3px; height: 40px; border-radius: 999px; background: var(--muted); opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
 .scroll-thumb.is-scrolling { opacity: .5; }

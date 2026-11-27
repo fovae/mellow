@@ -79,12 +79,17 @@ export function navigate(name, { now = false } = {}) {
         // A screen opened again with nothing changed is not rebuilt: switching is only a change of classes.
         if (views.get(name).stale !== false) draw(name);
         views.forEach(({ section }, key) => {
+            // The screen that was in view melts away under the new one.
+            section.classList.toggle("is-leaving", key !== name && section.classList.contains("is-active"));
             section.classList.toggle("is-active", key === name);
             section.classList.toggle("is-entering", key === name);
         });
         // Later redraws of the same screen must stay still.
         clearTimeout(enterTimer);
-        enterTimer = setTimeout(() => views.get(name).section.classList.remove("is-entering"), 400);
+        enterTimer = setTimeout(() => views.forEach(({ section }, key) => {
+            section.classList.remove("is-leaving");
+            if (key === name) section.classList.remove("is-entering");
+        }), 600);
     };
     if (now || current === null) return show();
     pending = requestAnimationFrame(() => { pending = requestAnimationFrame(show); });
