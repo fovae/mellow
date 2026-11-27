@@ -4,9 +4,10 @@
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,            -- random, never shown
     nick TEXT NOT NULL UNIQUE,      -- lower case, [a-z0-9_]{3,20}
-    salt TEXT NOT NULL,             -- base64, random per user
-    hash TEXT NOT NULL,             -- HMAC(pepper, salt + key derived on the device)
-    recovery TEXT NOT NULL,         -- HMAC(pepper, recovery code)
+    salt TEXT NOT NULL,             -- base64, random per user; '' without a password
+    hash TEXT NOT NULL,             -- HMAC(pepper, salt + key derived on the device); '' without a password
+    recovery TEXT NOT NULL,         -- HMAC(pepper, recovery code); '' without a password
+    google TEXT UNIQUE,             -- Google's account id ("sub"), when Google is linked
     created_at INTEGER NOT NULL
 );
 

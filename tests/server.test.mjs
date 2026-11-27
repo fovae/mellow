@@ -68,7 +68,7 @@ test("sign up, see the account, sign in elsewhere, sign out", async () => {
     assert.match(up.setCookie, /Secure/);
 
     const me = await call("GET", "/api/me", { cookie: up.token });
-    assert.deepEqual(me.data, { nick: "anna", backup: null });
+    assert.deepEqual(me.data, { nick: "anna", backup: null, google: false, linked: false, password: true });
     assert.equal(me.response.headers.get("cache-control"), "no-store");
 
     const wrong = await call("POST", "/api/login", { body: { nick: "anna", key: await key("secret-2") } });
@@ -81,7 +81,7 @@ test("sign up, see the account, sign in elsewhere, sign out", async () => {
     assert.notEqual(second.token, up.token);
 
     assert.equal((await call("POST", "/api/logout", { cookie: second.token })).status, 200);
-    assert.deepEqual((await call("GET", "/api/me", { cookie: second.token })).data, { nick: null, backup: null });
+    assert.deepEqual((await call("GET", "/api/me", { cookie: second.token })).data, { nick: null, backup: null, google: false });
     assert.equal((await call("GET", "/api/me", { cookie: up.token })).data.nick, "anna");
 });
 
@@ -207,4 +207,111 @@ test("no secret, no service; unknown routes are 404", async () => {
     assert.equal((await call("GET", "/api/nothing")).status, 404);
     env.PEPPER = "short";
     assert.equal((await call("POST", "/api/signup", { body: { nick: "anna", key: await key("x") } })).status, 500);
+});
+
+// Google: Google's token endpoint is replaced by a fake that answers with an ID token for "sub".
+function withGoogle(context, sub = "google-123") {
+    Object.assign(context.env, { GOOGLE_CLIENT_ID: "client.apps.googleusercontent.com", GOOGLE_SECRET: "secret" });
+    const jar = new Map();
+    const remember = (response) => {
+        for (const line of response.headers.getSetCookie()) {
+            const [pair] = line.split(";");
+            const [name, value] = pair.split("=");
+            value ? jar.set(name, value) : jar.delete(name);
+        }
+    };
+    const cookies = () => [...jar].map(([name, value]) => `${name}=${value}`).join("; ");
+    const send = async (method, path, body) => {
+        const headers = { origin: ORIGIN, "sec-fetch-site": "same-origin", cookie: cookies() };
+        const init = { method, headers };
+        if (body) { init.body = JSON.stringify(body); headers["content-type"] = "application/json"; }
+        const response = await handleApi(new Request(ORIGIN + path, init), context.env, Date.UTC(2026, 10, 26, 12));
+        remember(response);
+        return response;
+    };
+    // Through Google and back, as a browser would.
+    const through = async (mode = "") => {
+        const start = await send("GET", `/api/google/start${mode}`);
+        assert.equal(start.status, 303);
+        const target = new URL(start.headers.get("location"));
+        assert.equal(target.origin, "https://accounts.google.com");
+        assert.equal(target.searchParams.get("scope"), "openid");
+        assert.equal(target.searchParams.get("code_challenge_method"), "S256");
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async (url, init) => {
+            assert.equal(url, "https://oauth2.googleapis.com/token");
+            assert.ok(init.body.get("code_verifier"));
+            const claims = { iss: "https://accounts.google.com", aud: "client.apps.googleusercontent.com", sub, exp: Date.UTC(2026, 10, 26, 13) / 1000 };
+            return Response.json({ id_token: `x.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.y` });
+        };
+        try {
+            return await send("GET", `/api/google/callback?code=abc&state=${target.searchParams.get("state")}`);
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    };
+    return { send, through, jar };
+}
+
+test("google: a new account asks for a nickname, then signs in by itself", async () => {
+    const context = setup();
+    const google = withGoogle(context);
+    assert.equal((await (await google.send("GET", "/api/me")).json()).google, true);
+
+    const back = await google.through();
+    assert.equal(back.headers.get("location"), `${ORIGIN}/?google=done`);
+    const first = await (await google.send("POST", "/api/google/finish")).json();
+    assert.deepEqual(first, { nick: null, need: "nick" });
+    const made = await google.send("POST", "/api/google/signup", { nick: "Mira" });
+    assert.equal(made.status, 201);
+    const me = await (await google.send("GET", "/api/me")).json();
+    assert.deepEqual([me.nick, me.linked, me.password], ["mira", true, false]);
+
+    // No password: password sign-in and recovery never work for it; deleting asks for the nickname.
+    assert.equal((await context.call("POST", "/api/login", { body: { nick: "mira", key: await key("anything", "mira") } })).status, 401);
+    assert.equal((await google.send("DELETE", "/api/account", { nick: "someone" })).status, 401);
+
+    // Another device: Google again signs in to the same account.
+    const other = withGoogle(context);
+    await other.through();
+    assert.deepEqual(await (await other.send("POST", "/api/google/finish")).json(), { nick: "mira" });
+
+    // The first password comes with a recovery code; then Google can be taken off.
+    const set = await (await google.send("POST", "/api/password", { newKey: await key("new-secret", "mira") })).json();
+    assert.match(set.recovery, /^[A-Z2-9]{4}(-[A-Z2-9]{4}){3}$/);
+    assert.equal((await context.call("POST", "/api/login", { body: { nick: "mira", key: await key("new-secret", "mira") } })).status, 200);
+    assert.equal((await google.send("POST", "/api/google/unlink")).status, 200);
+    assert.equal((await (await google.send("GET", "/api/me")).json()).linked, false);
+});
+
+test("google: linking needs the session, a forged or old cookie is refused", async () => {
+    const context = setup();
+    const google = withGoogle(context, "google-777");
+    // Without a session there is nothing to link to.
+    assert.equal((await google.send("GET", "/api/google/start?mode=link")).status, 401);
+
+    const up = await context.call("POST", "/api/signup", { body: { nick: "anna", key: await key("secret-1") } });
+    google.jar.set(COOKIE, up.token);
+    await google.through("?mode=link");
+    assert.deepEqual(await (await google.send("POST", "/api/google/finish")).json(), { nick: "anna", linked: true });
+
+    // The same Google account cannot make a second account.
+    const other = withGoogle(context, "google-777");
+    await other.through();
+    assert.deepEqual(await (await other.send("POST", "/api/google/finish")).json(), { nick: "anna" });
+
+    // A changed cookie or a wrong state does not pass.
+    const forged = withGoogle(context);
+    await forged.send("GET", "/api/google/start");
+    const [name, value] = [...forged.jar].find(([n]) => n.endsWith("-google"));
+    forged.jar.set(name, value.replace(/^./, (c) => (c === "a" ? "b" : "a")));
+    assert.equal((await forged.send("GET", "/api/google/callback?code=abc&state=x")).headers.get("location"), `${ORIGIN}/?google=error`);
+    assert.equal((await forged.send("POST", "/api/google/finish")).status, 401);
+    assert.equal((await forged.send("POST", "/api/google/signup", { nick: "eve" })).status, 401);
+});
+
+test("google: hidden until both keys are set", async () => {
+    const { call } = setup();
+    assert.equal((await call("GET", "/api/me")).data.google, false);
+    assert.equal((await call("GET", "/api/google/start")).status, 404);
 });

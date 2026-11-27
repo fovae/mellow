@@ -12,7 +12,7 @@ import { openLibrary } from "./ui/library-modal.js";
 import { continueCourse } from "./ui/profiles.js";
 import { showOnboarding } from "./ui/onboarding.js";
 import { initUpdates } from "./ui/update.js";
-import { autoSave, checkAccount, hasServer, isSignedIn, showAuthScreen } from "./ui/account.js";
+import { accountGate, autoSave, checkAccount } from "./ui/account.js";
 import { renderHome } from "./screens/home.js";
 import { renderDictionaries } from "./screens/dictionaries.js";
 import { renderCards } from "./screens/cards.js";
@@ -46,7 +46,8 @@ subscribe((type) => {
         startFlow();
     } else if (type === "restore") {
         navigate("home");
-        if (!getState().username) showOnboarding();
+        // During the start flow the next screen comes from startFlow itself.
+        if (!inFlow && !getState().username) showOnboarding();
     } else {
         refresh();
     }
@@ -71,7 +72,7 @@ subscribe(updateBadge);
 // Ask the browser not to clear the data when space is low.
 navigator.storage?.persist?.().catch(() => {});
 
-// The account is checked while Mello wakes up: the first screen offers to sign in when there is a server.
+// The account is checked while Mello wakes up.
 const accountChecked = checkAccount();
 
 playLoader().then(async () => {
@@ -85,16 +86,23 @@ playLoader().then(async () => {
         refresh();
     });
     protectStreak();
-    // A slow network must not hold the app: without an answer it starts as without a server.
-    await Promise.race([accountChecked, new Promise((resolve) => setTimeout(resolve, 4000))]);
-    if (getState().username && (!hasServer() || isSignedIn())) return runShortcut();
-    startFlow();
+    // Without an answer in 10 s the check counts as offline (js/ui/account.js).
+    await accountChecked;
+    await startFlow();
+    if (getState().username) runShortcut();
 });
 
-// An account comes first (when the server answers), then the first screen when this device has no profile yet.
+// The order of a first start: the splash, the account, languages and pace, the guide (after the first screen), home.
+let inFlow = false;
 async function startFlow() {
-    if (hasServer() && !isSignedIn()) await showAuthScreen();
-    if (!getState().username) showOnboarding();
+    if (inFlow) return;
+    inFlow = true;
+    try {
+        await accountGate();
+        if (!getState().username) showOnboarding();
+    } finally {
+        inFlow = false;
+    }
 }
 
 // A session ends with its dialog; "close" does not bubble.

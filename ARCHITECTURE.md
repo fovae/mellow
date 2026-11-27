@@ -74,6 +74,7 @@ A wrong test answer makes a word that is already in study due now; right test an
 - Every modal uses `openModal()`.
 - The keyboard: `core/viewport.js` sets `--kb-h`, `--vvh` and `html[data-kb]` (the same mechanism as Training); screens never follow the visual viewport.
 - A cloud copy is the backup JSON and goes through `readBackup()` too. `localStorage.mellow_account` (nick, linked, cloudAt) is kept apart from the state so a restore does not touch it.
+- Start order (js/main.js `startFlow`): splash → account (`accountGate`) → first screen (languages, pace) → guide → home. The words on a device belong to one account: signing in to another one clears them first (`enterAccount`). `EPOCH` in js/boot.js clears devices together with a reset of the cloud database.
 - Data from files goes through `core/transfer.js` (`parseWords`, `cleanState`) before it reaches the store. A new state field must be added to `cleanState` too.
 - Topics: library topics and one "My words" per course (`mine: true`, `store.ensureMyWords`); no user-made dictionaries, no files.
 - When adding, removing or renaming a file, update `ASSETS` in `sw.js`. Every release: the same number in `APP_VERSION` and in `VERSION` of `sw.js` (a test checks it), so the app offers the update (`ui/update.js`).

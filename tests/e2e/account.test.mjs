@@ -109,3 +109,61 @@ test("accounts: the sign-in screen comes first, sign up, another device, sign ou
     await two.context.close();
     assert.deepEqual([...one.problems, ...two.problems], []);
 });
+
+test("accounts: a slow server still asks to sign in first, a code survives a reload, words of another account leave", { skip: !url && "MELLOW_URL is not set" }, async () => {
+    const nick = `s${Date.now() % 1e9}`;
+    const password = "correct horse 2";
+
+    // The server answers after 6 s: no first screen behind its back, the sign-in screen still comes first.
+    const slow = await device();
+    await slow.page.route("**/api/me", async (route) => { await new Promise((r) => setTimeout(r, 6000)); await route.continue(); });
+    await slow.page.reload();
+    await slow.page.waitForTimeout(4500);
+    assert.equal(await slow.page.locator("dialog #setup").count(), 0, "no first screen before the account");
+    await authScreen(slow.page).waitFor({ timeout: 15000 });
+    await slow.page.unroute("**/api/me");
+
+    // A recovery code that was not confirmed comes back after a reload.
+    await slow.page.getByLabel("Nickname").fill(nick);
+    await slow.page.getByLabel("Password").fill(password);
+    await submit(slow.page);
+    const code = await slow.page.locator(".recovery-code").textContent();
+    await slow.page.reload();
+    assert.equal(await slow.page.locator(".recovery-code").textContent(), code);
+    await slow.page.getByRole("button", { name: "I saved the code" }).click();
+    await slow.page.locator("dialog #setup").waitFor();
+    await slow.page.reload();
+    assert.equal(await slow.page.locator(".recovery-code").count(), 0, "a confirmed code is not shown again");
+    await slow.page.click("dialog .session-footer .btn-primary");
+    await slow.page.waitForFunction(() => JSON.parse(localStorage.mellow_account ?? "{}").cloudAt);
+    await slow.page.click("dialog .tour-skip");
+
+    // A device with someone else's words: signing in clears them and loads this account's copy.
+    const other = await device();
+    const someone = { ...(await state(slow.page)), username: "Somebody Else" };
+    someone.dictionaries[0].words.push({ ...someone.dictionaries[0].words[0], id: "someone", term: "someone's word" });
+    await other.page.evaluate((value) => { localStorage.mellow_state = value; }, JSON.stringify(someone));
+    await other.page.reload();
+    await authScreen(other.page).waitFor();
+    assert.equal(await other.page.getByLabel("Nickname").inputValue(), "", "no nickname of another account in New account");
+    await other.page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await other.page.getByLabel("Nickname").fill(nick);
+    await other.page.getByLabel("Password").fill(password);
+    await submit(other.page);
+    await other.page.waitForFunction((name) => JSON.parse(localStorage.mellow_state ?? "{}").username === name, nick);
+    await other.page.waitForFunction(() => !document.querySelector("dialog[open]"));
+    assert.ok(!JSON.stringify(await state(other.page)).includes("someone's word"), "words of another account left");
+
+    // After signing out the sign-in screen opens on "Sign in" with the nickname.
+    await other.page.click(".tab:nth-child(5)");
+    await other.page.locator(".screen.is-active .cell", { hasText: "Account" }).click();
+    await other.page.getByRole("button", { name: "Sign out" }).click();
+    await other.page.locator("dialog .btn-danger").click();
+    await authScreen(other.page).waitFor();
+    assert.equal(await other.page.getByLabel("Nickname").inputValue(), nick);
+    assert.equal(await other.page.locator('dialog .segment[aria-pressed="true"]').textContent(), "Sign in");
+
+    await slow.context.close();
+    await other.context.close();
+    assert.deepEqual([...slow.problems, ...other.problems], []);
+});

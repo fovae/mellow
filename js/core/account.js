@@ -1,4 +1,4 @@
-// The account: a nickname and a password, one backup in the cloud. No DOM here.
+// The account: a nickname with a password or Google, one backup in the cloud. No DOM here.
 // The password does not leave the device: a slow PBKDF2 turns it into a key, and the key is sent instead.
 // The server hashes the key again with its secret (server/api.js).
 
@@ -74,7 +74,16 @@ export const recover = async (nick, code, password) => call("POST", "/api/recove
 export const changePassword = async (nick, password, next) =>
     call("POST", "/api/password", { key: await deriveKey(nick, password), newKey: await deriveKey(nick, next) });
 export const newRecoveryCode = async (nick, password) => call("POST", "/api/recovery-code", { key: await deriveKey(nick, password) });
-export const deleteAccount = async (nick, password) => call("DELETE", "/api/account", { key: await deriveKey(nick, password) });
+// Without a password (an account made with Google) the nickname typed again confirms it.
+export const deleteAccount = async (nick, password) =>
+    call("DELETE", "/api/account", password == null ? { nick } : { key: await deriveKey(nick, password) });
+export const setFirstPassword = async (nick, password) => call("POST", "/api/password", { newKey: await deriveKey(nick, password) });
+
+// Google: the page goes to Google and comes back with ?google=done|cancel|error (server/api.js).
+export const googleStartUrl = (link = false) => `/api/google/start${link ? "?mode=link" : ""}`;
+export const googleFinish = () => call("POST", "/api/google/finish");
+export const googleSignUp = (nick) => call("POST", "/api/google/signup", { nick });
+export const googleUnlink = () => call("POST", "/api/google/unlink");
 
 async function pipe(bytes, stream) {
     return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());

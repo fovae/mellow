@@ -103,3 +103,9 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; w
 .auth-footer { flex-direction: column; gap: 4px; }
 .auth-footer .btn { flex: none; align-self: stretch; }
 .mascot-large.mascot-auth { width: 112px; }
+/* "Continue with Google": white with Google's letter, as Google's button rules ask, in both themes. */
+.auth-google { display: flex; flex-direction: column; align-items: stretch; gap: 20px; margin-bottom: -8px; }
+.auth-or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: .9rem; }
+.auth-or::before, .auth-or::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .25; }
+.btn-google { gap: 10px; color: #1f1f1f; background: #fff; box-shadow: inset 0 0 0 1px #747775; }
+.google-mark { flex: none; width: 20px; height: 20px; }

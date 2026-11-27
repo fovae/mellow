@@ -463,11 +463,16 @@ export function restore(next) {
 }
 
 // Removes only Mellow's key: other apps may share the same origin.
-export function resetAll() {
+// keepLook: the words leave but the language and the colours stay, and the start flow is not restarted
+// (signing in to another account on this device).
+export function resetAll({ keepLook = false } = {}) {
+    const { language, theme, accent, motion } = state.settings;
     localStorage.removeItem(KEY);
     localStorage.removeItem(`${KEY}_unreadable`);
     state = createState();
-    notify("reset");
+    if (!keepLook) return notify("reset");
+    Object.assign(state.settings, { language, theme, accent, motion });
+    commit("clear");
 }
 
 // Keep several open tabs in sync.

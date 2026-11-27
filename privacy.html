@@ -28,6 +28,7 @@
             <p>A word list you export goes only where you choose to save or share it. It is not encrypted.</p>
             <h2>Account and cloud copy</h2>
             <p>For your account the server stores your nickname, a hash of a key made from your password (the password itself never leaves your device), a hash of the recovery code, sign-in sessions and the last two copies of your data. A copy is sent after the first setup, when you press "Save to the cloud", before you sign out, and by itself once every 7 days while you use the app. No email or phone number is asked.</p>
+            <p>If you sign in with Google, Google tells the server only an anonymous number of your Google account (the "openid" scope): not your name, email or photo. The server keeps that number to recognise you next time. Google's own privacy policy applies on Google's sign-in page.</p>
             <p>The server runs on Cloudflare (Workers and D1). Copies are sent over HTTPS and are not encrypted with your password, so they are technically readable on the server. The developer does not look at them and does not share them.</p>
             <h2>How to delete data</h2>
             <p>Use Profile → Reset all data, or clear the site data in your browser. Files you exported must be deleted separately. Profile → Account → Delete account removes the account, its sessions, its cloud copies and the words on this device at once.</p>
@@ -49,6 +50,7 @@
             <p>Выгруженный список слов попадает только туда, куда ты его сохранишь или отправишь. Он не зашифрован.</p>
             <h2>Аккаунт и копия в облаке</h2>
             <p>Для аккаунта сервер хранит ник, хэш ключа, полученного из пароля (сам пароль не покидает устройство), хэш кода восстановления, сеансы входа и две последние копии данных. Копия отправляется после первой настройки, по кнопке «Сохранить в облако», перед выходом из аккаунта и сама раз в 7 дней, пока ты пользуешься приложением. Почту и телефон мы не спрашиваем.</p>
+            <p>Если входишь через Google, Google сообщает серверу только обезличенный номер твоего Google-аккаунта (область «openid»): ни имени, ни почты, ни фото. Сервер хранит этот номер, чтобы узнать тебя в следующий раз. На странице входа Google действуют правила Google.</p>
             <p>Сервер работает на Cloudflare (Workers и D1). Копии передаются по HTTPS и не шифруются паролем, поэтому технически их можно прочитать на сервере. Разработчик их не просматривает и никому не передаёт.</p>
             <h2>Как удалить данные</h2>
             <p>Профиль → Сбросить все данные, либо очисти данные сайта в браузере. Выгруженные файлы нужно удалить отдельно. Профиль → Аккаунт → Удалить аккаунт сразу удаляет аккаунт, его сеансы, копии в облаке и слова на этом устройстве.</p>

@@ -1,12 +1,18 @@
 # Server: accounts and the cloud copy
 
 The app and its API run as one Cloudflare Worker on one origin: static files from the repository root, `/api/*` from `server/`.
-No build step. An account is required: the sign-in screen comes first whenever the server answers.
-Without an answer (offline at the first start, or plain static hosting) the app starts without it.
+No build step. An account is required. Start order: splash → sign-in screen → languages and pace → guide → home.
+Offline, a device that was signed in before goes straight on; a new device waits on the sign-in screen. Only a plain static host without the API starts without accounts (tests).
 
 ## How it works
 
-- Sign-in: nickname (`[a-z0-9_]`, 3–20, case-insensitive) and password. No email.
+- Sign-in: nickname (`[a-z0-9_]`, 3–20, case-insensitive) and password, or Google. No email.
+- Google: OAuth code flow with PKCE, scope `openid` only, so the server learns just Google's account id (`sub`) and keeps it in `users.google`.
+  `/api/google/start` → Google → `/api/google/callback` (exchanges the code with `GOOGLE_SECRET`) → `/?google=done` → the app calls `/api/google/finish`.
+  Between the steps the state lives in a signed (HMAC with `PEPPER`), 10-minute, `SameSite=Lax` cookie: no database row until someone is signed in.
+  A new Google account picks a nickname (`/api/google/signup`). It has no password until one is set in the account sheet (then a recovery code comes with it);
+  deleting it asks for the nickname typed again. Google can be unlinked only while a password remains. Until both Google keys are set, the button is hidden.
+- The words on a device belong to one account: signing in to another account clears them first, then the cloud copy loads.
 - The password never leaves the device: `js/core/account.js` turns it into a key with PBKDF2-SHA256, 600,000 rounds, salt = nickname.
   The server stores `HMAC-SHA256(PEPPER, random salt + key)`. `PEPPER` is a Worker secret, so a copy of the database alone is not enough to test passwords.
 - Recovery code (80 bits, shown once): sets a new password, gives a new code, signs out every device.
@@ -19,7 +25,8 @@ Without an answer (offline at the first start, or plain static hosting) the app 
   for the whole service a day: 1000 sign-ups, 5000 sign-ins, 20,000 saves. Worst case about 53,000 written rows, under D1's free 100,000.
 - Static files get CSP, HSTS, `frame-ancestors 'none'`, `Permissions-Policy: microphone=()` and more from `_headers`. `.assetsignore` keeps `server/`, tests and configs off the site.
 
-API: `POST /api/signup | login | logout | recover | password | recovery-code`, `GET /api/me`, `PUT|GET /api/backup` (`?which=previous`), `DELETE /api/account`.
+API: `POST /api/signup | login | logout | recover | password | recovery-code`, `GET /api/me`, `PUT|GET /api/backup` (`?which=previous`), `DELETE /api/account`,
+`GET /api/google/start | callback`, `POST /api/google/finish | signup | unlink`.
 
 ## First deploy (once)
 
@@ -34,6 +41,26 @@ Live: https://mellow.fovae.workers.dev (D1 "mellow", region WEUR). Steps below w
 
 Then deploy again after each change: `npx wrangler deploy`.
 
+## Google sign-in (free)
+
+1. https://console.cloud.google.com → create a project "Mellow" (no billing account needed).
+2. Google Auth Platform → Branding: app name "Mellow", support email. Audience: External, then "Publish app".
+   With only the `openid` scope Google does not ask for verification.
+3. Clients → Create client → Web application. Authorized redirect URIs:
+   `https://mellow.fovae.workers.dev/api/google/callback` and, for local runs, `http://localhost:8787/api/google/callback`.
+4. Put the keys into the Worker (each command asks for the value):
+   `npx wrangler secret put GOOGLE_CLIENT_ID` and `npx wrangler secret put GOOGLE_SECRET`. No new deploy needed for secrets.
+   Locally: add `GOOGLE_CLIENT_ID=...` and `GOOGLE_SECRET=...` to `.dev.vars`.
+
+## Reset everything (test phase only)
+
+Drops every account, session and copy, then makes empty tables. Raise `EPOCH` in js/boot.js in the same release, so devices forget their words too.
+
+```bash
+npx wrangler d1 execute mellow --remote --command "DROP TABLE IF EXISTS backups; DROP TABLE IF EXISTS sessions; DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS daily;"
+npx wrangler d1 execute mellow --remote --file=server/schema.sql
+```
+
 ## Local run
 
 ```bash
@@ -47,6 +74,6 @@ Tests: `node --test tests/*.mjs` (the API on node:sqlite), and with `wrangler de
 
 ## Not done yet
 
-- Sign in with Google (needs a Google Cloud client ID) and Apple (needs the paid Apple Developer Program).
+- Sign in with Apple (needs the paid Apple Developer Program).
 - Turnstile on sign-up (needs a Turnstile site key): today mass sign-ups are only held by the per-IP limit and the daily cap.
 - Backups are not encrypted with the password; they are readable on the server.
