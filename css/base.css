@@ -80,9 +80,8 @@ body {
     -webkit-user-select: none;
 }
 
-/* A soft light of the colour style that slowly moves behind the screen. */
-body::before { content: ""; position: fixed; inset: -20% -20% auto; height: 70%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--g1) 15%, transparent), transparent) 0 0 / 70% 100% no-repeat, radial-gradient(closest-side, color-mix(in srgb, var(--g2) 15%, transparent), transparent) 100% 0 / 70% 90% no-repeat; animation: drift 16s ease-in-out infinite alternate; }
-@keyframes drift { to { transform: translate3d(4%, 6%, 0) scale(1.1); } }
+/* A soft light of the colour style behind the screen. Still: when it moved, the blurred tab bar above it was redrawn every frame. */
+body::before { content: ""; position: fixed; inset: -20% -20% auto; height: 70%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--g1) 15%, transparent), transparent) 0 0 / 70% 100% no-repeat, radial-gradient(closest-side, color-mix(in srgb, var(--g2) 15%, transparent), transparent) 100% 0 / 70% 90% no-repeat; }
 
 button, input, textarea { font: inherit; color: inherit; }
 button { border: 0; background: none; cursor: pointer; padding: 0; text-align: inherit; touch-action: manipulation; }

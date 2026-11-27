@@ -52,7 +52,11 @@ afterEach(async () => {
 });
 
 const state = () => page.evaluate(() => JSON.parse(localStorage.mellow_state));
-const tab = (index) => page.click(`.tab:nth-child(${index})`);
+// The screen is drawn just after the frame of the tap (js/ui/navigation.js): wait for it.
+async function tab(index) {
+    await page.click(`.tab:nth-child(${index})`);
+    await page.waitForFunction((i) => document.querySelectorAll(".screen")[i - 1].classList.contains("is-active"), index);
+}
 const active = (selector) => page.locator(`.screen.is-active ${selector}`);
 // The first screen, then the guide that follows it (skipped).
 async function start() {

@@ -50,6 +50,13 @@ export function initViewport() {
     let baseHeight = window.innerHeight;
     let open = false;
     let timers = [];
+    // Only a changed value is written: each write restyles the whole page.
+    const written = {};
+    const setVar = (name, value) => {
+        if (written[name] === value) return;
+        written[name] = value;
+        root.style.setProperty(name, value);
+    };
 
     const update = () => {
         const view = window.visualViewport;
@@ -58,8 +65,8 @@ export function initViewport() {
         if (!focused) baseHeight = window.innerHeight;
         const keyboard = view ? Math.max(0, window.innerHeight - view.height - view.offsetTop) : 0;
         const now = focused && (keyboard >= MIN_KB || (!ios && baseHeight - window.innerHeight >= MIN_KB));
-        root.style.setProperty("--kb-h", `${now ? Math.round(keyboard) : 0}px`);
-        root.style.setProperty("--vvh", `${Math.round(view ? view.height : window.innerHeight)}px`);
+        setVar("--kb-h", `${now ? Math.round(keyboard) : 0}px`);
+        setVar("--vvh", `${Math.round(view ? view.height : window.innerHeight)}px`);
         if (now !== open) {
             open = now;
             root.toggleAttribute("data-kb", now);

@@ -7,6 +7,7 @@ const views = new Map();
 let current = null;
 let bar;
 let enterTimer;
+let pending = 0;
 
 // screens: { name: render }. render() returns the nodes of the screen.
 export function initNavigation(screens) {
@@ -27,27 +28,66 @@ export function initNavigation(screens) {
     }
 }
 
+// Something changed: the screen in view is drawn again, the others when they are opened next.
 export function refresh() {
     bar.setAttribute("aria-label", t("nav.label"));
-    views.forEach(({ label }, name) => { label.textContent = t(`tab.${name}`); });
-    const view = views.get(current);
-    view?.content.replaceChildren(...view.render());
+    views.forEach((view, name) => {
+        view.label.textContent = t(`tab.${name}`);
+        view.stale = true;
+    });
+    draw(current);
 }
 
-export function navigate(name) {
-    if (current === name) views.get(name).content.scrollTo({ top: 0, behavior: "smooth" });
-    current = name;
-    views.forEach(({ section, tab }, key) => {
-        section.classList.toggle("is-active", key === name);
-        section.classList.toggle("is-entering", key === name);
+// After the start, while nothing happens: the other screens are built ahead, one per task, so the first visit
+// to a tab is only a change of classes too. Skipped while a window is open or something is pressed.
+export function prepareScreens() {
+    const next = () => {
+        const name = [...views.keys()].find((key) => key !== current && views.get(key).stale !== false);
+        if (!name) return;
+        if (!document.querySelector("dialog[open]") && !document.querySelector(":active")) draw(name);
+        setTimeout(next, 250);
+    };
+    setTimeout(next, 1500);
+}
+
+// Changes that must not redraw the screen in view (the study timer) still reach the others.
+export const markStale = () => views.forEach((view, name) => { if (name !== current) view.stale = true; });
+
+function draw(name) {
+    const view = views.get(name);
+    if (!view) return;
+    view.content.replaceChildren(...view.render());
+    view.stale = false;
+}
+
+// The tab lights up in the frame of the tap; the screen is drawn just after that frame is painted,
+// so building it never holds the press back (on a phone that takes tens of milliseconds).
+export function navigate(name, { now = false } = {}) {
+    if (current === name && !pending) {
+        views.get(name).content.scrollTo({ top: 0, behavior: "smooth" });
+        return refresh();
+    }
+    views.forEach(({ tab }, key) => {
         tab.classList.toggle("is-active", key === name);
         if (key === name) tab.setAttribute("aria-current", "page");
         else tab.removeAttribute("aria-current");
     });
-    refresh();
-    // Later redraws of the same screen must stay still.
-    clearTimeout(enterTimer);
-    enterTimer = setTimeout(() => views.get(name).section.classList.remove("is-entering"), 900);
+    cancelAnimationFrame(pending);
+    const show = () => {
+        pending = 0;
+        current = name;
+        // A screen opened again with nothing changed is not rebuilt: switching is only a change of classes.
+        if (views.get(name).stale !== false) draw(name);
+        views.forEach(({ section }, key) => {
+            section.classList.toggle("is-active", key === name);
+            section.classList.toggle("is-entering", key === name);
+        });
+        // Later redraws of the same screen must stay still.
+        clearTimeout(enterTimer);
+        enterTimer = setTimeout(() => views.get(name).section.classList.remove("is-entering"), 400);
+    };
+    if (now || current === null) return show();
+    pending = requestAnimationFrame(() => { pending = requestAnimationFrame(show); });
 }
 
 export const screenHeader = (eyebrow, title, action) =>

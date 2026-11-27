@@ -1,18 +1,20 @@
 .main { position: relative; width: 100%; max-width: 600px; height: 100%; margin: 0 auto; opacity: 0; transition: opacity .6s var(--ease); }
 .is-ready .main { opacity: 1; }
 
+/* Hidden screens stay laid out (not content-visibility: hidden): they are drawn only when something changed,
+   so showing one again costs only a change of classes. */
 .screen { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
 .screen.is-active { visibility: visible; opacity: 1; }
 .screen-scroll { height: 100%; display: flex; flex-direction: column; gap: 30px; overflow: hidden auto; overscroll-behavior: none; scrollbar-width: none; padding: calc(24px + var(--safe-top)) var(--gutter) calc(124px + var(--safe-bottom)); }
 .screen-scroll::-webkit-scrollbar { display: none; }
 .screen-scroll > * { flex-shrink: 0; }
-.screen.is-entering .screen-scroll > * { animation: rise .5s var(--ease-soft) backwards; }
-.screen.is-entering .screen-scroll > :nth-child(2) { animation-delay: 40ms; }
-.screen.is-entering .screen-scroll > :nth-child(3) { animation-delay: 80ms; }
-.screen.is-entering .screen-scroll > :nth-child(4) { animation-delay: 120ms; }
-.screen.is-entering .screen-scroll > :nth-child(n+5) { animation-delay: 160ms; }
-.screen.is-entering .bar-fill, .screen.is-entering .status-bar > span { animation: grow .8s var(--ease-soft) .15s backwards; }
+/* A new screen: visible from the first frame and settles softly. The whole screen moves as one layer
+   (it scrolls by itself, so it is a layer anyway); moving its blocks one by one made a layer with a shadow
+   for each of them in the first frame, and that frame came late. */
+.screen.is-entering { animation: settle .28s var(--ease-soft) backwards; }
+.screen.is-entering .bar-fill, .screen.is-entering .status-bar > span { animation: grow .6s var(--ease-soft) .1s backwards; }
 @keyframes grow { from { transform: scaleX(0); } }
+@keyframes settle { from { opacity: .35; transform: translateY(6px); } }
 @keyframes rise { from { opacity: .2; transform: translateY(18px); } }
 .scroll-thumb { position: absolute; top: 0; right: 4px; width: 3px; height: 40px; border-radius: 999px; background: var(--muted); opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
 .scroll-thumb.is-scrolling { opacity: .5; }

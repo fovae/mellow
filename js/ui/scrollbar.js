@@ -3,19 +3,26 @@ export function attachScrollbar(wrapper, scroller) {
     const thumb = wrapper.querySelector(".scroll-thumb");
     let frame = 0;
     let hideTimer;
+    let size = null; // paddings and heights, measured once per scroll gesture
 
     const update = () => {
         frame = 0;
-        const distance = scroller.scrollHeight - scroller.clientHeight;
+        if (!size) {
+            const style = getComputedStyle(scroller);
+            size = { top: parseFloat(style.paddingTop), bottom: parseFloat(style.paddingBottom), thumb: thumb.offsetHeight, height: scroller.clientHeight, full: scroller.scrollHeight };
+        }
+        const distance = size.full - size.height;
         if (distance <= 0) return;
-        const style = getComputedStyle(scroller);
-        const top = parseFloat(style.paddingTop);
-        const travel = scroller.clientHeight - top - parseFloat(style.paddingBottom) - thumb.offsetHeight;
+        const travel = size.height - size.top - size.bottom - size.thumb;
         const ratio = Math.min(1, Math.max(0, scroller.scrollTop / distance));
-        thumb.style.transform = `translate3d(0, ${top + ratio * Math.max(travel, 0)}px, 0)`;
-        thumb.classList.add("is-scrolling");
+        thumb.style.transform = `translate3d(0, ${size.top + ratio * Math.max(travel, 0)}px, 0)`;
+        if (!hideTimer) thumb.classList.add("is-scrolling");
         clearTimeout(hideTimer);
-        hideTimer = setTimeout(() => thumb.classList.remove("is-scrolling"), 650);
+        hideTimer = setTimeout(() => {
+            hideTimer = 0;
+            size = null;
+            thumb.classList.remove("is-scrolling");
+        }, 650);
     };
 
     scroller.addEventListener("scroll", () => { frame ||= requestAnimationFrame(update); }, { passive: true });

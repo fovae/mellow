@@ -5,7 +5,7 @@ import { applyTheme } from "./core/theme.js";
 import { libraryExamples, loadLibrary } from "./core/library.js";
 import { showRewards } from "./ui/rewards.js";
 import { fillExamples, onRewards, protectStreak, getScopeQueue, getState, subscribe } from "./core/store.js";
-import { initNavigation, navigate, refresh } from "./ui/navigation.js";
+import { initNavigation, markStale, navigate, prepareScreens, refresh } from "./ui/navigation.js";
 import { playLoader } from "./ui/loader.js";
 import { countAll, studyAll } from "./ui/actions.js";
 import { openLibrary } from "./ui/library-modal.js";
@@ -34,18 +34,18 @@ initNavigation({
     tests: renderTests,
     profile: renderProfile,
 });
-navigate("home");
+navigate("home", { now: true });
 
 subscribe((type) => {
     // The timer must not redraw what the user is touching.
-    if (type === "time") return;
+    if (type === "time") return markStale();
     applySettings();
     if (type === "switch") return;
     if (type === "reset") {
-        navigate("home");
+        navigate("home", { now: true });
         startFlow();
     } else if (type === "restore") {
-        navigate("home");
+        navigate("home", { now: true });
         // During the start flow the next screen comes from startFlow itself.
         if (!inFlow && !getState().username) showOnboarding();
     } else {
@@ -88,6 +88,7 @@ playLoader().then(async () => {
     protectStreak();
     // Without an answer in 10 s the check counts as offline (js/ui/account.js).
     await accountChecked;
+    prepareScreens();
     await startFlow();
     if (getState().username) runShortcut();
 });
